@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: questhub-backend
+  labels:
+    app: questhub-backend
+spec:
+  selector:
+    app: questhub-backend
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090

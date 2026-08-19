@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: questhub-ai-service
+  labels:
+    app: questhub-ai-service
+spec:
+  selector:
+    app: questhub-ai-service
+  ports:
+    - name: http
+      port: 8090
+      targetPort: 8090

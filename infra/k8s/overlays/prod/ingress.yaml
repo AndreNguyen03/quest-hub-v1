@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: questhub-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - questhub.app
+      secretName: questhub-tls
+  rules:
+    - host: questhub.app
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: questhub-backend
+                port:
+                  number: 9090
+          - path: /ai
+            pathType: Prefix
+            backend:
+              service:
+                name: questhub-ai-service
+                port:
+                  number: 8090

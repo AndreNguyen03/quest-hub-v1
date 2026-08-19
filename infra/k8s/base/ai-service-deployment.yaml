@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: questhub-ai-service
+  labels:
+    app: questhub-ai-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: questhub-ai-service
+  template:
+    metadata:
+      labels:
+        app: questhub-ai-service
+    spec:
+      containers:
+        - name: ai-service
+          image: ghcr.io/questhub/ai-service:latest
+          ports:
+            - containerPort: 8090
+          env:
+            - name: AI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: questhub-secrets
+                  key: AI_API_KEY
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8090
+            initialDelaySeconds: 10
+            periodSeconds: 10

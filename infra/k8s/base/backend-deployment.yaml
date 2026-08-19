@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: questhub-backend
+  labels:
+    app: questhub-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: questhub-backend
+  template:
+    metadata:
+      labels:
+        app: questhub-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/questhub/backend:latest
+          ports:
+            - containerPort: 9090
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: staging
+            - name: DB_HOST
+              value: questhub-postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: questhub
+            - name: DB_USER
+              value: questhub
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: questhub-secrets
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9090
+            initialDelaySeconds: 20
+            periodSeconds: 10
