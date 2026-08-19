@@ -1,0 +1,2825 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — US Analysis theo Sprint (Spec · Plan · Implement · Verify)</title>
+<style>
+  :root {
+    --bg:        #FAF5FF;
+    --surface:   #FFFFFF;
+    --surface-2: #FAF5FF;
+    --border-std:#E2E8F0;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #6D28D9;
+    --accent-bg: #EDE9FE;
+    --mono-bg:   #F1F5F9;
+    --spec:      #1D4ED8; --spec-bg: #DBEAFE;
+    --plan:      #92400E; --plan-bg: #FEF3C7;
+    --impl:      #065F46; --impl-bg: #D1FAE5;
+    --ver:       #9F1239; --ver-bg:  #FFE4E6;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-std);
+  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .875rem; margin-top: 2.5rem;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  .module-section { margin-bottom: 2.5rem; }
+  .module-header {
+    display: flex; align-items: center; gap: .75rem;
+    margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border-std);
+  }
+  .mod-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .05em;
+    background: var(--accent-bg); color: var(--accent);
+    padding: .2rem .6rem; border-radius: 5px;
+  }
+  .module-title { font-size: 1.05rem; font-weight: 700; }
+  .module-desc { color: var(--muted); font-size: .8rem; }
+
+  .us-card {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.1rem;
+  }
+  .us-head { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; margin-bottom: .5rem; }
+  .us-id { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-bg); padding: .15rem .5rem; border-radius: 5px; }
+  .us-title { font-weight: 700; font-size: .95rem; }
+  .us-meta { margin-left: auto; font-size: .7rem; color: var(--muted); text-align: right; }
+  .us-meta .sprint { font-weight: 700; color: var(--accent); }
+
+  .us-statement { font-size: .8125rem; color: var(--muted); font-style: italic; margin-bottom: .75rem; }
+
+  .phase { margin-bottom: .7rem; }
+  .phase-head {
+    display: flex; align-items: center; gap: .45rem;
+    font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: .3rem;
+  }
+  .phase-spec  { color: var(--spec); }  .phase-spec  .phase-dot { background: var(--spec); }
+  .phase-plan  { color: var(--plan); }  .phase-plan  .phase-dot { background: var(--plan); }
+  .phase-impl  { color: var(--impl); }  .phase-impl  .phase-dot { background: var(--impl); }
+  .phase-ver   { color: var(--ver); }   .phase-ver   .phase-dot { background: var(--ver); }
+  .phase-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .phase-label { margin-right: .25rem; }
+
+  .phase-body { font-size: .8125rem; color: var(--text); }
+  .phase-body ul { padding-left: 1.2rem; }
+  .phase-body li { margin: .18rem 0; }
+  .phase-body code {
+    font-family: SFMono-Regular, Consolas, monospace; font-size: .75rem;
+    background: var(--mono-bg); padding: .08rem .3rem; border-radius: 4px;
+  }
+  .ac { color: var(--muted); }
+
+  .status { display: inline-block; font-size: .65rem; font-weight: 800; letter-spacing: .05em; padding: .12rem .45rem; border-radius: 5px; }
+  .status-now   { background: var(--impl-bg); color: var(--impl); }
+  .status-later { background: var(--plan-bg); color: var(--plan); }
+
+  .fe-id { font-size: 11px; font-weight: 700; color: #0E7490; background: #CFFAFE; padding: .15rem .5rem; border-radius: 5px; }
+  .fe-tag { font-size: 11px; font-weight: 700; letter-spacing: .05em; background: #CFFAFE; color: #0E7490; padding: .2rem .6rem; border-radius: 5px; }
+  .fe-title { font-weight: 700; font-size: .95rem; }
+  .status-fe { background: #CFFAFE; color: #0E7490; }
+
+  .sprint-summary { width: 100%; border-collapse: collapse; background: var(--surface); margin-bottom: 2rem; }
+  .sprint-summary th, .sprint-summary td { text-align: left; padding: .5rem .75rem; font-size: .8rem; border-bottom: 1px solid var(--border-std); }
+  .sprint-summary th { font-size: .6875rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface-2); }
+  .sprint-summary td a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .sprint-summary td a:hover { text-decoration: underline; }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>US Analysis theo Sprint — Spec · Plan · Implement · Verify</h1>
+  <p class="subtitle">31 user stories sắp xếp theo thứ tự implement · đọc từ Sprint 1 → Sprint 16 · tham chiếu roadmap.html</p>
+</header>
+
+<div class="section-label">Lộ trình implement (đọc theo thứ tự này)</div>
+<table class="sprint-summary">
+  <thead>
+    <tr><th style="width:90px">Sprint</th><th style="width:70px">Tháng</th><th>Module / Chủ đề</th><th>US theo thứ tự làm</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><a href="#sp1">Sprint 1</a></td><td>M1</td><td>Identity</td><td>US-20 → US-21</td></tr>
+    <tr><td><a href="#sp2">Sprint 2</a></td><td>M1</td><td>Quest CRUD</td><td>US-01 → US-02 → US-03 → US-04 → US-10</td></tr>
+    <tr><td><a href="#sp3">Sprint 3</a></td><td>M2</td><td>Fork + Task Completion + Quiz</td><td>US-05 → US-06 → US-07</td></tr>
+    <tr><td><a href="#sp4">Sprint 4</a></td><td>M2</td><td>Completion engine + PersonalQuest edit</td><td>US-08 → US-09</td></tr>
+    <tr><td><a href="#sp5">Sprint 5</a></td><td>M3</td><td>World + Marketplace browse</td><td>US-16 → US-17 → US-18 → US-19 → US-11</td></tr>
+    <tr><td><a href="#sp7">Sprint 7</a></td><td>M4</td><td>Search + Review + Favorite</td><td>US-12 → US-13 → US-14</td></tr>
+    <tr><td><a href="#sp8">Sprint 8</a></td><td>M4</td><td>Quest Analytics</td><td>US-15</td></tr>
+    <tr><td><a href="#sp9">Sprint 9</a></td><td>M5</td><td>Social (Go service)</td><td>US-22 → US-23 → US-24</td></tr>
+    <tr><td><a href="#sp11">Sprint 11</a></td><td>M6</td><td>Web Next.js — Auth + Marketplace + Quest Detail</td><td>FE-01 → FE-02 → FE-03</td></tr>
+    <tr><td><a href="#sp12">Sprint 12</a></td><td>M6</td><td>Web — Dashboard + Create Quest + Tracker</td><td>FE-04 → FE-05 → FE-06</td></tr>
+    <tr><td><a href="#sp13">Sprint 13</a></td><td>M7</td><td>Web — World + Profile + Feed</td><td>FE-07 → FE-08 → FE-09</td></tr>
+    <tr><td><a href="#sp14">Sprint 14</a></td><td>M7</td><td>Web — Analytics + AI + Deploy staging</td><td>FE-10 → FE-11 → FE-12</td></tr>
+    <tr><td><a href="#sp15">Sprint 15</a></td><td>M8</td><td>AI (Python service)</td><td>US-25 → US-26 → US-30 → US-31</td></tr>
+    <tr><td><a href="#sp16">Sprint 16</a></td><td>M8</td><td>Admin</td><td>US-27 → US-28 → US-29</td></tr>
+    <tr><td><a href="#sp21">Sprint 21</a></td><td>M11</td><td>React Native — Home + Task Check + My Quests</td><td>FE-13 → FE-14</td></tr>
+    <tr><td><a href="#sp22">Sprint 22</a></td><td>M11</td><td>RN — World + Profile + Notifications + Search</td><td>FE-15 → FE-16</td></tr>
+    <tr><td><a href="#sp23">Sprint 23</a></td><td>M12</td><td>Admin page</td><td>FE-17 → FE-18</td></tr>
+    <tr><td><a href="#sp24">Sprint 24</a></td><td>M12</td><td>Landing page + polish + deploy prod</td><td>FE-19 → FE-20</td></tr>
+  </tbody>
+</table>
+
+<div class="section-label">Cách đọc file này</div>
+<div class="us-card">
+  <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span> — Yêu cầu &amp; acceptance criteria (từ modules-user-stories.html)</div>
+  <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span> — Thiết kế: bảng DB, endpoint, domain entity/VO, event (từ database-schema.html + api-design.html + high-level-design.html)</div>
+  <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span> — Thứ tự code: file/package cần viết theo lớp DDD (domain → application → infrastructure → presentation)</div>
+  <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span> — Cách kiểm chứng: unit test, integration test, curl/manual e2e</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 1 -->
+<div class="section-label" id="sp1">Sprint 1 · M1 · Identity <span style="margin-left:0;color:var(--muted)">— bắt đầu ở đây</span></div>
+<div class="module-section">
+
+  <!-- US-20 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-20</span>
+      <span class="us-title">Đăng ký</span>
+      <span class="us-meta">Identity · <span class="sprint">Sprint 1 / M1</span> · <span class="status status-now">IMPLEMENT</span></span>
+    </div>
+    <div class="us-statement">As a <em>Guest</em>, I want to create an account, so that I can start tracking my progress.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Đăng ký bằng email hoặc OAuth</li>
+          <li>World được tạo tự động sau khi đăng ký</li>
+          <li>Profile mặc định là public</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>users</code> (id, email UNIQUE, username UNIQUE, password_hash, role LEARNER, is_public=true, avatar, bio, timestamps)</li>
+          <li>API: <code>POST /api/v1/auth/register</code> → access + refresh token; <code>POST /api/v1/auth/login</code>; <code>POST /api/v1/auth/refresh</code>; <code>POST /api/v1/auth/logout</code></li>
+          <li>World auto-tạo: trong transaction register → tạo users + worlds</li>
+          <li>Security: bcrypt, JWT access 15m + refresh 7d (rotation, Redis)</li>
+          <li>OAuth: defer (roadmap note) — email/password trước</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V1__users.sql</code> (email/username UNIQUE, index)</li>
+          <li>domain: <code>User</code> (entity + VO Role), repository interface</li>
+          <li>application: <code>RegisterUseCase</code> (unique check → bcrypt → save user → save world), <code>LoginUseCase</code>, <code>RefreshUseCase</code>, <code>LogoutUseCase</code></li>
+          <li>infrastructure: JPA repo, JwtService (sign/verify), RedisTokenStore (refresh rotation, blacklist)</li>
+          <li>presentation: <code>AuthController</code> — set refreshToken trong httpOnly cookie</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: email trùng → 409; username trùng → 409; password không hash (plaintext) → fail test security</li>
+          <li>Integration test: register → 201 + world được tạo; login sai password → 401</li>
+          <li>curl e2e: register → login → gọi <code>GET /users/me</code> với access token → 200</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-21 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-21</span>
+      <span class="us-title">Cập nhật profile</span>
+      <span class="us-meta">Identity · <span class="sprint">Sprint 1 / M1</span> · <span class="status status-now">IMPLEMENT</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to update my profile information, so that others can know who I am.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Cập nhật avatar, bio, social links</li>
+          <li>Có thể set profile public hoặc private</li>
+          <li>Role mặc định LEARNER; nâng CREATOR khi có quest published</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/users/me</code> (kèm denorm stats), <code>PUT /api/v1/users/me</code>, <code>GET /api/v1/users/:username</code></li>
+          <li>Avatar: upload qua Cloudinary → lưu URL; không đổi email/username (AC từ api-design)</li>
+          <li>Role promotion: trigger trong PublishQuestUseCase (US-10)</li>
+          <li>Denorm stats: quest_count, follower_count, following_count — cập nhật qua event (M5)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>application: <code>GetMyProfileQuery</code>, <code>UpdateProfileUseCase</code>, <code>GetPublicProfileQuery</code></li>
+          <li>infrastructure: Cloudinary client (upload avatar), denorm fields trên users</li>
+          <li>guard public/private: GET /users/:username private → 404 nếu chưa follow</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: PUT avatar/bio → GET thấy mới; đổi is_public=false → GET public profile trả 404</li>
+          <li>Publish quest đầu tiên → role = CREATOR</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 2 -->
+<div class="section-label" id="sp2">Sprint 2 · M1 · Quest CRUD <span style="margin-left:0;color:var(--muted)">— chạy từ Sprint 1 xong</span></div>
+<div class="module-section">
+
+  <!-- US-01 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-01</span>
+      <span class="us-title">Tạo learning path</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+    </div>
+    <div class="us-statement">As a <em>Creator</em>, I want to create a learning path with a title, description and difficulty, so that I can bundle multiple quests toward one goal.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Path phải thuộc một <code>skill_domains</code></li>
+          <li>Path mặc định <strong>private</strong> khi tạo</li>
+          <li>Creator là owner của path</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>learning_paths</code> (id, creator_id FK→users, domain_id FK→skill_domains, title, description, difficulty, is_public, timestamps)</li>
+          <li>API: <code>POST /api/v1/learning-paths</code> · <code>GET /api/v1/learning-paths/:id</code> · <code>PUT /api/v1/learning-paths/:id</code></li>
+          <li>Domain: entity <code>LearningPath</code>, VO <code>Difficulty</code> (BEGINNER/INTERMEDIATE/ADVANCED)</li>
+          <li>Kiểm tra domain tồn tại trong application layer trước khi persist</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>db/migration/V2__learning_paths.sql</code> (FK + index creator_id, domain_id)</li>
+          <li>domain: <code>LearningPath</code>, <code>Difficulty</code>; repository interface <code>LearningPathRepository</code></li>
+          <li>application: <code>CreateLearningPathUseCase</code> (validate domain → tạo → private mặc định), <code>UpdateLearningPathUseCase</code></li>
+          <li>infrastructure: <code>JpaLearningPathRepository</code>, map exception domain→404</li>
+          <li>presentation: <code>LearningPathController</code> (POST/PUT), DTO + validation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: tạo path với domain không tồn tại → throw; mặc định <code>is_public=false</code></li>
+          <li>Integration test: POST → 201; GET theo id; PUT không phải owner → 403</li>
+          <li>curl: <code>curl -X POST localhost:9090/api/v1/learning-paths -H "Authorization: Bearer ..." -d @path.json</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-02 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-02</span>
+      <span class="us-title">Tạo quest với chapters &amp; tasks</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+    </div>
+    <div class="us-statement">As a <em>Creator</em>, I want to create a quest with chapters and tasks, so that I can structure a roadmap for others to follow.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Quest có thể gắn vào LearningPath (hoặc độc lập)</li>
+          <li>Quest phải có ≥1 chapter, mỗi chapter ≥1 task</li>
+          <li>Quest mặc định <strong>DRAFT</strong> khi tạo</li>
+          <li>Mỗi task có <code>type</code>: LEARN/QUIZ/PRACTICE/SUBMISSION/REFLECTION</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>quests</code> (id, creator_id, path_id nullable, domain_id, title, description, difficulty, status DRAFT, completion_rule JSONB, timestamps), <code>chapters</code> (id, quest_id, title, description, position), <code>tasks</code> (id, chapter_id, title, description, type, position, config JSONB — threshold/evidence)</li>
+          <li>API: <code>POST /api/v1/quests</code> (body chứa chapters+tasks lồng nhau), <code>GET /api/v1/quests/:id</code>, <code>PUT /api/v1/quests/:id</code></li>
+          <li>Domain: Aggregate <code>Quest</code> → chứa <code>Chapter</code> → chứa <code>Task</code>; enum <code>TaskType</code>; VO <code>QuestStatus</code></li>
+          <li>Transaction: tạo cả cây quest+chapters+tasks trong 1 @Transactional</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V3__quests_chapters_tasks.sql</code> (quests, chapters, tasks + FK cascade + indexes)</li>
+          <li>domain: <code>Quest</code> (aggregate root với <code>addChapter()</code>/<code>addTask()</code>), <code>Chapter</code>, <code>Task</code>, <code>TaskType</code>, <code>QuestStatus</code></li>
+          <li>application: <code>CreateQuestUseCase</code> — validate cây ≥1 chapter ≥1 task, gán position, set DRAFT; <code>QuestQueryService</code></li>
+          <li>infrastructure: <code>JpaQuestRepository</code> (save cả cascade), DTO mapper quest↔cây chapters/tasks</li>
+          <li>presentation: <code>QuestController</code> POST/GET/PUT + request DTO có nested list + bean validation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: quest không chapter → reject; chapter không task → reject; mặc định DRAFT</li>
+          <li>Integration test: POST với cây 2 chapters × 2 tasks → 201 + toàn bộ tồn tại; position tự tăng</li>
+          <li>Kiểm tra cascade delete: xóa quest → chapters/tasks bị xóa</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-03 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-03</span>
+      <span class="us-title">Thêm chapter &amp; task, gắn resource</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+    </div>
+    <div class="us-statement">As a <em>Creator</em>, I want to add chapters, add tasks inside each chapter, and attach resources to LEARN tasks, so that the learning path is clear and logical.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Chapter: title, description, có thể reorder</li>
+          <li>Task: title, description, type, order — có thể reorder</li>
+          <li>Task LEARN chứa nhiều Resource (VIDEO, ARTICLE, BOOK, DOCUMENT, COURSE, PODCAST, FILE, LINK)</li>
+          <li>Chapter/task có thể xóa nếu quest chưa được fork</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: thêm <code>resources</code> (id, task_id, type, title, url, position, timestamps)</li>
+          <li>API: <code>POST /api/v1/quests/:id/chapters</code>, <code>POST /api/v1/quests/:id/chapters/:chapterId/tasks</code>, <code>POST /api/v1/tasks/:id/resources</code>, <code>PUT /api/v1/quests/:id/order</code> (reorder), <code>DELETE ...</code></li>
+          <li>Domain: <code>Resource</code>, enum <code>ResourceType</code>; method <code>quest.reorderChapters()</code> chỉ hoạt động khi status DRAFT</li>
+          <li>Guard: <code>canModify(quest)</code> → đã có personal_quest thì 409 (US-03 AC)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V4__resources.sql</code></li>
+          <li>domain: <code>Resource</code>, <code>ResourceType</code>, mở rộng <code>Task.addResource()</code> (chỉ khi type LEARN — invariant trong domain)</li>
+          <li>application: <code>AddChapterUseCase</code>, <code>AddTaskUseCase</code>, <code>AddResourceUseCase</code>, <code>ReorderQuestUseCase</code>, <code>DeleteQuestPartUseCase</code></li>
+          <li>Guard chống fork: query <code>personal_quests</code> theo quest_id → tồn tại thì reject</li>
+          <li>presentation: mở rộng controller + DTO reorder (danh sách {id, position})</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: addResource vào task PRACTICE → reject (chỉ LEARN); reorder khi quest đã PUBLIC + đã fork → 409</li>
+          <li>Integration test: thêm chapter/task/resource → GET quest thấy thứ tự mới</li>
+          <li>curl: POST resource → 201; DELETE chapter → GET lại không còn</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-04 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-04</span>
+      <span class="us-title">Cấu hình CompletionRule</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+    </div>
+    <div class="us-statement">As a <em>Creator</em>, I want to set a completion rule for my quest, so that a quest is considered done only when the real criteria are met.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Rule mặc định: <code>ALL_TASKS</code></li>
+          <li>Hỗ trợ <code>QUIZ_SCORE</code> (quiz ≥ ngưỡng %), <code>SUBMISSION</code> (phải nộp), <code>ALL_OF</code> (AND), <code>ANY_OF</code> (OR)</li>
+          <li>Rule được <strong>snapshot</strong> vào PersonalQuest khi fork — thay đổi sau không ảnh hưởng</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: cột <code>quests.completion_rule</code> JSONB (đã có từ V3)</li>
+          <li>JSON schema: <code>{ "type": "ALL_TASKS" }</code> | <code>{ "type": "QUIZ_SCORE", "threshold": 80 }</code> | <code>{ "type": "SUBMISSION" }</code> | <code>{ "type": "ALL_OF", "rules": [...] }</code> | <code>{ "type": "ANY_OF", "rules": [...] }</code></li>
+          <li>Domain: VO <code>CompletionRule</code> (type + params), factory với default; validation schema</li>
+          <li>Engine <code>CompletionEvaluator</code> đọc PersonalQuest tasks → trả boolean (được dùng thật ở M2, nhưng validation + lưu trữ làm ngay)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>domain: <code>CompletionRule</code> + <code>CompletionRuleFactory.defaultAllTasks()</code> + parser từ JSON (Jackson)</li>
+          <li>application: <code>SetCompletionRuleUseCase</code> (PUT /api/v1/quests/:id/completion-rule) — validate schema, chỉ creator, chỉ khi DRAFT</li>
+          <li>infrastructure: AttributeConverter lưu VO ↔ JSONB</li>
+          <li>presentation: endpoint riêng + DTO; trả về rule đã lưu để confirm</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: parser rule hợp lệ/không hợp lệ (unknown type → reject); default khi tạo quest = ALL_TASKS</li>
+          <li>Integration test: PUT rule → GET thấy rule; non-creator → 403; quest đã PUBLIC → 409</li>
+          <li>Snapshot check chuyển sang M2 khi có fork</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-10 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-10</span>
+      <span class="us-title">Publish quest</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+    </div>
+    <div class="us-statement">As a <em>Creator</em>, I want to publish my quest so others can discover it, so that my work can help the community.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Quest chuyển từ DRAFT sang PUBLIC</li>
+          <li>Quest xuất hiện trong Marketplace</li>
+          <li>Creator có thể unpublish bất cứ lúc nào</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/quests/:id/publish</code>, <code>POST /api/v1/quests/:id/unpublish</code></li>
+          <li>Guard: phải có ≥1 chapter ≥1 task (US-02 invariant) trước khi publish</li>
+          <li>Outbox: <code>quest.published</code> → Marketplace index (ES ở M4; trước đó list query filter status=PUBLIC)</li>
+          <li>Nâng role: creator được nâng CREATOR (US-21 AC) khi có quest published đầu tiên</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>application: <code>PublishQuestUseCase</code>, <code>UnpublishQuestUseCase</code> (validate tree, đổi status, role promotion, write outbox)</li>
+          <li>presentation: 2 endpoint; DTO trả quest + status mới</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: publish quest rỗng → 400; non-creator → 403</li>
+          <li>Integration test: publish → GET danh sách PUBLIC thấy quest; unpublish → biến mất; role creator được cập nhật</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 3 -->
+<div class="section-label" id="sp3">Sprint 3 · M2 · Fork + Task Completion + Quiz <span style="margin-left:0;color:var(--muted)">— track tiến độ thật</span></div>
+<div class="module-section">
+
+  <!-- US-05 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-05</span>
+      <span class="us-title">Fork quest</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to fork a public quest into my own copy, so that I can track my personal progress without affecting the original.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Tạo ra PersonalQuest + PersonalChapter + PersonalTask (copy toàn bộ)</li>
+          <li>Learner là owner của PersonalQuest</li>
+          <li>Quest gốc không bị thay đổi</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>personal_quests</code> (id, user_id, quest_id FK, completion_rule snapshot, status ACTIVE, timestamps), <code>personal_chapters</code>, <code>personal_tasks</code> (id, ref: task_id, type, config snapshot)</li>
+          <li>API: <code>POST /api/v1/quests/:id/fork</code>, <code>GET /api/v1/personal-quests</code>, <code>GET /api/v1/personal-quests/:id</code></li>
+          <li>Domain: <code>PersonalQuest</code> aggregate; <code>Quest.forkTo(user)</code> — copy rule + cây chapter/task</li>
+          <li>Idempotent: fork 2 lần cùng quest → 409 (đã fork)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V5__personal_quests.sql</code> (3 bảng, FK cascade)</li>
+          <li>domain: <code>PersonalQuest</code>/<code>PersonalChapter</code>/<code>PersonalTask</code>, method <code>forkTo()</code></li>
+          <li>application: <code>ForkQuestUseCase</code> (transaction copy cây, snapshot rule), <code>GetPersonalQuestsQuery</code></li>
+          <li>outbox: publish <code>quest.forked</code> trong cùng transaction</li>
+          <li>presentation: controller + DTO</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: fork 2 lần → 409; snapshot rule không đổi sau khi quest gốc sửa rule</li>
+          <li>Integration test: fork → 3 bảng personal có đủ bản sao; quest gốc không đổi</li>
+          <li>Verify outbox: bảng <code>outbox_events</code> có <code>quest.forked</code> sau fork</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-06 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-06</span>
+      <span class="us-title">Hoàn thành task theo loại</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to complete tasks of different types, so that my progress reflects real work done.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>LEARN/PRACTICE/REFLECTION: tick là xong (REFLECTION bắt buộc text ≥ minLength nếu cấu hình)</li>
+          <li>SUBMISSION: phải nộp URL/text vào <code>evidence</code> mới tính hoàn thành</li>
+          <li>QUIZ: phải đạt <code>passThreshold</code> trong task.config mới tính hoàn thành</li>
+          <li>Tạo TaskCompletion record; progress tự tính; completion có thể undo</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>task_completions</code> (id, personal_task_id, user_id, completed_at, evidence nullable, UNIQUE(personal_task_id))</li>
+          <li>API: <code>PUT /api/v1/personal-quests/:pqId/tasks/:ptId/complete</code> (body: evidence/reflection optional), <code>DELETE .../complete</code> (undo)</li>
+          <li>Domain: <code>PersonalTask.complete(evidence)</code> — validate theo type (REFLECTION length, SUBMISSION bắt buộc evidence, QUIZ không qua endpoint này)</li>
+          <li>Event: <code>task.completed</code> / <code>task.undone</code> → update progress + trigger rule evaluation (US-08)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V6__task_completions.sql</code> (UNIQUE constraint để chống double-complete)</li>
+          <li>domain: <code>TaskCompletion</code>, logic validate theo type trong domain layer</li>
+          <li>application: <code>CompleteTaskUseCase</code>, <code>UndoTaskUseCase</code> (idempotent khi undo chưa có record)</li>
+          <li>sau complete → gọi <code>CompletionEvaluator</code> (US-08) trong cùng transaction hoặc qua event</li>
+          <li>presentation: endpoint + DTO evidence</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: SUBMISSION không evidence → reject; REFLECTION ngắn hơn minLength → reject; complete 2 lần → 409</li>
+          <li>Integration test: complete → task_completions có record; undo → record biến mất; progress % giảm đúng</li>
+          <li>curl: PUT complete + DELETE undo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-07 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-07</span>
+      <span class="us-title">Làm quiz và xem kết quả</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to take a quiz and see my score immediately, so that I know if I've passed the task.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Mỗi lần làm quiz ghi 1 QuizAttempt (score, max_score, passed)</li>
+          <li>Đạt ngưỡng → task tự hoàn thành; chưa đạt → được làm lại</li>
+          <li>Lịch sử attempt hiển thị được</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>quiz_attempts</code> (id, personal_task_id, user_id, score, max_score, passed, created_at)</li>
+          <li>API: <code>POST /api/v1/personal-tasks/:ptId/quiz-attempts</code> (body: answers) → trả score; <code>GET /api/v1/personal-tasks/:ptId/quiz-attempts</code></li>
+          <li>Task QUIZ config: <code>{ "passThreshold": 80, "questions": [...] }</code> (questions có thể trả về ẩn đáp án)</li>
+          <li>Pass → tự gọi CompleteTaskUseCase (US-06)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V7__quiz_attempts.sql</code></li>
+          <li>domain: <code>QuizAttempt</code>, <code>QuizService.grade(task.config, answers)</code> — đếm câu đúng, tính %, passed</li>
+          <li>application: <code>SubmitQuizUseCase</code> (grade → save attempt → nếu passed gọi complete), <code>GetQuizHistoryQuery</code></li>
+          <li>presentation: 2 endpoint + DTO (không trả đáp án trong response)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: đúng 8/10 → 80% → passed; 7/10 → failed; failed lần 2 vẫn được nộp</li>
+          <li>Integration test: POST attempt pass → task tự complete + task_completions có record</li>
+          <li>curl: nộp 2 lần → GET history thấy 2 records</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 4 -->
+<div class="section-label" id="sp4">Sprint 4 · M2 · Completion engine + PersonalQuest edit</div>
+<div class="module-section">
+
+  <!-- US-08 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-08</span>
+      <span class="us-title">Hoàn thành quest theo rule</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 4 / M2</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want my quest to be marked completed automatically when the rule is satisfied, so that I know I have achieved my goal.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Evaluate <code>completion_rule</code> khi task completed/undone</li>
+          <li>Rule thỏa → status = COMPLETED, completed_at được lưu</li>
+          <li>Activity + Notification được tạo ra; Achievement được kiểm tra mở khóa</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Domain: <code>CompletionEvaluator</code> — strategy per rule type; <code>PersonalQuest.advance()</code> đổi status</li>
+          <li>Trigger: trong CompleteTask/UndoTask use case → gọi evaluator; undo có thể reset COMPLETED → ACTIVE</li>
+          <li>Outbox: publish <code>quest.completed</code> + <code>task.completed</code></li>
+          <li>Consumers (M3): World cập nhật completion_count, Social tạo activity, Notification gửi (M5)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>domain: <code>CompletionEvaluator</code> + các rule strategy (ALL_TASKS, QUIZ_SCORE, SUBMISSION, ALL_OF, ANY_OF)</li>
+          <li>application: hook vào CompleteTaskUseCase/UndoTaskUseCase; <code>EvaluateCompletionUseCase</code></li>
+          <li>thêm cột <code>completed_at</code> vào <code>personal_quests</code> (V6 alter)</li>
+          <li>outbox writer cho 2 event</li>
+          <li>achievement check: stub interface cho tới M3</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: ALL_TASKS complete hết → COMPLETED; undo 1 → ACTIVE; ANY_OF chỉ cần 1</li>
+          <li>Integration test: hoàn thành quest → completed_at có giá trị + outbox có quest.completed</li>
+          <li>Test idempotent: complete lại task đã complete → không ghi event trùng</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-09 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-09</span>
+      <span class="us-title">Chỉnh sửa PersonalQuest</span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 4 / M2</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to add or modify chapters/tasks in my forked quest, so that I can customize the path to fit my needs.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Chỉ chỉnh sửa được PersonalQuest của mình</li>
+          <li>Không ảnh hưởng Quest gốc</li>
+          <li>Chapter/task thêm mới không ảnh hưởng fork khác</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/personal-quests/:id/chapters</code>, <code>POST /api/v1/personal-quests/:id/chapters/:cid/tasks</code>, reorder, delete (chỉ ACTIVE)</li>
+          <li>Domain: giống US-03 nhưng trên cây Personal*; guard owner + status ACTIVE</li>
+          <li>Task mới mặc định chưa completed (không tạo TaskCompletion)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>application: <code>EditPersonalQuestUseCase</code> (đủ 4 thao tác thêm/xóa/reorder chapter + task)</li>
+          <li>reuse guard: owner check + <code>isActive()</code></li>
+          <li>không chạm quest gốc — chỉ thao tác trên personal_* tables</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: sửa quest của user khác → 403; quest COMPLETED → 409</li>
+          <li>Integration test: thêm task vào PersonalQuest → quest gốc không đổi; fork khác không đổi</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 5 -->
+<div class="section-label" id="sp5">Sprint 5 · M3 · World + Marketplace browse</div>
+<div class="module-section">
+
+  <!-- US-16 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-16</span>
+      <span class="us-title">Xem thế giới cá nhân</span>
+      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to see my Knowledge World, so that I can visualize my progress across different domains.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Mỗi Domain có một District riêng</li>
+          <li>District reflect số TaskCompletion thuộc domain đó</li>
+          <li>World cập nhật ngay khi có completion mới</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>worlds</code> (user_id 1-1, created_at), <code>districts</code> (id, world_id, domain_id, completion_count)</li>
+          <li>API: <code>GET /api/v1/world/me</code> → world + districts + completion_count</li>
+          <li>Consumer <code>task.completed</code>/<code>task.undone</code>: cập nhật completion_count district theo domain của quest gốc</li>
+          <li>World + districts auto-tạo khi đăng ký (US-20 AC)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V9__worlds_districts.sql</code></li>
+          <li>domain: <code>World</code>, <code>District</code> (aggregate World chứa districts)</li>
+          <li>application: <code>GetWorldQuery</code>; <code>TaskCompletedEventHandler</code> cập nhật completion_count (idempotent, +1/-1 đúng sự kiện)</li>
+          <li>chỉ tạo District khi domain có completion đầu tiên (lazy) hoặc eager tạo tất cả — chọn lazy để world gọn</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: complete task → district completion_count tăng; undo → giảm</li>
+          <li>Idempotent test: xử lý trùng event → không tăng 2 lần</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-17 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-17</span>
+      <span class="us-title">Xem district &amp; building</span>
+      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to see district details with buildings, so that I can feel my progress visually.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>District hiển thị quest đã complete + quest đang active + tổng task hoàn thành</li>
+          <li>Building mở khóa theo completion_count — thuần visualize, không ảnh hưởng logic</li>
+          <li>Building type tự do (house, school, library...) — không gắn game rule nào</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>buildings</code> (id, district_id, type, unlocked_at, position)</li>
+          <li>API: <code>GET /api/v1/world/districts/:id</code> → district + buildings + quests completed/active + total tasks</li>
+          <li>Unlock rule: threshold completion_count → unlock building (predefined: 1/5/10/20...)</li>
+          <li>Thuần UI mapping — không dùng cho logic chấm điểm</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V9__buildings.sql</code></li>
+          <li>application: <code>GetDistrictDetailQuery</code> (join personal_quests completed/active theo domain); <code>BuildingUnlockService</code> chạy khi completion_count đổi ngưỡng</li>
+          <li>presentation: endpoint + DTO</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: completion_count đạt ngưỡng → building mới xuất hiện; quest completed/active liệt kê đúng</li>
+          <li>UI test (web M6): building render từ DTO</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-18 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-18</span>
+      <span class="us-title">Xem world người khác</span>
+      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Visitor</em>, I want to view another user's Knowledge World, so that I can be inspired by their progress.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Chỉ xem được nếu user đó có profile public</li>
+          <li>Không thể chỉnh sửa world người khác</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/users/:username/world</code></li>
+          <li>Guard: kiểm tra <code>users.is_public</code>; private + chưa follow → 404 (ẩn danh tính như US profile)</li>
+          <li>Read-only — không có mutation endpoint</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>application: <code>GetUserWorldQuery</code> (permission check qua profile service)</li>
+          <li>reuse DTO thế giới từ US-16</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: profile private → 404 với visitor; public → 200; không có endpoint chỉnh sửa</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-19 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-19</span>
+      <span class="us-title">Mở khóa achievement</span>
+      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to unlock achievements at real milestones, so that I get intrinsic recognition without fake gamification.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Achievement gắn mốc thật: quest đầu tiên, X quests, X tasks, Y tasks trong 1 domain</li>
+          <li>Không có XP/Level/điểm thưởng</li>
+          <li>Achievement unlock hiển thị trên feed và profile</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>achievements</code> (id, code, title, description, criteria JSONB), <code>user_achievements</code> (user_id, achievement_id, unlocked_at, PK composite)</li>
+          <li>Engine: <code>AchievementEvaluator</code> chạy khi quest completed / task completed — đọc counter (total_quests, total_tasks, per-domain tasks) → check criteria → unlock</li>
+          <li>Event: <code>achievement.unlocked</code> → feed (M5) + notification (M5)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V10__achievements.sql</code> + seed 6-8 achievement codes</li>
+          <li>domain: <code>Achievement</code>, <code>AchievementEvaluator</code> (strategy per criteria)</li>
+          <li>application: hook sau quest completed (US-08); <code>GetMyAchievementsQuery</code> + <code>?onlyLocked=true</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: đạt mốc → unlock đúng; không double-unlock; criteria không khớp → không unlock</li>
+          <li>Integration test: complete quest đầu tiên → achievement "First Quest" có trong user_achievements</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-11 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-11</span>
+      <span class="us-title">Khám phá learning path &amp; quest</span>
+      <span class="us-meta">Marketplace · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Guest</em>, I want to browse learning paths and popular/trending quests, so that I can find interesting goals to pursue.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Hiển thị Learning Paths theo Domain</li>
+          <li>Hiển thị Popular quests (usage count + rating)</li>
+          <li>Hiển thị Trending quests (gần đây dùng nhiều)</li>
+          <li>Không cần đăng nhập</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/marketplace/home</code> (paths by domain, popular, trending)</li>
+          <li>DB: denorm <code>quests.usage_count</code>, <code>quests.avg_rating</code> (M4); trending = usage trong 7 ngày qua (bảng aggregate tạm hoặc Redis ZSET)</li>
+          <li>Redis (Upstash): cache kết quả ~60s, ZSET cho trending</li>
+          <li>Public endpoint, không cần auth</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>application: <code>MarketplaceHomeQuery</code> — 3 dataset: paths theo domain, popular (ORDER BY usage_count DESC, avg_rating DESC), trending (Redis ZINCRBY)</li>
+          <li>infrastructure: Redis template + cache config; repository query</li>
+          <li>presentation: <code>MarketplaceController</code> GET /marketplace/home</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: không token vẫn 200; quest DRAFT không xuất hiện; thứ tự popular đúng</li>
+          <li>Redis: sau fork (US-05) → usage_count tăng → quest lên trending</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 7 -->
+<div class="section-label" id="sp7">Sprint 7 · M4 · Search + Review + Favorite</div>
+<div class="module-section">
+
+  <!-- US-12 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-12</span>
+      <span class="us-title">Tìm kiếm quest</span>
+      <span class="us-meta">Marketplace · <span class="sprint">Sprint 7 / M4</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Guest</em>, I want to search quests by keyword, so that I can find quests relevant to my goal.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Tìm theo title, description, chapter title, task title</li>
+          <li>Kết quả xếp theo relevance</li>
+          <li>Lọc được theo domain, difficulty</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Elasticsearch (Bonsai) index <code>quests</code>: fields title/desc (analyzed), chapter/task title (nested), domain_id, difficulty</li>
+          <li>Sync: consumer <code>quest.published</code> → index; <code>quest.unpublished</code> → delete doc; <code>quest.updated</code> → reindex</li>
+          <li>API: <code>GET /api/v1/marketplace/search?q=&domain=&difficulty=&page=</code></li>
+          <li>Trước khi có ES: fallback PostgreSQL full-text (tsvector) — plan chuyển sang ES khi M4</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>index mapping + <code>QuestIndexService</code> (index/delete/reindex)</li>
+          <li>outbox consumer: <code>QuestPublishedEventHandler</code> → ES</li>
+          <li>application: <code>SearchQuestsQuery</code> — build ES query (multi_match + filter) → map results</li>
+          <li>presentation: <code>MarketplaceController.search()</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: index quest → search keyword tìm thấy; filter domain đúng; unpublished không hiện</li>
+          <li>Relevance: tên trùng từ khóa xếp trước mô tả chứa từ khóa</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-13 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-13</span>
+      <span class="us-title">Review quest</span>
+      <span class="us-meta">Marketplace · <span class="sprint">Sprint 7 / M4</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to rate a quest I have used with stars and optional text, so that I can help others choose quality quests.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Chỉ review được quest đã fork</li>
+          <li>Score 1–5 sao + content text (tùy chọn)</li>
+          <li>Chỉ review 1 lần, có thể cập nhật</li>
+          <li>Average rating hiển thị trên quest card</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>reviews</code> (id, quest_id, user_id, score 1-5, content, created_at, updated_at, UNIQUE(quest_id,user_id))</li>
+          <li>API: <code>POST /api/v1/quests/:id/review</code>, <code>PUT /api/v1/reviews/:id</code>, <code>GET /api/v1/quests/:id/reviews</code></li>
+          <li>Denorm: cập nhật <code>quests.avg_rating</code> + <code>review_count</code> sau mỗi review/update (trong cùng transaction)</li>
+          <li>Guard: phải có PersonalQuest của quest này</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V8__reviews.sql</code> (UNIQUE + index quest_id)</li>
+          <li>application: <code>CreateReviewUseCase</code> (guard đã fork, upsert 1 lần), <code>UpdateReviewUseCase</code>, <code>GetReviewsQuery</code></li>
+          <li>infrastructure: recompute avg_rating (hoặc incremental update)</li>
+          <li>presentation: controller + DTO</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Unit test: review quest chưa fork → 403; score ngoài 1–5 → 400; review 2 lần → update (không trùng)</li>
+          <li>Integration test: sau review, <code>avg_rating</code> cập nhật đúng</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-14 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-14</span>
+      <span class="us-title">Lưu quest yêu thích</span>
+      <span class="us-meta">Marketplace · <span class="sprint">Sprint 7 / M4</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to save a quest to my favorites, so that I can find it easily later.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Toggle favorite (add/remove)</li>
+          <li>Danh sách favorite trong profile</li>
+          <li>Không cần fork để favorite</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>favorites</code> (user_id, quest_id, created_at, PK(user_id, quest_id))</li>
+          <li>API: <code>PUT /api/v1/quests/:id/favorite</code> (toggle hoặc body action), <code>GET /api/v1/users/me/favorites</code></li>
+          <li>Auth required; đơn giản, không cần event</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V8__favorites.sql</code></li>
+          <li>application: <code>ToggleFavoriteUseCase</code> (idempotent), <code>GetFavoritesQuery</code> (paginated)</li>
+          <li>presentation: controller</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: toggle 2 lần → hết favorite; list trong profile đúng; chưa login → 401</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 8 -->
+<div class="section-label" id="sp8">Sprint 8 · M4 · Quest Analytics</div>
+<div class="module-section">
+
+  <!-- US-15 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-15</span>
+      <span class="us-title">Xem analytics quest (Creator)</span>
+      <span class="us-meta">Marketplace · <span class="sprint">Sprint 8 / M4</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Creator</em>, I want to see how many people are using and completing my quest, so that I can understand its impact.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Hiển thị: fork count, completion rate, average rating</li>
+          <li>Hiển thị task/chapter nào drop-off nhiều nhất</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/quests/:id/analytics</code> (owner only)</li>
+          <li>Data: fork_count từ personal_quests, completion_rate = completed/total, drop-off = count task_completions per personal_task_id</li>
+          <li>Native SQL query qua repository (join 3 bảng) — tránh N+1</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>infrastructure: <code>QuestAnalyticsRepository</code> — native query group by task, count completions</li>
+          <li>application: <code>GetQuestAnalyticsQuery</code> — build DTO fork/completion/rating/dropOff[]</li>
+          <li>presentation: endpoint owner-only</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: tạo 2 forks, 1 completed → completion rate 50%; drop-off đúng task</li>
+          <li>Permission: creator khác → 403</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 9 -->
+<div class="section-label" id="sp9">Sprint 9 · M5 · Social <span style="margin-left:0;color:var(--muted)">— Go service</span></div>
+<div class="module-section">
+
+  <!-- US-22 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-22</span>
+      <span class="us-title">Follow user</span>
+      <span class="us-meta">Social · <span class="sprint">Sprint 9 / M5</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to follow other users, so that I can see their progress and be motivated.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Toggle follow/unfollow</li>
+          <li>Số follower hiển thị trên profile</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>follows</code> (follower_id, followee_id, created_at, PK composite)</li>
+          <li>API: <code>PUT /api/v1/users/:username/follow</code> (toggle), <code>GET /api/v1/users/:username/followers</code>, <code>.../following</code></li>
+          <li>Go service (Fiber) sở hữu bảng này — không cho phép Java module viết trực tiếp (service-ownership)</li>
+          <li>Denorm follower_count trên users (qua event hoặc update trực tiếp qua API internal)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>repo Go: <code>internal/follow/</code> — domain + repository + handler</li>
+          <li>migration V11__follows.sql (DB dùng chung phase 1)</li>
+          <li>cập nhật follower_count: publish event <code>user.followed/unfollowed</code> → Identity consumer</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Go test: toggle follow; self-follow → 400; double follow → idempotent</li>
+          <li>Integration: follow → follower_count tăng trên profile</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-23 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-23</span>
+      <span class="us-title">Xem feed</span>
+      <span class="us-meta">Social · <span class="sprint">Sprint 9 / M5</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to see a feed of activities from people I follow, so that I can stay updated on their progress.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Hiển thị: quest completed, quest forked, task completed, quest published, achievement unlocked</li>
+          <li>Sắp xếp theo thời gian mới nhất</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>activities</code> (id, actor_id, type, payload JSONB, created_at, index actor+time)</li>
+          <li>API: <code>GET /api/v1/feed</code> (activities của người mình follow)</li>
+          <li>Consumers: <code>quest.completed</code>, <code>quest.forked</code>, <code>task.completed</code>, <code>quest.published</code>, <code>achievement.unlocked</code> → insert activities</li>
+          <li>Feed query: join follows + activities (fan-out-on-read, đủ cho learning scale)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>migration V11__activities.sql</li>
+          <li>Go: <code>internal/feed/</code> — event consumers (idempotent theo eventId) + <code>GetFeedQuery</code></li>
+          <li>mapper payload → display DTO</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration: user B follow A → A fork quest → feed B thấy activity; sắp xếp desc</li>
+          <li>Idempotent: event trùng không insert 2 activity</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-24 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-24</span>
+      <span class="us-title">Comment trên quest &amp; discussion</span>
+      <span class="us-meta">Social · <span class="sprint">Sprint 9 / M5</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to comment on quests and reply inside discussions, so that the community can help each other.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Comment trên Quest (target_type = QUEST)</li>
+          <li>Tạo Discussion gắn với Quest (hỏi đáp, chia sẻ)</li>
+          <li>Reply lồng nhau tối đa 2 cấp qua parent_id</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>comments</code> (id, target_type, target_id, user_id, content, parent_id, created_at), <code>discussions</code> (id, quest_id, user_id, title, status OPEN/CLOSED, created_at)</li>
+          <li>API: <code>GET/POST /api/v1/quests/:id/comments</code>, <code>GET/POST /api/v1/quests/:id/discussions</code>, reply qua parent_id (max 2 cấp)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>migration V11__comments_discussions.sql</li>
+          <li>Go: <code>internal/comment/</code>, <code>internal/discussion/</code> — handlers + depth guard</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Go test: reply cấp 3 → 400; discussion trên quest không tồn tại → 404</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 11 -->
+<div class="section-label" id="sp11">Sprint 11 · M6 · Web (Next.js) — Auth + Marketplace + Quest Detail <span style="margin-left:0;color:var(--muted)">— bắt đầu làm web</span></div>
+<div class="module-section">
+
+  <!-- FE-01 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-01</span>
+      <span class="fe-title">Web skeleton + Auth (Login · Register)</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 11 / M6</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #02 Login, #03 Register — guest đăng nhập / tạo tài khoản, vào Web App được, World tự tạo.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Login: email + password, link Register / Forgot Password, OAuth buttons (placeholder nếu chưa làm)</li>
+          <li>Register: email + password + username, terms checkbox, sau khi xong → redirect vào app</li>
+          <li>Access token 15m + silent refresh 7d qua httpOnly cookie</li>
+          <li>Bảo vệ route: chưa login → redirect Login</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Next.js 14 App Router + Tailwind + TanStack Query (design tokens từ design-system.html)</li>
+          <li>API: <code>POST /auth/register</code>, <code>POST /auth/login</code>, <code>POST /auth/refresh</code> (đã có từ US-20)</li>
+          <li>Auth flow: <code>AuthProvider</code> (React context) — kiểm tra session khi app mount, silent refresh interceptor</li>
+          <li>Middleware Next.js bảo vệ route: <code>middleware.ts</code> kiểm tra access token</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>create-next-app</code> + setup Tailwind + folder <code>src/</code></li>
+          <li><code>src/lib/api.ts</code> — fetch wrapper (base URL, credentials, error normalization)</li>
+          <li><code>src/providers/auth.tsx</code> — session state + login/register/logout actions</li>
+          <li><code>src/app/(auth)/login/page.tsx</code> + <code>register/page.tsx</code> — form + validation + error display</li>
+          <li><code>src/middleware.ts</code> — redirect chưa login</li>
+          <li>UI primitives: Button, Input, Card từ design tokens</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: register → vào app; login → vào app; access token hết hạn → tự refresh không mất phiên</li>
+          <li>Không login → truy cập route private bị redirect</li>
+          <li>Test component (jest/RTL): form validation hiển thị đúng lỗi</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-02 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-02</span>
+      <span class="fe-title">Marketplace browse (Explore · Search · Domain)</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 11 / M6</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #04 Explore, #05 Search Results, #06 Domain Browse — guest duyệt quest không cần login.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Explore: trending, popular, domains grid, featured banner</li>
+          <li>Search: keyword, filter domain, sort (trending/newest/rating), paginated grid</li>
+          <li>Domain Browse: header + learning paths + quest grid theo domain</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/marketplace/home</code> (US-11), <code>GET /api/v1/marketplace/search</code> (US-12), <code>GET /api/v1/domains</code></li>
+          <li>State: TanStack Query — cache home/search, invalidate khi filter đổi</li>
+          <li>Component: <code>QuestCard</code>, <code>DomainGrid</code>, <code>SearchBar</code>, <code>Pagination</code> (reuse giữa 3 màn hình)</li>
+          <li>SEO: metadata cho Explore (SSR) — lý do chọn Next.js</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/components/quest/QuestCard.tsx</code> — hiển thị rating, fork count, domain badge</li>
+          <li><code>src/app/page.tsx</code> (Explore) — fetch home, render sections</li>
+          <li><code>src/app/search/page.tsx</code> — URL state cho query/filter/sort (SSR-friendly)</li>
+          <li><code>src/app/domains/[slug]/page.tsx</code> — dynamic route + list</li>
+          <li><code>src/lib/queries.ts</code> — hooks useHomeData, useSearch</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: guest xem Explore đủ sections; search "java" → kết quả + filter domain đúng</li>
+          <li>Kết quả search khớp: quest PUBLIC/HIDDEN đúng từ API</li>
+          <li>Pagination: trang 2 hoạt động, URL phản ánh page</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-03 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-03</span>
+      <span class="fe-title">Quest Detail (Public)</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 11 / M6</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screen #07 — xem quest trước khi dùng, không tick được, nút "Use Quest" yêu cầu login.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Cover + meta (domain, difficulty, rating, fork count)</li>
+          <li>Chapters preview (3 chapters đầu, collapse phần còn lại)</li>
+          <li>Creator card + Ratings</li>
+          <li>"Use Quest" → chưa login thì redirect login; đã fork thì hiện "Go to your quest"</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/quests/:id</code> (US-02), <code>POST /api/v1/quests/:id/fork</code> (US-05), reviews list (US-13)</li>
+          <li>Route: <code>/quests/[id]</code> (SSR cho SEO + metadata)</li>
+          <li>Use Quest: chưa login → redirect; đã login → fork → redirect PersonalQuest</li>
+          <li>Kiểm tra đã fork: API trả flag <code>forked</code> khi đã login</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/quests/[id]/page.tsx</code> — server component fetch + metadata</li>
+          <li><code>src/components/quest/ChapterPreview.tsx</code> — expand/collapse (client component)</li>
+          <li><code>src/components/quest/UseQuestButton.tsx</code> — auth check + fork mutation (TanStack)</li>
+          <li><code>src/components/quest/RatingSummary.tsx</code> + <code>ReviewList.tsx</code></li>
+          <li><code>src/components/quest/CreatorCard.tsx</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: guest xem detail; click Use Quest → redirect login; sau login → fork → vào tracker</li>
+          <li>Đã fork: nút đổi thành "Go to your quest" (không fork lần 2)</li>
+          <li>Metadata/OG tag hiển thị đúng title + description</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 12 -->
+<div class="section-label" id="sp12">Sprint 12 · M6 · Web — Dashboard + Create Quest + Tracker</div>
+<div class="module-section">
+
+  <!-- FE-04 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-04</span>
+      <span class="fe-title">My Dashboard</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 12 / M6</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screen #08 — tổng quan tiến độ cá nhân sau login.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Active PersonalQuests với progress bar</li>
+          <li>Recently completed + quick stats tuần này</li>
+          <li>Link tới từng PersonalQuest tracker</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/personal-quests?status=ACTIVE</code> (US-05), recent completed</li>
+          <li>Route: <code>/dashboard</code> (private)</li>
+          <li>Component: <code>QuestProgressCard</code> (progress %, chapter list mini)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/dashboard/page.tsx</code> — layout 2 cột (active | recent)</li>
+          <li><code>src/components/quest/QuestProgressCard.tsx</code> — animated progress bar</li>
+          <li>query hooks cho active/recent</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: login → dashboard thấy quest đang active, progress đúng %</li>
+          <li>Chưa có quest → empty state + CTA Explore</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-05 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-05</span>
+      <span class="fe-title">Create Quest + Edit Quest</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 12 / M6</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #09, #10 — wizard 3 bước tạo quest; edit pre-filled.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Step 1: title, description, skill domain, difficulty</li>
+          <li>Step 2: Chapters &amp; Tasks — add/reorder, task type, resource cho LEARN</li>
+          <li>Step 3: completion_rule, thumbnail, visibility</li>
+          <li>Publish (US-10); Edit chỉ cho quest chưa fork</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/quests</code> (US-02), <code>POST /api/v1/quests/:id/chapters</code> (US-03), reorder, publish (US-10)</li>
+          <li>Route: <code>/quests/new</code>, <code>/quests/[id]/edit</code> (private)</li>
+          <li>State: local form state (nest chapters→tasks), validations trước khi submit</li>
+          <li>Reorder: drag-and-drop (hoặc arrow buttons MVP)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/components/create/QuestWizard.tsx</code> — stepper + 3 steps</li>
+          <li><code>src/components/create/ChapterTaskEditor.tsx</code> — add/reorder task, type select</li>
+          <li><code>src/components/create/CompletionRulePicker.tsx</code> — 5 loại rule</li>
+          <li><code>src/app/quests/new/page.tsx</code> + edit page (reuse wizard với initialData)</li>
+          <li>mutation + invalidate query sau khi save/publish</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: tạo quest 2 chapters × 2 tasks → publish → xuất hiện Explore</li>
+          <li>Validation: chưa đủ chapter/task → nút Publish disabled</li>
+          <li>Edit quest đã fork → khóa phần chỉnh sửa (hiển thị restriction)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-06 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-06</span>
+      <span class="fe-title">Quest Tracking (PersonalQuest) + Favorites</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 12 / M6</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #11, #12 — màn hình làm quest chính + danh sách favorite.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Progress bar tổng + chapters với task checkbox + completion dates + "Add note"</li>
+          <li>Tick task: LEARN/PRACTICE/REFLECTION tick là xong; SUBMISSION cần evidence modal; QUIZ mở quiz</li>
+          <li>Undo tick được (US-06); hiển thị "Forked from"</li>
+          <li>Favorites: grid + toggle remove (US-14)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/personal-quests/:id</code>, <code>PUT/DELETE .../tasks/:ptId/complete</code> (US-06), quiz attempts (US-07), <code>PUT /api/v1/quests/:id/favorite</code> (US-14)</li>
+          <li>Route: <code>/p/[id]</code> (private), <code>/favorites</code></li>
+          <li>Optimistic update khi tick — progress bar cập nhật real-time</li>
+          <li>Component: <code>TaskRow</code> (theo type), <code>EvidenceModal</code>, <code>QuizRunner</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/p/[id]/page.tsx</code> — tree chapters + tasks, progress header</li>
+          <li><code>src/components/track/TaskRow.tsx</code> — checkbox per type, disabled states</li>
+          <li><code>src/components/track/EvidenceModal.tsx</code> + <code>ReflectionTextarea</code></li>
+          <li><code>src/components/quiz/QuizRunner.tsx</code> — nộp đáp án, hiện score/passed</li>
+          <li><code>src/app/favorites/page.tsx</code> — grid + toggle</li>
+          <li>optimistic mutation: rollback nếu API lỗi</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: tick LEARN → progress tăng ngay; undo → giảm; SUBMISSION không evidence → modal yêu cầu</li>
+          <li>QUIZ: submit → score → pass thì task tự complete</li>
+          <li>Refresh page → trạng thái tick giữ nguyên</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 13 -->
+<div class="section-label" id="sp13">Sprint 13 · M7 · Web — World + Profile + Feed</div>
+<div class="module-section">
+
+  <!-- FE-07 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-07</span>
+      <span class="fe-title">My World + District Detail</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 13 / M7</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #14, #15 — Knowledge World cá nhân.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Grid districts theo domain, mỗi district hiển thị completion_count</li>
+          <li>Click district → detail: stats, active quests, completed quests, buildings</li>
+          <li>Building mở khóa theo completion_count (thuần visualize — D3.js, có thể MVP = bar chart)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/world/me</code> (US-16), <code>GET /api/v1/world/districts/:id</code> (US-17)</li>
+          <li>Route: <code>/world</code>, <code>/world/districts/[id]</code> (private)</li>
+          <li>Render: MVP simple bar grid → upgrade D3 sau (decision log: Deferred)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/world/page.tsx</code> — district grid + overall stats</li>
+          <li><code>src/app/world/districts/[id]/page.tsx</code> — detail với quest lists</li>
+          <li><code>src/components/world/DistrictCard.tsx</code>, <code>BuildingList.tsx</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: hoàn thành task → world cập nhật count ngay khi refetch</li>
+          <li>District detail liệt kê đúng active/completed quests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-08 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-08</span>
+      <span class="fe-title">My Profile + Public Profile</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 13 / M7</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #16, #17 — profile của mình (edit) và của người khác (read-only + follow).</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>My Profile: avatar, bio, social links, quests đã tạo, world preview nhỏ, followers/following</li>
+          <li>Public Profile: read-only + Follow/Unfollow (US-22); private profile → 404 với visitor</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET/PUT /api/v1/users/me</code> (US-21), <code>GET /api/v1/users/:username</code>, follow endpoints (US-22)</li>
+          <li>Route: <code>/profile</code> (private), <code>/u/[username]</code></li>
+          <li>Avatar upload: Cloudinary widget → URL → PUT profile</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/profile/page.tsx</code> — edit form + avatar upload + stats</li>
+          <li><code>src/app/u/[username]/page.tsx</code> — read-only + FollowButton (optimistic)</li>
+          <li><code>src/components/profile/ProfileCard.tsx</code>, <code>StatsBar.tsx</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: sửa avatar/bio → lưu → hiển thị mới; follow/unfollow đổi trạng thái nút</li>
+          <li>Profile private của người khác → trang 404</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-09 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-09</span>
+      <span class="fe-title">Activity Feed + Settings</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 13 / M7</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #18, #20 — feed hoạt động + cài đặt tài khoản.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Feed: activity từ người follow theo thời gian (completed/forked/published/achievement)</li>
+          <li>Settings: profile info, đổi password, notification prefs, privacy (public/private), OAuth placeholder</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/feed</code> (US-23), <code>PUT /api/v1/users/me</code> (privacy) (US-21)</li>
+          <li>Route: <code>/feed</code>, <code>/settings</code> (private)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/feed/page.tsx</code> — timeline + infinite scroll</li>
+          <li><code>src/components/feed/ActivityItem.tsx</code> — render theo type</li>
+          <li><code>src/app/settings/page.tsx</code> — form sections</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: follow người khác → feed thấy activity của họ</li>
+          <li>Settings đổi privacy → public profile 404 đúng</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 14 -->
+<div class="section-label" id="sp14">Sprint 14 · M7 · Web — Analytics + AI + Deploy staging</div>
+<div class="module-section">
+
+  <!-- FE-10 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-10</span>
+      <span class="fe-title">Creator Analytics</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 14 / M7</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screen #13 — creator xem hiệu quả quest của mình.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Quest selector → fork count, completion rate, drop-off per task, average rating, reviews</li>
+          <li>Chart drop-off: task nào người bỏ nhiều nhất</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/quests/:id/analytics</code> (US-15)</li>
+          <li>Route: <code>/creator/analytics</code> (private, role CREATOR)</li>
+          <li>Chart: simple bars (recharts hoặc tự vẽ div) — MVP không cần thư viện nặng</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/creator/analytics/page.tsx</code> — selector + metric cards</li>
+          <li><code>src/components/analytics/DropOffChart.tsx</code>, <code>StatCard.tsx</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: chọn quest → số liệu đúng; task drop-off cao nhất hiển thị trước</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-11 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-11</span>
+      <span class="fe-title">AI Advisor</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 14 / M7</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screen #19 — mô tả mục tiêu → AI gợi ý quest / sinh quest mới.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Text input mục tiêu → danh sách quest gợi ý (US-25)</li>
+          <li>Không có quest phù hợp → "Generate a new quest" (US-26) → preview trước khi dùng</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/ai/recommend</code>, <code>POST /api/v1/ai/generate-quest</code> (M8 — khi tới Sprint 15 mới có backend)</li>
+          <li>Route: <code>/ai</code> (private) — nếu flag ai.enabled tắt thì ẩn entry</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/ai/page.tsx</code> — input + loading state + kết quả</li>
+          <li><code>src/components/ai/RecommendationList.tsx</code>, <code>GeneratePreview.tsx</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: gõ mục tiêu → loading → gợi ý quest; generate → preview quest DRAFT</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-12 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-12</span>
+      <span class="fe-title">Deploy staging</span>
+      <span class="us-meta">Web · <span class="sprint">Sprint 14 / M7</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Đưa web lên Vercel, kết nối backend, env config.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Vercel preview per PR + staging domain</li>
+          <li>Env: NEXT_PUBLIC_API_URL, cookie domain, CORS cho backend</li>
+          <li>Backend: dùng được từ Vercel (có host staging hoặc local tunnel khi test)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Kết nối GitHub repo → Vercel import, configure env</li>
+          <li>Backend staging: render/VM nhỏ (hoặc K8s từ M10) — tối thiểu chạy Docker trên VPS</li>
+          <li>Cookie: httpOnly cookie cần CORS config + sameSite</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>.env.production.example</code> trong repo</li>
+          <li>Vercel project + domains</li>
+          <li>CI workflow: build web + test → Vercel preview</li>
+          <li>Kiểm tra silent refresh hoạt động cross-origin</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: truy cập staging URL, login, tạo quest, fork, tick task — toàn bộ flow hoạt động</li>
+          <li>Cookie/session hoạt động đúng trên https staging</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 15 -->
+<div class="section-label" id="sp15">Sprint 15 · M8 · AI <span style="margin-left:0;color:var(--muted)">— Python service</span></div>
+<div class="module-section">
+
+  <!-- US-25 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-25</span>
+      <span class="us-title">Gợi ý quest theo mục tiêu</span>
+      <span class="us-meta">AI · <span class="sprint">Sprint 15 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to describe my goal and get quest recommendations, so that I can quickly find a relevant learning path.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Input là text mô tả mục tiêu</li>
+          <li>Output là danh sách quest gợi ý có sẵn</li>
+          <li>Nếu không có quest phù hợp → gợi ý sinh quest mới</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/ai/recommend</code> → { suggestions: [...questIds], fallback: bool }</li>
+          <li>Python service: FastAPI + Anthropic SDK</li>
+          <li>Flow: prompt Claude "map goal text → keywords" → tìm quest qua ES (matching title/domain) → nếu rỗng, flag fallback=true</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/routers/recommend.py</code> — endpoint + call Claude</li>
+          <li><code>app/services/recommender.py</code> — parse intent, query ES</li>
+          <li>timeout + fallback: nếu LLM lỗi → trả trending quests</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>pytest: mock Claude → intent đúng → quest match; no match → fallback=true</li>
+          <li>Manual: POST mô tả "học Java backend" → gợi ý quest Java</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-26 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-26</span>
+      <span class="us-title">Sinh quest mới bằng AI</span>
+      <span class="us-meta">AI · <span class="sprint">Sprint 15 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want AI to generate a quest for a goal that has no existing quest, so that I can start immediately without waiting for a creator.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>AI tạo quest với chapters + tasks có type phù hợp</li>
+          <li>Quest tạo dưới tên user (không phải AI), DRAFT</li>
+          <li>User có thể chỉnh sửa trước khi dùng</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/ai/generate-quest</code> → trả quest DRAFT đã tạo (gọi internal Quest API)</li>
+          <li>Prompt: yêu cầu JSON đúng schema quest (chapters[], tasks[{type}]) → validate → gọi tạo quest</li>
+          <li>Json validation layer để chống LLM trả schema sai</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/routers/generate.py</code>, <code>app/services/quest_generator.py</code> — prompt + JSON schema validate (pydantic)</li>
+          <li>gọi <code>POST /api/v1/quests</code> với creator_id = user (service-to-service auth)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>pytest: JSON invalid → retry 1 lần → vẫn invalid → 422; quest tạo đúng DRAFT dưới tên user</li>
+          <li>Manual: generate → mở UI chỉnh sửa → publish</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-30 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-30</span>
+      <span class="us-title">Chấm bài tự động bằng AI (AI Grader)</span>
+      <span class="us-meta">AI · <span class="sprint">Sprint 15 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want AI to grade my SUBMISSION/PRACTICE submission against the task rubric, so that I know whether my work really meets the requirements.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Chỉ áp dụng cho task SUBMISSION/PRACTICE có rubric trong task.config</li>
+          <li>AI chấm theo rubric → PASS / FAIL / NEEDS_REVISION + score (0–100) + feedback cụ thể</li>
+          <li>PASS → tạo TaskCompletion tự động + evaluate completion_rule</li>
+          <li>FAIL / NEEDS_REVISION → user nộp lại, feedback hiển thị kèm mỗi lần nộp</li>
+          <li>Rate-limited: 20 req/day per user</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>submission_grades</code> (personal_task_id FK, user_id FK, quest_id denorm, attempt_no, status, score, feedback, rubric_snapshot JSONB, model)</li>
+          <li>API: <code>POST /api/v1/ai/grade</code> → { gradeId, status, score, feedback, gradedAt }</li>
+          <li>Flow: gọi internal Quest API lấy rubric từ task.config → prompt Claude chấm theo rubric → validate JSON → ghi grade → nếu PASS publish <code>submission.graded</code></li>
+          <li>Quest Module consumer: status=PASS → tạo TaskCompletion + evaluate completion_rule</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/routers/grade.py</code>, <code>app/services/grader.py</code> — prompt + rubric parse + pydantic validate (score 0–100, feedback required)</li>
+          <li>Async: grade task nặng → queue nếu cần; timeout + retry (LLM lỗi → 503, không tự PASS)</li>
+          <li>Call internal <code>POST /api/v1/quests/:id/tasks/:taskId/complete</code> khi PASS (service-to-service auth)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>pytest: rubric → PASS/FAIL/NEEDS_REVISION đúng; JSON invalid → 422; PASS → TaskCompletion được tạo + event publish</li>
+          <li>Manual: nộp bài kém → FAIL + feedback; nộp bài tốt → PASS tự hoàn thành task</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-31 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-31</span>
+      <span class="us-title">AI Coach cá nhân</span>
+      <span class="us-meta">AI · <span class="sprint">Sprint 15 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As a <em>Learner</em>, I want to chat with an AI coach that knows my real progress, so that I can stay on track and know what to do next.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Chat hỏi đáp về trạng thái PersonalQuest thật của user (task đang dở, streak, achievement)</li>
+          <li>AI dùng tool calling để đọc: get_progress, get_streak, get_achievements, get_upcoming_tasks</li>
+          <li>Gợi ý bước tiếp theo dựa trên dữ liệu thật</li>
+          <li>Streaming response; lịch sử chat lưu theo session</li>
+          <li>AI chỉ đọc progress — không tự ý sửa/chấm quest của user</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>coach_sessions</code> + <code>coach_messages</code> (role USER/ASSISTANT/TOOL, tool_calls JSONB)</li>
+          <li>API: <code>POST /api/v1/ai/coach/sessions</code>, <code>GET /api/v1/ai/coach/sessions</code>, <code>POST /api/v1/ai/coach/sessions/:id/messages</code> (SSE streaming), <code>GET /api/v1/ai/coach/sessions/:id</code></li>
+          <li>Tool calling: define tools (get_progress, get_streak, get_achievements, get_upcoming_tasks) — read-only, query qua internal Quest/World API</li>
+          <li>Rate-limited: 60 messages/day per user</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/routers/coach.py</code>, <code>app/services/coach.py</code> — conversation loop + tool dispatch</li>
+          <li><code>app/services/coach_tools.py</code> — các tool read-only gọi internal API (personal_quests, task_completions, quiz_attempts, achievements)</li>
+          <li>Streaming: SSE qua FastAPI StreamingResponse; message ASSISTANT lưu sau khi stream xong</li>
+          <li>Tool calls chỉ READ — không có tool nào write quest</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>pytest: mock Claude → tool được gọi đúng với progress thật; message lưu đúng session; không tool write nào được expose</li>
+          <li>Manual: chat "tôi đang kẹt ở đâu?" → trả về task đang dở + gợi ý bước tiếp</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 16 -->
+<div class="section-label" id="sp16">Sprint 16 · M8 · Admin</div>
+<div class="module-section">
+
+  <!-- US-27 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-27</span>
+      <span class="us-title">Ẩn quest vi phạm</span>
+      <span class="us-meta">Admin · <span class="sprint">Sprint 16 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As an <em>Admin</em>, I want to hide a quest that violates community guidelines, so that the marketplace remains safe and high quality.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Quest bị hidden không xuất hiện trong Marketplace</li>
+          <li>Creator được thông báo lý do</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>POST /api/v1/admin/quests/:id/hide</code> (body: reason), <code>POST .../unhide</code></li>
+          <li>Status thêm: HIDDEN — bị loại khỏi mọi list marketplace (filter status)</li>
+          <li>Notification cho creator: gửi qua Notification service (M5)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>application: <code>HideQuestUseCase</code> (role ADMIN via @PreAuthorize), <code>UnhideQuestUseCase</code></li>
+          <li>outbox: <code>quest.hidden</code> → ES remove (M4) + notification</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: non-admin → 403; hide → marketplace/search không thấy; unhide → hiện lại</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-28 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-28</span>
+      <span class="us-title">Quản lý domain</span>
+      <span class="us-meta">Admin · <span class="sprint">Sprint 16 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As an <em>Admin</em>, I want to create and manage skill domains, so that quests and paths are organized properly.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Tạo / sửa / ẩn skill_domains</li>
+          <li>Domain ảnh hưởng cả LearningPath lẫn District trong World</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET/POST /api/v1/admin/domains</code>, <code>PUT/DELETE /api/v1/admin/domains/:id</code></li>
+          <li>DB: <code>skill_domains</code> (id, name, slug UNIQUE, is_active) — seed dữ liệu ban đầu (Programming, Language, Fitness...)</li>
+          <li>Domain inactive → quest mới không chọn được</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V1__skill_domains.sql</code> + seed</li>
+          <li>application: <code>AdminDomainUseCase</code> + <code>DomainQueryService</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: tạo domain → path tạo với domain đó; ẩn → path mới không dùng được</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- US-29 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="us-id">US-29</span>
+      <span class="us-title">Bật/tắt feature flag</span>
+      <span class="us-meta">Admin · <span class="sprint">Sprint 16 / M8</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">As an <em>Admin</em>, I want to enable or disable specific features, so that I can control the rollout of new functionality.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Feature flag được quản lý qua admin panel</li>
+          <li>Thay đổi có hiệu lực ngay, không cần deploy lại</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>DB: <code>feature_flags</code> (id, key UNIQUE, enabled, description, updated_at)</li>
+          <li>API: <code>GET/PUT /api/v1/admin/feature-flags</code>; <code>GET /api/v1/feature-flags</code> (public aggregate cho client cache)</li>
+          <li>Cache Redis: flag được cache ~30s → thay đổi hiệu lực nhanh; invalidate khi update</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>V10__feature_flags.sql</code> + seed (ai.enabled, social.enabled...)</li>
+          <li>application: <code>FeatureFlagService.isEnabled(key)</code> — check cache → DB; <code>AdminFlagUseCase</code></li>
+          <li>guard các endpoint mới theo flag (vd: AI endpoints nếu flag tắt → 404)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Integration test: tắt flag ai.enabled → POST /api/v1/ai/* trả 404; bật lại → 200 (không restart)</li>
+          <li>Cache test: sau PUT, flag mới phản ánh trong ≤ 30s</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 21 -->
+<div class="section-label" id="sp21">Sprint 21 · M11 · React Native — Home + Task Check + My Quests</div>
+<div class="module-section">
+
+  <!-- FE-13 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-13</span>
+      <span class="fe-title">RN skeleton + Today / Home + Task Check</span>
+      <span class="us-meta">Mobile · <span class="sprint">Sprint 21 / M11</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #21 Today/Home, #24 Task Check — mobile-first daily tracking (tracking-first UX).</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Home: active quests, tasks cần làm hôm nay, streak counter, quick-complete</li>
+          <li>Task Check: fullscreen — tên task to, checkbox lớn, optional note, nút Confirm (satisfying UX)</li>
+          <li>Auth: RN có login riêng (token lưu secure-store)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Expo SDK 51 + expo-router + RN Skia (cho world sau; MVP dùng RN core)</li>
+          <li>API: personal-quests list (US-05), complete task (US-06)</li>
+          <li>Auth: login screen trong app, token storage (expo-secure-store)</li>
+          <li>Streak: tính từ task_completions theo ngày (backend thêm endpoint nếu cần)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>expo init</code> + expo-router setup + nativewind</li>
+          <li><code>app/(tabs)/index.tsx</code> — Today screen, quick-complete list</li>
+          <li><code>app/task/[id].tsx</code> — Task Check fullscreen</li>
+          <li><code>app/(auth)/login.tsx</code> — login/register, secure token storage</li>
+          <li><code>lib/api.ts</code> — fetch wrapper + token header</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual (Expo Go): login → Today hiển thị quests; tick task → complete + progress tăng</li>
+          <li>Offline: app không crash khi mất mạng (graceful error)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-14 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-14</span>
+      <span class="fe-title">My Quests + Quest Detail + Explore (mobile)</span>
+      <span class="us-meta">Mobile · <span class="sprint">Sprint 21 / M11</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #25 My Quests, #23 Quest Detail, #22 Explore — tab điều hướng chính trên mobile.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>My Quests: active + completed tabs, progress per quest</li>
+          <li>Quest Detail: chapters &amp; tasks list, progress bar, "Use Quest"/"Continue"</li>
+          <li>Explore: search bar + domains horizontal scroll + trending list</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: personal-quests (US-05), quest detail (US-02), marketplace home/search (US-11/12)</li>
+          <li>Tabs: Today · My Quests · Explore · Profile</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/(tabs)/quests.tsx</code> — tabs active/completed</li>
+          <li><code>app/quest/[id].tsx</code> — detail + Use Quest (fork) + Continue</li>
+          <li><code>app/(tabs)/explore.tsx</code> — search + domains + trending</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: fork quest từ explore → xuất hiện My Quests; detail hiển thị chapters</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 22 -->
+<div class="section-label" id="sp22">Sprint 22 · M11 · RN — World + Profile + Notifications + Search</div>
+<div class="module-section">
+
+  <!-- FE-15 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-15</span>
+      <span class="fe-title">My World (mobile) + Profile (mobile)</span>
+      <span class="us-meta">Mobile · <span class="sprint">Sprint 22 / M11</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #26, #27 — world + profile rút gọn cho mobile.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>World: district list dọc + progress bar + completion count per domain</li>
+          <li>Profile: avatar, stats tóm tắt, public quests, world snapshot</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>GET /api/v1/world/me</code> (US-16), <code>GET /api/v1/users/me</code> (US-21)</li>
+          <li>RN Skia nếu muốn world sinh động; MVP list đơn giản</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/(tabs)/world.tsx</code> — district list + progress</li>
+          <li><code>app/(tabs)/profile.tsx</code> — avatar/stats/quests</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: world cập nhật sau task complete; profile đúng dữ liệu</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-16 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-16</span>
+      <span class="fe-title">Notifications + Search + Settings (mobile)</span>
+      <span class="us-meta">Mobile · <span class="sprint">Sprint 22 / M11</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #28, #29, #30 — thông báo, search fullscreen, settings.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Notifications: completions của người follow, new followers, quest updates; unread indicator</li>
+          <li>Search: fullscreen + recent searches + suggestions</li>
+          <li>Settings: notification prefs, privacy, account (đơn giản hơn web)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: notifications (backend M5 — Notification service), search (US-12)</li>
+          <li>Push: Expo Push Notifications (decision log)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>app/(tabs)/notifications.tsx</code> — list + unread badges</li>
+          <li><code>app/search.tsx</code> — fullscreen search + recent (AsyncStorage)</li>
+          <li><code>app/settings.tsx</code> — prefs toggles</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: nhận notification khi được follow; search có suggestions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 23 -->
+<div class="section-label" id="sp23">Sprint 23 · M12 · Admin page</div>
+<div class="module-section">
+
+  <!-- FE-17 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-17</span>
+      <span class="fe-title">Admin Dashboard + Quest Moderation</span>
+      <span class="us-meta">Admin · <span class="sprint">Sprint 23 / M12</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #31, #32, #33 — admin overview + kiểm duyệt quest.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Dashboard: tổng users, quests, completions hôm nay/tuần, charts đơn giản</li>
+          <li>Moderation queue: quests pending/reviewed/hidden + quick actions</li>
+          <li>Quest Detail admin view: xem cả private content, actions Hide/Approve/Flag + internal note</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>/api/v1/admin/quests/:id/hide</code> (US-27), danh sách moderation, dashboard stats</li>
+          <li>Route: <code>/admin/...</code> — role ADMIN gate (middleware + API guard)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/admin/page.tsx</code> — stats + charts</li>
+          <li><code>src/app/admin/moderation/page.tsx</code> — queue + filters + actions</li>
+          <li><code>src/app/admin/moderation/[id]/page.tsx</code> — full quest view + action bar</li>
+          <li>middleware check role ADMIN</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: non-admin truy cập /admin → redirect; hide quest → biến mất khỏi marketplace</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-18 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-18</span>
+      <span class="fe-title">User Management + Skill Domain + Feature Flags</span>
+      <span class="us-meta">Admin · <span class="sprint">Sprint 23 / M12</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screens #34, #35, #36 — quản lý user, domain, feature flags.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>User Management: search, assign role, ban/restore</li>
+          <li>Skill Domain: CRUD, reorder, hide/show (US-28)</li>
+          <li>Feature Flags: list + toggle on/off, hiệu lực ngay (US-29)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>API: <code>/api/v1/admin/domains</code> (US-28), <code>/api/v1/admin/feature-flags</code> (US-29), user management</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/admin/users/page.tsx</code> — table + role select + ban</li>
+          <li><code>src/app/admin/domains/page.tsx</code> — CRUD + reorder</li>
+          <li><code>src/app/admin/flags/page.tsx</code> — toggle switch + scope display</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: toggle feature flag → app phản ánh ngay không cần reload</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SPRINT 24 -->
+<div class="section-label" id="sp24">Sprint 24 · M12 · Landing page + polish + deploy prod</div>
+<div class="module-section">
+
+  <!-- FE-19 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-19</span>
+      <span class="fe-title">Landing Page (Home)</span>
+      <span class="us-meta">Landing · <span class="sprint">Sprint 24 / M12</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Screen #01 — trang marketing chính, CTA dẫn vào app.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Hero + 2 CTA ("Explore Quests" / "Get Started")</li>
+          <li>Features, How It Works, Example Quests, Footer</li>
+          <li>SEO + OG tags, responsive</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Route: <code>/</code> tách khỏi app (landing khi chưa login, redirect vào app khi đã login)</li>
+          <li>Dùng sẵn design tokens + components</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/app/(marketing)/page.tsx</code> — hero, sections, CTA</li>
+          <li><code>src/components/marketing/*</code> — FeatureGrid, HowItWorks, ExampleQuests, Footer</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Manual: guest vào / thấy landing; CTA Explore → marketplace; Get Started → register</li>
+          <li>Lighthouse: SEO/performance ≥ 90</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FE-20 -->
+  <div class="us-card">
+    <div class="us-head">
+      <span class="fe-id">FE-20</span>
+      <span class="fe-title">Polish + Deploy Production</span>
+      <span class="us-meta">Landing · <span class="sprint">Sprint 24 / M12</span> · <span class="status status-later">LATER</span></span>
+    </div>
+    <div class="us-statement">Hoàn thiện UX, error handling, deploy prod.</div>
+    <div class="phase">
+      <div class="phase-head phase-spec"><span class="phase-dot"></span><span class="phase-label">SPEC</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Empty states, loading skeletons, error boundaries toàn app</li>
+          <li>Responsive hoàn thiện, dark mode nếu có</li>
+          <li>Deploy prod: Vercel + backend production</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Audit các màn hình qua screen-inventory #01-#20</li>
+          <li>Final e2e checklist</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-impl"><span class="phase-dot"></span><span class="phase-label">IMPLEMENT</span></div>
+      <div class="phase-body">
+        <ul>
+          <li><code>src/components/ui/Skeleton.tsx</code>, <code>EmptyState.tsx</code>, global error boundary</li>
+          <li>Audit + fix từng màn hình theo inventory</li>
+          <li>Prod env + deploy + smoke test</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head phase-ver"><span class="phase-dot"></span><span class="phase-label">VERIFY</span></div>
+      <div class="phase-body">
+        <ul>
+          <li>Smoke test toàn bộ flow: register → explore → fork → complete → world → feed</li>
+          <li>Prod check: https, performance, error monitoring</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>

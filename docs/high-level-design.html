@@ -1,0 +1,839 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — High Level Design</title>
+<style>
+  :root {
+    --bg:         #F8FAFC;
+    --surface:    #FFFFFF;
+    --surface-2:  #F1F5F9;
+    --border:     #E2E8F0;
+    --text:       #0F172A;
+    --muted:      #64748B;
+    --accent:     #0284C7;
+    --accent-bg:  #E0F2FE;
+    --code-bg:    #F1F5F9;
+    --c-client:   #1D4ED8; --c-client-bg:   #DBEAFE;
+    --c-service:  #065F46; --c-service-bg:  #D1FAE5;
+    --c-data:     #92400E; --c-data-bg:     #FEF3C7;
+    --c-event:    #5B21B6; --c-event-bg:    #EDE9FE;
+    --c-ext:      #9F1239; --c-ext-bg:      #FFE4E6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:         #0F172A;
+      --surface:    #1E293B;
+      --surface-2:  #162032;
+      --border:     #2D3F55;
+      --text:       #F1F5F9;
+      --muted:      #94A3B8;
+      --accent:     #38BDF8;
+      --accent-bg:  #0C4A6E;
+      --code-bg:    #0F172A;
+      --c-client:   #93C5FD; --c-client-bg:   #1E3A5F;
+      --c-service:  #6EE7B7; --c-service-bg:  #064E3B;
+      --c-data:     #FCD34D; --c-data-bg:     #451A03;
+      --c-event:    #C4B5FD; --c-event-bg:    #2E1065;
+      --c-ext:      #FCA5A5; --c-ext-bg:      #4C0519;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg:         #F8FAFC;
+    --surface:    #FFFFFF;
+    --surface-2:  #F1F5F9;
+    --border:     #E2E8F0;
+    --text:       #0F172A;
+    --muted:      #64748B;
+    --accent:     #0284C7;
+    --accent-bg:  #E0F2FE;
+    --code-bg:    #F1F5F9;
+    --c-client:   #1D4ED8; --c-client-bg:   #DBEAFE;
+    --c-service:  #065F46; --c-service-bg:  #D1FAE5;
+    --c-data:     #92400E; --c-data-bg:     #FEF3C7;
+    --c-event:    #5B21B6; --c-event-bg:    #EDE9FE;
+    --c-ext:      #9F1239; --c-ext-bg:      #FFE4E6;
+  }
+
+  :root[data-theme="dark"] {
+    --bg:         #0F172A;
+    --surface:    #1E293B;
+    --surface-2:  #162032;
+    --border:     #2D3F55;
+    --text:       #F1F5F9;
+    --muted:      #94A3B8;
+    --accent:     #38BDF8;
+    --accent-bg:  #0C4A6E;
+    --code-bg:    #0F172A;
+    --c-client:   #93C5FD; --c-client-bg:   #1E3A5F;
+    --c-service:  #6EE7B7; --c-service-bg:  #064E3B;
+    --c-data:     #FCD34D; --c-data-bg:     #451A03;
+    --c-event:    #C4B5FD; --c-event-bg:    #2E1065;
+    --c-ext:      #FCA5A5; --c-ext-bg:      #4C0519;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {}
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    margin-top: 0.35rem;
+  }
+
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+
+  /* Section labels */
+  .section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Diagram card */
+  .diagram-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .zoom-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .zoom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .zoom-btn:hover { background: var(--accent-bg); color: var(--accent); }
+
+  .zoom-level {
+    font-size: 0.75rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    color: var(--muted);
+    min-width: 3rem;
+    text-align: center;
+  }
+
+  .zoom-hint {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .diagram-viewport {
+    height: 520px;
+    overflow: hidden;
+    cursor: grab;
+    position: relative;
+  }
+  .diagram-viewport:active { cursor: grabbing; }
+
+  .diagram-inner {
+    transform-origin: 0 0;
+    display: inline-block;
+    padding: 2rem;
+    width: 100%;
+  }
+
+  .mermaid {
+    display: flex;
+    justify-content: center;
+    min-height: 120px;
+  }
+
+  /* Events table */
+  .events-section { margin-bottom: 2rem; }
+
+  .event-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+
+  .event-table th {
+    text-align: left;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .event-table th:first-child { border-radius: 6px 0 0 0; }
+  .event-table th:last-child  { border-radius: 0 6px 0 0; }
+
+  .event-table td {
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .event-table tr:last-child td { border-bottom: none; }
+
+  .event-table tbody tr:hover { background: var(--surface-2); }
+
+  .event-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Stores table */
+  .stores-section { margin-bottom: 2rem; }
+
+  /* Tags / badges */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.175em 0.55em;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  .tag-client   { background: var(--c-client-bg);  color: var(--c-client); }
+  .tag-service  { background: var(--c-service-bg); color: var(--c-service); }
+  .tag-data     { background: var(--c-data-bg);    color: var(--c-data); }
+  .tag-event    { background: var(--c-event-bg);   color: var(--c-event); }
+  .tag-ext      { background: var(--c-ext-bg);     color: var(--c-ext); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+  /* Code */
+  code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    font-size: 0.75rem;
+    background: var(--code-bg);
+    color: var(--accent);
+    padding: 0.15em 0.45em;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* Decisions grid */
+  .decisions-section { margin-bottom: 2rem; }
+
+  .decisions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.875rem;
+  }
+
+  .decision-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.125rem;
+    border-left: 3px solid var(--accent);
+  }
+
+  .decision-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .decision-body {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* Flow section */
+  .flows-section { margin-bottom: 2rem; }
+
+  .flow-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .flow-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.875rem 1.125rem;
+    font-size: 0.8125rem;
+  }
+
+  .flow-title {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .flow-steps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .flow-step {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15em 0.5em;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 1.25rem 1rem; }
+    h1 { font-size: 1.25rem; }
+    .decisions-grid { grid-template-columns: 1fr; }
+    .event-table { font-size: 0.75rem; }
+  }
+</style>
+
+<h2 class="sr-only">QuestHub High Level Design — Logical Architecture Diagram</h2>
+
+<header>
+  <div class="header-left">
+    <div class="eyebrow">QuestHub</div>
+    <h1>High Level Design</h1>
+    <p class="subtitle">Logical architecture — components, data flows, và integration points</p>
+    <div class="badge-row">
+      <span class="tag tag-client">Client Layer</span>
+      <span class="tag tag-service">Service Layer</span>
+      <span class="tag tag-event">Event Bus</span>
+      <span class="tag tag-data">Data Layer</span>
+      <span class="tag tag-ext">External</span>
+    </div>
+  </div>
+</header>
+
+<!-- DIAGRAM -->
+<div class="section-label">Architecture Diagram</div>
+<div class="diagram-card">
+  <div class="zoom-toolbar">
+    <button class="zoom-btn" id="btn-in"  title="Zoom in">+</button>
+    <button class="zoom-btn" id="btn-out" title="Zoom out">−</button>
+    <button class="zoom-btn" id="btn-reset" title="Reset" style="width:auto;padding:0 .6rem;font-size:.75rem;">Reset</button>
+    <span class="zoom-level" id="zoom-level">100%</span>
+    <span class="zoom-hint">Scroll để zoom · Kéo để di chuyển</span>
+  </div>
+  <div class="diagram-viewport" id="viewport">
+    <div class="diagram-inner" id="diagram-inner">
+  <pre class="mermaid">
+flowchart TD
+    subgraph Client["Client Layer"]
+        Web["Web App · Next.js"]
+        Mobile["Mobile App · React Native"]
+    end
+
+    subgraph Monolith["QuestHub API — Java 21 · Spring Boot 3.x · Modular Monolith"]
+        direction LR
+        subgraph Modules["Bounded Contexts — 5 Java modules trong 1 app"]
+            direction LR
+            ISvc["Identity"]
+            QSvc["Quest"]
+            MSvc["Marketplace"]
+            WSvc["World"]
+            ADSvc["Admin"]
+        end
+        RELAY["Outbox Relay · @Scheduled ~1s"]
+    end
+
+    subgraph Side["Apps riêng · Go / Python"]
+        SSvc["Social · Go/Fiber · 8081"]
+        NSvc["Notification · Go/Fiber · 8082"]
+        AISvc["AI · Python/FastAPI · 8090"]
+    end
+
+    subgraph Data["Data Layer"]
+        DB[("PostgreSQL\n+ outbox_events")]
+        Cache[("Redis")]
+        Search[("Elasticsearch")]
+    end
+
+    subgraph Phase2["— Phase 2 · Extract when ready —"]
+        MQ["RabbitMQ"]
+        Split["Các module tách thành service riêng"]
+    end
+
+    subgraph External["External Services"]
+        OAuth["OAuth · Google/GitHub"]
+        Claude["Claude API"]
+        Push["Expo Push · FCM"]
+        Email["Resend · Email"]
+    end
+
+    Web & Mobile -->|"HTTPS REST"| Monolith
+    Modules -->|"Domain Events"| RELAY
+    RELAY <-->|"poll + mark PROCESSED"| DB
+    RELAY -->|"Spring ApplicationEvent"| Modules
+    Monolith --> DB & Cache & Search
+
+    SSvc -->|"DB chung"| DB
+    NSvc -->|"DB chung"| DB
+    AISvc -->|"DB chung"| DB
+
+    RELAY -.->|"Phase 2: thay relay poll"| MQ
+    RELAY -.->|"Phase 2"| Split
+
+    ISvc --> OAuth
+    AISvc --> Claude
+    NSvc --> Push
+    NSvc --> Email
+  </pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var scale = 1, tx = 0, ty = 0;
+    var dragging = false, ox = 0, oy = 0;
+    var viewport = document.getElementById('viewport');
+    var inner    = document.getElementById('diagram-inner');
+    var label    = document.getElementById('zoom-level');
+
+    function apply() {
+      inner.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+      label.textContent = Math.round(scale * 100) + '%';
+    }
+
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    document.getElementById('btn-in').addEventListener('click', function() {
+      scale = clamp(scale * 1.25, 0.25, 5); apply();
+    });
+    document.getElementById('btn-out').addEventListener('click', function() {
+      scale = clamp(scale / 1.25, 0.25, 5); apply();
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      scale = 1; tx = 0; ty = 0; apply();
+    });
+
+    viewport.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var rect = viewport.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      var factor = e.deltaY < 0 ? 1.12 : 0.89;
+      var ns = clamp(scale * factor, 0.25, 5);
+      tx = mx - (mx - tx) * (ns / scale);
+      ty = my - (my - ty) * (ns / scale);
+      scale = ns;
+      apply();
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', function(e) {
+      dragging = true;
+      ox = e.clientX - tx;
+      oy = e.clientY - ty;
+      viewport.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      tx = e.clientX - ox;
+      ty = e.clientY - oy;
+      apply();
+    });
+    window.addEventListener('mouseup', function() {
+      dragging = false;
+      viewport.style.cursor = 'grab';
+    });
+
+    /* touch pinch */
+    var lastDist = null;
+    viewport.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) lastDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY);
+    }, { passive: true });
+    viewport.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && lastDist) {
+        e.preventDefault();
+        var d = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY);
+        scale = clamp(scale * (d / lastDist), 0.25, 5);
+        lastDist = d;
+        apply();
+      }
+    }, { passive: false });
+    viewport.addEventListener('touchend', function() { lastDist = null; });
+  })();
+</script>
+
+<!-- KEY EVENTS -->
+<div class="events-section">
+  <div class="section-label">Key Events — Async qua Outbox Relay · Phase 2: RabbitMQ</div>
+  <table class="event-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Publisher</th>
+        <th>Consumer</th>
+        <th>Mục đích</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>task.completed</code></td>
+        <td><span class="tag tag-service">Quest Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">World Module</span><span class="tag tag-service">Social Module</span><span class="tag tag-service">Notification Module</span></div></td>
+        <td style="color:var(--muted)">Cập nhật District completion_count + mở khóa Building, thêm Activity vào Feed, notify user</td>
+      </tr>
+      <tr>
+        <td><code>quest.completed</code></td>
+        <td><span class="tag tag-service">Quest Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">World Module</span><span class="tag tag-service">Notification Module</span></div></td>
+        <td style="color:var(--muted)">Kiểm tra & unlock Achievement</td>
+      </tr>
+      <tr>
+        <td><code>quest.forked</code></td>
+        <td><span class="tag tag-service">Quest Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">Social Module</span><span class="tag tag-service">Marketplace Module</span></div></td>
+        <td style="color:var(--muted)">Thêm Activity QUEST_FORKED, invalidate cache quest card</td>
+      </tr>
+      <tr>
+        <td><code>quest.published</code></td>
+        <td><span class="tag tag-service">Marketplace Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">Social Module</span><span class="tag tag-data">Elasticsearch</span></div></td>
+        <td style="color:var(--muted)">Thêm Activity, index quest để tìm kiếm</td>
+      </tr>
+      <tr>
+        <td><code>quest.rated</code></td>
+        <td><span class="tag tag-service">Marketplace Module</span></td>
+        <td><span class="tag tag-service">Quest Module</span></td>
+        <td style="color:var(--muted)">Recalculate avg_rating / rating_count</td>
+      </tr>
+      <tr>
+        <td><code>achievement.unlocked</code></td>
+        <td><span class="tag tag-service">World Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">Social Module</span><span class="tag tag-service">Notification Module</span></div></td>
+        <td style="color:var(--muted)">Thêm Activity, notify achievement mới</td>
+      </tr>
+      <tr>
+        <td><code>submission.graded</code></td>
+        <td><span class="tag tag-service">AI Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">Quest Module</span><span class="tag tag-service">Notification Module</span></div></td>
+        <td style="color:var(--muted)">PASS → tạo TaskCompletion + evaluate completion_rule; notify kết quả chấm bài</td>
+      </tr>
+      <tr>
+        <td><code>comment.created</code></td>
+        <td><span class="tag tag-service">Social Module</span></td>
+        <td><span class="tag tag-service">Notification Module</span></td>
+        <td style="color:var(--muted)">Thông báo chủ bài / chủ quest</td>
+      </tr>
+      <tr>
+        <td><code>discussion.created</code></td>
+        <td><span class="tag tag-service">Social Module</span></td>
+        <td><span class="tag tag-service">Notification Module</span></td>
+        <td style="color:var(--muted)">Thông báo creator quest có discussion mới</td>
+      </tr>
+      <tr>
+        <td><code>user.followed</code></td>
+        <td><span class="tag tag-service">Social Module</span></td>
+        <td><div class="tags"><span class="tag tag-service">Notification Module</span><span class="tag tag-service">Identity Module</span></div></td>
+        <td style="color:var(--muted)">Notify user được follow, cập nhật follower_count</td>
+      </tr>
+      <tr>
+        <td><code>user.registered</code></td>
+        <td><span class="tag tag-service">Identity Module</span></td>
+        <td><span class="tag tag-service">World Module</span></td>
+        <td style="color:var(--muted)">Tạo World + District mặc định cho user mới</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DATA STORES -->
+<div class="stores-section">
+  <div class="section-label">Data Stores</div>
+  <table class="event-table">
+    <thead>
+      <tr>
+        <th>Store</th>
+        <th>Role</th>
+        <th>Dùng bởi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag tag-data">PostgreSQL</span></td>
+        <td style="color:var(--muted)">Source of truth — tất cả dữ liệu nghiệp vụ + outbox_events</td>
+        <td style="color:var(--muted)">5 Java modules (Identity, Quest, Marketplace, World, Admin) + Social, Notification, AI</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-data">Redis</span></td>
+        <td style="color:var(--muted)">Cache trending / popular quests, session, refresh tokens</td>
+        <td style="color:var(--muted)">Marketplace Module, Identity Module</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-data">Elasticsearch</span></td>
+        <td style="color:var(--muted)">Full-text search theo keyword + relevance ranking</td>
+        <td style="color:var(--muted)">Marketplace Module</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- KEY FLOWS -->
+<div class="flows-section">
+  <div class="section-label">Key Flows</div>
+  <div class="flow-list">
+    <div class="flow-item">
+      <div class="flow-title">Hoàn thành Task</div>
+      <div class="flow-steps">
+        <span class="flow-step">Learner tick Task</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Quest Module tạo TaskCompletion</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">recalc progress + evaluate completion_rule</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">publish task.completed</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">World cập nhật District + mở khóa Building</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-step">Social thêm Activity vào Feed</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-step">Notification gửi</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">nếu rule thỏa: publish quest.completed</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">World kiểm tra & unlock Achievement</span>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-title">Fork Quest</div>
+      <div class="flow-steps">
+        <span class="flow-step">Learner click "Use Quest"</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Quest Module tạo PersonalQuest + copy chapters/tasks + snapshot completion_rule</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">publish quest.forked</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Social thêm Activity</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-step">Marketplace invalidate cache</span>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-title">Tìm kiếm Quest</div>
+      <div class="flow-steps">
+        <span class="flow-step">User nhập keyword</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Marketplace Module</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Redis cache trending?</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Elasticsearch query</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">trả kết quả đã rank</span>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-title">Publish Quest</div>
+      <div class="flow-steps">
+        <span class="flow-step">Creator click Publish</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Marketplace Module đổi visibility → PUBLIC</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">publish quest.published</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Elasticsearch index quest</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-step">Social thêm Activity</span>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-title">AI chấm bài submission</div>
+      <div class="flow-steps">
+        <span class="flow-step">Learner nộp bài SUBMISSION/PRACTICE</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">AI Module lấy rubric từ task.config</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Claude chấm theo rubric → JSON {status, score, feedback}</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">pydantic validate + INSERT submission_grades</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">PASS → publish submission.graded</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Quest Module tạo TaskCompletion + evaluate completion_rule</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-step">Notification gửi kết quả</span>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-title">AI Coach chat (tool calling)</div>
+      <div class="flow-steps">
+        <span class="flow-step">Learner gửi tin nhắn</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Claude quyết định gọi tool (get_progress / get_streak / get_achievements / get_upcoming_tasks)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">AI Module dispatch tool → query internal Quest/World API (READ only)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">trả kết quả tool về Claude → streaming reply qua SSE</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">INSERT coach_messages (USER + ASSISTANT + TOOL)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHITECTURAL DECISIONS -->
+<div class="decisions-section">
+  <div class="section-label">Architectural Decisions</div>
+  <div class="decisions-grid">
+    <div class="decision-card">
+      <div class="decision-title">Event-driven World update</div>
+      <div class="decision-body">World Module không nhận sync call từ Quest Module. District tự cập nhật khi nhận <code>task.completed</code> — đúng với thiết kế "World chỉ là visualization của thực tế."</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">CompletionRule cấu hình được</div>
+      <div class="decision-body">Quest hoàn thành theo tiêu chí thật (quiz ≥ 80% + submission), không cứng nhắc theo checklist. Rule được snapshot khi fork để Learner chạy độc lập.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">Elasticsearch riêng cho search</div>
+      <div class="decision-body">PostgreSQL full-text search không đủ cho relevance ranking phức tạp. Elasticsearch xử lý keyword, filter kết hợp, và ranking.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">Redis cache cho Marketplace</div>
+      <div class="decision-body">Trending và Popular đọc nhiều, tính toán nặng. Cache invalidate khi nhận <code>quest.rated</code> hoặc <code>quest.forked</code>.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">Single PostgreSQL</div>
+      <div class="decision-body">Learning project — không tách DB theo service. Social, Notification, AI dùng chung DB. Dễ query cross-domain, migrate sau khi cần scale thật.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">No XP entity</div>
+      <div class="decision-body">XP là calculated metric từ <code>TaskCompletion</code>. Không lưu riêng, tính on-the-fly khi World cần render District level.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">Quest = Template · PersonalQuest = Instance</div>
+      <div class="decision-body">Fork pattern đảm bảo Quest gốc bất biến. PersonalQuest copy chapters/tasks — Creator update không ảnh hưởng Learner đang chạy.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">AI Grader không tự PASS</div>
+      <div class="decision-body">Kết quả chấm chỉ qua event <code>submission.graded</code>, Quest Module quyết định tạo TaskCompletion. LLM lỗi/timeout → 503, không bao giờ tự coi là PASS.</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-title">AI Coach chỉ đọc (read-only agent)</div>
+      <div class="decision-body">Coach dùng tool calling nhưng mọi tool chỉ READ qua internal API. Không có tool nào write quest — tránh AI tự ý thay đổi tiến trình của user.</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    securityLevel: 'loose'
+  });
+</script>

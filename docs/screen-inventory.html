@@ -1,0 +1,594 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Screen Inventory</title>
+<style>
+  :root {
+    --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;--border:#E2E8F0;
+    --text:#0F172A;--muted:#64748B;
+    --landing:#D97706;--landing-bg:#FEF3C7;
+    --web:#0284C7;--web-bg:#E0F2FE;
+    --mobile:#059669;--mobile-bg:#D1FAE5;
+    --admin:#BE123C;--admin-bg:#FFE4E6;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;
+    --text:#F1F5F9;--muted:#94A3B8;
+    --landing:#FCD34D;--landing-bg:#451A03;
+    --web:#38BDF8;--web-bg:#0C4A6E;
+    --mobile:#34D399;--mobile-bg:#064E3B;
+    --admin:#FCA5A5;--admin-bg:#4C0519;
+  }}
+  :root[data-theme="light"]{--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;--border:#E2E8F0;--text:#0F172A;--muted:#64748B;--landing:#D97706;--landing-bg:#FEF3C7;--web:#0284C7;--web-bg:#E0F2FE;--mobile:#059669;--mobile-bg:#D1FAE5;--admin:#BE123C;--admin-bg:#FFE4E6;}
+  :root[data-theme="dark"]{--bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;--text:#F1F5F9;--muted:#94A3B8;--landing:#FCD34D;--landing-bg:#451A03;--web:#38BDF8;--web-bg:#0C4A6E;--mobile:#34D399;--mobile-bg:#064E3B;--admin:#FCA5A5;--admin-bg:#4C0519;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;padding:2.5rem 2rem;max-width:960px;margin:0 auto}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem}
+  h1{font-size:1.5rem;font-weight:700;line-height:1.25;text-wrap:balance}
+  .subtitle{color:var(--muted);font-size:.8125rem;margin-top:.35rem}
+
+  /* Platform section */
+  .platform{margin-bottom:3rem}
+  .platform-header{
+    display:flex;align-items:center;gap:.75rem;
+    margin-bottom:1.25rem;padding:.75rem 1rem;
+    border-radius:8px;border-left:4px solid;
+  }
+  .platform-header.landing{background:var(--landing-bg);border-color:var(--landing)}
+  .platform-header.web    {background:var(--web-bg);   border-color:var(--web)}
+  .platform-header.mobile {background:var(--mobile-bg);border-color:var(--mobile)}
+  .platform-header.admin  {background:var(--admin-bg); border-color:var(--admin)}
+
+  .platform-icon{font-size:1.25rem;line-height:1}
+  .platform-title{font-size:1rem;font-weight:700}
+  .platform-title.landing{color:var(--landing)}
+  .platform-title.web    {color:var(--web)}
+  .platform-title.mobile {color:var(--mobile)}
+  .platform-title.admin  {color:var(--admin)}
+  .platform-count{
+    margin-left:auto;font-size:.75rem;font-weight:600;
+    padding:.2em .6em;border-radius:99px;
+    background:var(--surface);color:var(--muted);
+    border:1px solid var(--border);
+  }
+
+  /* Group label */
+  .group-label{
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);
+    margin:1.5rem 0 .6rem;padding-left:.25rem;
+  }
+
+  /* Screen cards */
+  .screens{display:grid;gap:.6rem}
+
+  .screen-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;padding:.875rem 1rem;
+    display:grid;grid-template-columns:auto 1fr;gap:.75rem;align-items:start;
+  }
+
+  .screen-num{
+    font-family:'SFMono-Regular',Consolas,monospace;
+    font-size:.7rem;font-weight:700;color:var(--muted);
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:5px;padding:.2em .5em;white-space:nowrap;
+    margin-top:.1rem;
+  }
+
+  .screen-body{}
+  .screen-name{font-size:.875rem;font-weight:600;color:var(--text);margin-bottom:.3rem}
+  .screen-desc{font-size:.775rem;color:var(--muted);line-height:1.55}
+
+  .screen-sections{
+    display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;
+  }
+  .chip{
+    font-size:.675rem;font-weight:500;
+    padding:.15em .5em;border-radius:4px;
+    background:var(--surface-2);border:1px solid var(--border);
+    color:var(--muted);white-space:nowrap;
+  }
+
+  /* Summary table */
+  .summary{margin-top:1rem}
+  table{width:100%;border-collapse:collapse;font-size:.8125rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:.5rem 1rem;border-bottom:1px solid var(--border);background:var(--surface-2)}
+  td{padding:.625rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:none;font-weight:700;color:var(--text)}
+  tr:last-child td:last-child{font-variant-numeric:tabular-nums}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:.4rem;vertical-align:middle}
+
+  @media(max-width:600px){body{padding:1.25rem 1rem}.screen-card{grid-template-columns:1fr}.screen-num{width:fit-content}}
+</style>
+
+<h2 class="sr-only">QuestHub Screen Inventory — 37 screens across Landing, Web App, Mobile, Admin</h2>
+
+<header>
+  <div class="eyebrow" style="color:var(--muted)">QuestHub</div>
+  <h1>Screen Inventory</h1>
+  <p class="subtitle">37 màn hình · Landing Page · Web App · Mobile App · Admin</p>
+</header>
+
+<!-- LANDING -->
+<div class="platform">
+  <div class="platform-header landing">
+    <span class="platform-icon">🌐</span>
+    <span class="platform-title landing">Landing Page</span>
+    <span class="platform-count">3 màn hình</span>
+  </div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#01</span>
+      <div class="screen-body">
+        <div class="screen-name">Home</div>
+        <div class="screen-desc">Trang marketing chính. Hero với tagline + 2 CTA ("Explore Quests" / "Get Started"). Giới thiệu sản phẩm, cách hoạt động, ví dụ quests nổi bật.</div>
+        <div class="screen-sections">
+          <span class="chip">Hero + CTA</span><span class="chip">Features</span><span class="chip">How It Works</span><span class="chip">Example Quests</span><span class="chip">Footer</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#02</span>
+      <div class="screen-body">
+        <div class="screen-name">Login</div>
+        <div class="screen-desc">Form email + password. OAuth Google / GitHub. Link tới Register và Forgot Password.</div>
+        <div class="screen-sections">
+          <span class="chip">Email form</span><span class="chip">OAuth buttons</span><span class="chip">Forgot password link</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#03</span>
+      <div class="screen-body">
+        <div class="screen-name">Register</div>
+        <div class="screen-desc">Form email + password + username. OAuth. Terms checkbox. Sau khi xong → redirect vào Web App, World được tạo tự động.</div>
+        <div class="screen-sections">
+          <span class="chip">Email form</span><span class="chip">OAuth buttons</span><span class="chip">Terms checkbox</span><span class="chip">Auto-create World</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WEB APP -->
+<div class="platform">
+  <div class="platform-header web">
+    <span class="platform-icon">💻</span>
+    <span class="platform-title web">Web App</span>
+    <span class="platform-count">20 màn hình</span>
+  </div>
+
+  <div class="group-label">Marketplace</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#04</span>
+      <div class="screen-body">
+        <div class="screen-name">Explore</div>
+        <div class="screen-desc">Trang khám phá chính. Guest xem được không cần login. Hiển thị trending, popular, skill domains grid và featured quest banner.</div>
+        <div class="screen-sections">
+          <span class="chip">Trending quests</span><span class="chip">Popular quests</span><span class="chip">Domains grid</span><span class="chip">Featured banner</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#05</span>
+      <div class="screen-body">
+        <div class="screen-name">Search Results</div>
+        <div class="screen-desc">Kết quả tìm kiếm theo keyword. Filter theo skill domain, sort theo trending / newest / rating. Paginated grid.</div>
+        <div class="screen-sections">
+          <span class="chip">Search bar</span><span class="chip">Domain filter</span><span class="chip">Sort options</span><span class="chip">Quest grid</span><span class="chip">Pagination</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#06</span>
+      <div class="screen-body">
+        <div class="screen-name">Domain Browse</div>
+        <div class="screen-desc">Header skill domain + learning paths và quest grid lọc theo domain bên dưới.</div>
+        <div class="screen-sections">
+          <span class="chip">Domain header</span><span class="chip">Learning paths</span><span class="chip">SkillDomain info</span><span class="chip">Quest grid</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#07</span>
+      <div class="screen-body">
+        <div class="screen-name">Quest Detail (Public)</div>
+        <div class="screen-desc">Xem quest trước khi dùng. Cover, mô tả, preview chapters &amp; tasks (không tick được), creator info, ratings, fork count. Nút "Use Quest" yêu cầu login.</div>
+        <div class="screen-sections">
+          <span class="chip">Cover + meta</span><span class="chip">Chapters preview</span><span class="chip">Creator card</span><span class="chip">Ratings</span><span class="chip">Use Quest CTA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">Quest</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#08</span>
+      <div class="screen-body">
+        <div class="screen-name">My Dashboard</div>
+        <div class="screen-desc">Tổng quan tiến độ cá nhân. Active PersonalQuests với progress bar, recently completed, quick stats tuần này.</div>
+        <div class="screen-sections">
+          <span class="chip">Active quests</span><span class="chip">Progress bars</span><span class="chip">Recently completed</span><span class="chip">Weekly stats</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#09</span>
+      <div class="screen-body">
+        <div class="screen-name">Create Quest</div>
+        <div class="screen-desc">Wizard 3 bước: ① Thông tin (title, description, skill domain) → ② Chapters &amp; Tasks (add/reorder) → ③ Settings (visibility, thumbnail, completion_rule) → Publish.</div>
+        <div class="screen-sections">
+          <span class="chip">Step 1: Info</span><span class="chip">Step 2: Chapters &amp; Tasks</span><span class="chip">Step 3: Settings</span><span class="chip">Publish</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#10</span>
+      <div class="screen-body">
+        <div class="screen-name">Edit Quest</div>
+        <div class="screen-desc">Giống Create nhưng pre-filled. Chỉ chỉnh được Quest chưa bị fork, hoặc một số fields nhất định sau khi đã fork.</div>
+        <div class="screen-sections">
+          <span class="chip">Pre-filled form</span><span class="chip">Edit restrictions</span><span class="chip">Save / Unpublish</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#11</span>
+      <div class="screen-body">
+        <div class="screen-name">Quest Tracking (PersonalQuest)</div>
+        <div class="screen-desc">Màn hình chính để làm quest. Progress bar tổng, danh sách chapters với các task checkbox, ngày hoàn thành từng cái, nút "Add note". Hiển thị forked from Quest gốc.</div>
+        <div class="screen-sections">
+          <span class="chip">Progress bar</span><span class="chip">Chapter/task checklist</span><span class="chip">Completion dates</span><span class="chip">Notes</span><span class="chip">Forked from</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#12</span>
+      <div class="screen-body">
+        <div class="screen-name">My Favorites</div>
+        <div class="screen-desc">Grid các quests đã save. Toggle remove favorite. Không cần fork để vào đây.</div>
+        <div class="screen-sections">
+          <span class="chip">Saved quest grid</span><span class="chip">Remove toggle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">Creator</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#13</span>
+      <div class="screen-body">
+        <div class="screen-name">Creator Analytics</div>
+        <div class="screen-desc">Chọn quest → xem hiệu quả: fork count, completion rate, drop-off rate theo từng task (task nào người ta bỏ nhiều nhất), average rating, reviews.</div>
+        <div class="screen-sections">
+          <span class="chip">Quest selector</span><span class="chip">Fork count</span><span class="chip">Completion rate</span><span class="chip">Drop-off per task</span><span class="chip">Ratings &amp; reviews</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">World</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#14</span>
+      <div class="screen-body">
+        <div class="screen-name">My World</div>
+        <div class="screen-desc">Grid các Districts. Mỗi District hiển thị SkillDomain + tổng TaskCompletion. Click vào District để xem chi tiết.</div>
+        <div class="screen-sections">
+          <span class="chip">District grid</span><span class="chip">Completion count per domain</span><span class="chip">Overall stats</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#15</span>
+      <div class="screen-body">
+        <div class="screen-name">District Detail</div>
+        <div class="screen-desc">Xem một SkillDomain cụ thể. Stats domain, danh sách PersonalQuests đang active, danh sách đã complete trong domain này.</div>
+        <div class="screen-sections">
+          <span class="chip">Domain stats</span><span class="chip">Active quests</span><span class="chip">Completed quests</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">Profile &amp; Social</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#16</span>
+      <div class="screen-body">
+        <div class="screen-name">My Profile</div>
+        <div class="screen-desc">Trang cá nhân của mình. Avatar, bio, social links, public quests đã tạo, world preview nhỏ, followers/following count.</div>
+        <div class="screen-sections">
+          <span class="chip">Avatar + bio</span><span class="chip">Public quests</span><span class="chip">World preview</span><span class="chip">Followers / Following</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#17</span>
+      <div class="screen-body">
+        <div class="screen-name">Public Profile</div>
+        <div class="screen-desc">Xem profile người khác. Giống My Profile nhưng read-only + nút Follow/Unfollow. Chỉ hiển thị nếu profile đó public.</div>
+        <div class="screen-sections">
+          <span class="chip">Read-only view</span><span class="chip">Follow / Unfollow</span><span class="chip">Public quests</span><span class="chip">World preview</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#18</span>
+      <div class="screen-body">
+        <div class="screen-name">Activity Feed</div>
+        <div class="screen-desc">Feed theo thời gian từ những người đang follow. Các loại activity: "A completed quest X", "B started quest Y", "C published quest Z".</div>
+        <div class="screen-sections">
+          <span class="chip">Chronological feed</span><span class="chip">Activity types</span><span class="chip">Link to quest / profile</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">AI</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#19</span>
+      <div class="screen-body">
+        <div class="screen-name">AI Advisor</div>
+        <div class="screen-desc">Text input mô tả mục tiêu → AI gợi ý quests có sẵn trong hệ thống. Nếu không có → offer "Generate a new quest". Preview quest được generate trước khi dùng.</div>
+        <div class="screen-sections">
+          <span class="chip">Goal input</span><span class="chip">Quest recommendations</span><span class="chip">Generate quest</span><span class="chip">Quest preview</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#37</span>
+      <div class="screen-body">
+        <div class="screen-name">AI Grader — Review Submission</div>
+        <div class="screen-desc">Nộp bài task SUBMISSION/PRACTICE (text/URL) → bấm "Chấm bằng AI" → hiện kết quả PASS/FAIL/NEEDS_REVISION + score + feedback theo rubric. PASS → task tự hoàn thành. FAIL → hiện nút nộp lại.</div>
+        <div class="screen-sections">
+          <span class="chip">Submission input</span><span class="chip">Grade result</span><span class="chip">Score + feedback</span><span class="chip">Resubmit</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#38</span>
+      <div class="screen-body">
+        <div class="screen-name">AI Coach — Chat</div>
+        <div class="screen-desc">Chat với AI coach biết trạng thái quest thật của bạn. Hỏi "tôi đang kẹt ở đâu?" → trả lời dựa trên progress + gợi ý bước tiếp. Streaming response, lịch sử theo session.</div>
+        <div class="screen-sections">
+          <span class="chip">Chat bubbles</span><span class="chip">Progress-aware reply</span><span class="chip">Next-step suggestion</span><span class="chip">Session history</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">Settings</div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#20</span>
+      <div class="screen-body">
+        <div class="screen-name">Settings</div>
+        <div class="screen-desc">Cài đặt tài khoản. Profile info, đổi password, notification preferences, privacy (public/private), connected OAuth accounts.</div>
+        <div class="screen-sections">
+          <span class="chip">Profile info</span><span class="chip">Password</span><span class="chip">Notifications</span><span class="chip">Privacy</span><span class="chip">OAuth connections</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE -->
+<div class="platform">
+  <div class="platform-header mobile">
+    <span class="platform-icon">📱</span>
+    <span class="platform-title mobile">Mobile App</span>
+    <span class="platform-count">10 màn hình</span>
+  </div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#21</span>
+      <div class="screen-body">
+        <div class="screen-name">Today / Home</div>
+        <div class="screen-desc">Màn hình chính, focus vào hôm nay. Active PersonalQuests, tasks cần làm hôm nay, streak counter, quick-complete button ngay trên màn hình.</div>
+        <div class="screen-sections">
+          <span class="chip">Active quests</span><span class="chip">Today's tasks</span><span class="chip">Streak counter</span><span class="chip">Quick complete</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#22</span>
+      <div class="screen-body">
+        <div class="screen-name">Explore (mobile)</div>
+        <div class="screen-desc">Search bar trên cùng + skill domains horizontal scroll + trending quests dạng card dọc.</div>
+        <div class="screen-sections">
+          <span class="chip">Search bar</span><span class="chip">Domains scroll</span><span class="chip">Trending list</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#23</span>
+      <div class="screen-body">
+        <div class="screen-name">Quest Detail (mobile)</div>
+        <div class="screen-desc">Chapters &amp; tasks list, progress bar, nút "Use Quest" hoặc "Continue" nếu đã fork.</div>
+        <div class="screen-sections">
+          <span class="chip">Chapters &amp; tasks list</span><span class="chip">Progress bar</span><span class="chip">Use / Continue CTA</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#24</span>
+      <div class="screen-body">
+        <div class="screen-name">Task Check</div>
+        <div class="screen-desc">Fullscreen focused: tên task to, checkbox lớn, optional note, nút Confirm. Thiết kế để cảm giác satisfying khi tick xong.</div>
+        <div class="screen-sections">
+          <span class="chip">Task name</span><span class="chip">Big checkbox</span><span class="chip">Optional note</span><span class="chip">Confirm button</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#25</span>
+      <div class="screen-body">
+        <div class="screen-name">My Quests</div>
+        <div class="screen-desc">Danh sách active + completed PersonalQuests. Filter toggle giữa hai tab.</div>
+        <div class="screen-sections">
+          <span class="chip">Active tab</span><span class="chip">Completed tab</span><span class="chip">Progress per quest</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#26</span>
+      <div class="screen-body">
+        <div class="screen-name">My World (mobile)</div>
+        <div class="screen-desc">Simplified: district list dạng dọc với progress bar và tổng completion count theo từng domain.</div>
+        <div class="screen-sections">
+          <span class="chip">District list</span><span class="chip">Progress per domain</span><span class="chip">Total stats</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#27</span>
+      <div class="screen-body">
+        <div class="screen-name">Profile (mobile)</div>
+        <div class="screen-desc">Avatar, stats tóm tắt, public quests, world snapshot nhỏ.</div>
+        <div class="screen-sections">
+          <span class="chip">Avatar + stats</span><span class="chip">Public quests</span><span class="chip">World snapshot</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#28</span>
+      <div class="screen-body">
+        <div class="screen-name">Notifications</div>
+        <div class="screen-desc">Activity list: completions của người follow, new followers, quest updates từ creator.</div>
+        <div class="screen-sections">
+          <span class="chip">Activity list</span><span class="chip">Unread indicator</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#29</span>
+      <div class="screen-body">
+        <div class="screen-name">Search (mobile)</div>
+        <div class="screen-desc">Fullscreen search với recent searches và suggestions theo keyword.</div>
+        <div class="screen-sections">
+          <span class="chip">Search input</span><span class="chip">Recent searches</span><span class="chip">Suggestions</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#30</span>
+      <div class="screen-body">
+        <div class="screen-name">Settings (mobile)</div>
+        <div class="screen-desc">Notification preferences, privacy, account info. Đơn giản hơn web settings.</div>
+        <div class="screen-sections">
+          <span class="chip">Notifications</span><span class="chip">Privacy</span><span class="chip">Account</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="platform">
+  <div class="platform-header admin">
+    <span class="platform-icon">🛡️</span>
+    <span class="platform-title admin">Admin</span>
+    <span class="platform-count">6 màn hình</span>
+  </div>
+  <div class="screens">
+    <div class="screen-card">
+      <span class="screen-num">#31</span>
+      <div class="screen-body">
+        <div class="screen-name">Dashboard</div>
+        <div class="screen-desc">Platform overview: tổng users, quests, completions hôm nay và tuần này. Charts đơn giản.</div>
+        <div class="screen-sections">
+          <span class="chip">User count</span><span class="chip">Quest count</span><span class="chip">Completion count</span><span class="chip">Charts</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#32</span>
+      <div class="screen-body">
+        <div class="screen-name">Quest Moderation Queue</div>
+        <div class="screen-desc">Danh sách quests bị report hoặc pending review. Filter theo status: Pending / Reviewed / Hidden.</div>
+        <div class="screen-sections">
+          <span class="chip">Report queue</span><span class="chip">Status filter</span><span class="chip">Quick actions</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#33</span>
+      <div class="screen-body">
+        <div class="screen-name">Quest Detail (Admin view)</div>
+        <div class="screen-desc">Xem toàn bộ quest bao gồm cả private content. Actions: Hide, Approve, Flag, Add internal note.</div>
+        <div class="screen-sections">
+          <span class="chip">Full quest view</span><span class="chip">Hide / Approve</span><span class="chip">Flag</span><span class="chip">Internal notes</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#34</span>
+      <div class="screen-body">
+        <div class="screen-name">User Management</div>
+        <div class="screen-desc">Search user, xem profile, assign role (User / Creator / Admin), ban account.</div>
+        <div class="screen-sections">
+          <span class="chip">User search</span><span class="chip">Role assignment</span><span class="chip">Ban / Restore</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#35</span>
+      <div class="screen-body">
+        <div class="screen-name">Skill Domain Management</div>
+        <div class="screen-desc">CRUD skill domains, reorder, hide/show. Thay đổi ảnh hưởng toàn bộ Marketplace và World (district).</div>
+        <div class="screen-sections">
+          <span class="chip">SkillDomain CRUD</span><span class="chip">Reorder</span><span class="chip">Hide / Show</span>
+        </div>
+      </div>
+    </div>
+    <div class="screen-card">
+      <span class="screen-num">#36</span>
+      <div class="screen-body">
+        <div class="screen-name">Feature Flags</div>
+        <div class="screen-desc">List tất cả features với toggle on/off, mô tả, scope ảnh hưởng. Thay đổi có hiệu lực ngay, không cần deploy lại.</div>
+        <div class="screen-sections">
+          <span class="chip">Feature list</span><span class="chip">Toggle on / off</span><span class="chip">Affected scope</span><span class="chip">Instant effect</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem">Tổng kết</div>
+  <table>
+    <thead><tr><th>Platform</th><th style="text-align:right">Số màn hình</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="dot" style="background:var(--landing)"></span>Landing Page</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">3</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--web)"></span>Web App</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">20</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--mobile)"></span>Mobile App</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">10</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--admin)"></span>Admin</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">6</td>
+      </tr>
+      <tr>
+        <td>Tổng</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums">39</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

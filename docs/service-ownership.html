@@ -1,0 +1,756 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Module Ownership</title>
+<style>
+  :root {
+    --bg:        #F7FAFA;
+    --surface:   #FFFFFF;
+    --surface-2: #EFF8F8;
+    --border:    #D8EAEA;
+    --border-acc:#0E9F9F;
+    --text:      #0F2A2A;
+    --muted:     #5C7878;
+    --accent:    #0891B2;
+    --accent-bg: #CFFAFE;
+    --mono-bg:   #F0F9FF;
+
+    --java:    #C2410C; --java-bg:    #FFF7ED;
+    --go:      #1D4ED8; --go-bg:      #EFF6FF;
+    --python:  #15803D; --python-bg:  #F0FDF4;
+
+    --own:     #059669; --own-bg:     #D1FAE5;
+    --read:    #2563EB; --read-bg:    #DBEAFE;
+    --none:    #9CA3AF; --none-bg:    #F9FAFB;
+    --warn:    #D97706; --warn-bg:    #FEF3C7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0B1E1E;--surface:#122929;--surface-2:#0D2020;--border:#1E3E3E;--border-acc:#0E7490;
+      --text:#E2F5F5;--muted:#7AADAD;--accent:#22D3EE;--accent-bg:#083344;--mono-bg:#0C2626;
+      --java:#FB923C;--java-bg:#431407;--go:#93C5FD;--go-bg:#1E3A5F;--python:#86EFAC;--python-bg:#052E16;
+      --own:#34D399;--own-bg:#064E3B;--read:#93C5FD;--read-bg:#1E3A5F;--none:#6B7280;--none-bg:#1F2937;
+      --warn:#FCD34D;--warn-bg:#451A03;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#0B1E1E;--surface:#122929;--surface-2:#0D2020;--border:#1E3E3E;--border-acc:#0E7490;
+    --text:#E2F5F5;--muted:#7AADAD;--accent:#22D3EE;--accent-bg:#083344;--mono-bg:#0C2626;
+    --java:#FB923C;--java-bg:#431407;--go:#93C5FD;--go-bg:#1E3A5F;--python:#86EFAC;--python-bg:#052E16;
+    --own:#34D399;--own-bg:#064E3B;--read:#93C5FD;--read-bg:#1E3A5F;--none:#6B7280;--none-bg:#1F2937;
+    --warn:#FCD34D;--warn-bg:#451A03;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6;
+    padding: 2.5rem 2rem; max-width: 1100px; margin: 0 auto;
+  }
+  header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: .75rem;
+    margin-bottom: 2rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: .4rem; font-size: .8rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .dot-own    { background: var(--own); }
+  .dot-read   { background: var(--read); }
+  .dot-none   { background: var(--none); }
+
+  .info-box {
+    background: var(--surface-2); border: 1px solid var(--border-acc);
+    border-radius: 8px; padding: .875rem 1.125rem;
+    font-size: .8125rem; color: var(--muted); margin-bottom: 2rem; line-height: 1.7;
+  }
+  .info-box strong { color: var(--accent); }
+
+  .section-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .875rem; margin-top: 2rem;
+  }
+
+  /* Service cards */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+
+  .service-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+  .service-card-head {
+    padding: .875rem 1.125rem; border-bottom: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+  }
+  .service-card-name { font-weight: 700; font-size: .9375rem; margin-bottom: .3rem; }
+  .service-card-meta { font-size: .75rem; color: var(--muted); display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+  .lang-badge {
+    display: inline-block; font-size: .6875rem; font-weight: 700;
+    padding: .1em .5em; border-radius: 4px; letter-spacing: .02em;
+  }
+  .lang-java   { background: var(--java-bg);   color: var(--java); }
+  .lang-go     { background: var(--go-bg);     color: var(--go); }
+  .lang-python { background: var(--python-bg); color: var(--python); }
+
+  .service-card-body { padding: .875rem 1.125rem; }
+  .ownership-group { margin-bottom: .75rem; }
+  .ownership-group:last-child { margin-bottom: 0; }
+  .ownership-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    margin-bottom: .35rem;
+  }
+  .label-own  { color: var(--own); }
+  .label-read { color: var(--read); }
+  .label-none { color: var(--none); }
+
+  .table-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .chip {
+    display: inline-block; font-size: .7rem; font-family: 'SFMono-Regular', Consolas, monospace;
+    padding: .2em .55em; border-radius: 4px; font-weight: 600;
+  }
+  .chip-own  { background: var(--own-bg);  color: var(--own); }
+  .chip-read { background: var(--read-bg); color: var(--read); }
+  .chip-none { background: var(--none-bg); color: var(--none); font-style: italic; }
+
+  /* Ownership matrix table */
+  .matrix-wrap { overflow-x: auto; margin-bottom: 2.5rem; }
+  .matrix-table { border-collapse: collapse; font-size: .75rem; min-width: 800px; width: 100%; }
+  .matrix-table th {
+    padding: .5rem .75rem; text-align: left; font-size: .7rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    background: var(--surface-2); border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .matrix-table td {
+    padding: .45rem .75rem; border: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .matrix-table tr:hover td { background: var(--surface-2); }
+  .table-name { font-family: monospace; font-size: .8rem; color: var(--text); font-weight: 600; }
+  .own-cell  { text-align: center; }
+  .badge-own  { display: inline-block; width: 22px; height: 22px; border-radius: 4px; background: var(--own);  font-size: .7rem; font-weight: 700; color: #fff; text-align: center; line-height: 22px; }
+  .badge-read { display: inline-block; width: 22px; height: 22px; border-radius: 4px; background: var(--read); font-size: .7rem; font-weight: 700; color: #fff; text-align: center; line-height: 22px; }
+  .badge-none { display: inline-block; width: 22px; height: 22px; border-radius: 4px; background: var(--none-bg); font-size: .8rem; color: var(--none); text-align: center; line-height: 22px; }
+
+  .rule-list { list-style: none; display: grid; gap: .5rem; margin-bottom: 2rem; }
+  .rule-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: .75rem 1rem; font-size: .8125rem;
+    display: flex; gap: .75rem; align-items: flex-start;
+  }
+  .rule-num {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 5px;
+    background: var(--accent); color: #fff;
+    font-size: .7rem; font-weight: 700; text-align: center; line-height: 22px;
+  }
+  .rule-body { color: var(--text); line-height: 1.55; }
+  .rule-body strong { color: var(--accent); }
+
+  @media(max-width: 640px) { body { padding: 1.25rem 1rem; } h1 { font-size: 1.25rem; } }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Module Ownership</h1>
+  <p class="subtitle">Mỗi module chỉ được write vào table nó sở hữu — ranh giới rõ ràng ngăn coupling ẩn</p>
+</header>
+
+<div class="info-box">
+  <strong>Nguyên tắc:</strong> Một table chỉ có 1 module được phép INSERT/UPDATE/DELETE (<span style="color:var(--own)">OWN</span>). Module khác muốn data đó → gọi API hoặc nhận event. Direct cross-module DB write là anti-pattern trong Modular Monolith + DDD — boundaries phải rõ ràng ngay từ Phase 1 để việc tách microservices sau này không đau. <br>
+  <strong>Phase 1 (Modular Monolith):</strong> Identity, Quest, Marketplace, World, Admin chạy trong 1 Spring Boot app (port 8080, share cùng PostgreSQL). Social + Notification là Go/Fiber apps riêng (port 8081/8082). AI là Python/FastAPI riêng (port 8090). Boundaries được enforce bởi package structure + ArchUnit tests (Java) và DB roles. <strong>Phase 2 (Microservices):</strong> Mỗi module tách thành service riêng với port và DB riêng.
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot dot-own"></div> <span><strong>OWN</strong> — read + write, chạy migrations</span></div>
+  <div class="legend-item"><div class="legend-dot dot-read"></div> <span><strong>READ</strong> — read-only khi cần thiết (tránh nếu có thể, dùng API call)</span></div>
+  <div class="legend-item"><div class="legend-dot dot-none"></div> <span><strong>—</strong> không access</span></div>
+</div>
+
+<!-- Module cards -->
+<div class="section-label">Modules — ownership chi tiết</div>
+<div class="services-grid">
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">Identity Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-java">Java / Spring Boot</span>
+        <span>Port 9090</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">users</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-none">Không access</div>
+        <div class="table-chips"><span class="chip chip-none">tất cả tables khác</span></div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;">Session/refresh tokens lưu ở Redis, không phải DB. Đăng ký → publish <code>user.registered</code> để World tạo World mặc định.</div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">Quest Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-java">Java / Spring Boot</span>
+        <span>Port 9090</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">learning_paths</span>
+          <span class="chip chip-own">quests</span>
+          <span class="chip chip-own">chapters</span>
+          <span class="chip chip-own">tasks</span>
+          <span class="chip chip-own">resources</span>
+          <span class="chip chip-own">personal_quests</span>
+          <span class="chip chip-own">personal_chapters</span>
+          <span class="chip chip-own">personal_tasks</span>
+          <span class="chip chip-own">task_completions</span>
+          <span class="chip chip-own">quiz_attempts</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only (avoid if possible)</div>
+        <div class="table-chips">
+          <span class="chip chip-read">users</span>
+          <span class="chip chip-read">skill_domains</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">Marketplace Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-java">Java / Spring Boot</span>
+        <span>Port 9090</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">reviews</span>
+          <span class="chip chip-own">favorites</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only</div>
+        <div class="table-chips">
+          <span class="chip chip-read">quests</span>
+          <span class="chip chip-read">learning_paths</span>
+          <span class="chip chip-read">users</span>
+          <span class="chip chip-read">skill_domains</span>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;"><code>quests.avg_rating / fork_count</code> là denorm của Quest Module — Marketplace chỉ publish <code>quest.rated</code>, không write trực tiếp.</div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">World Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-java">Java / Spring Boot</span>
+        <span>Port 9090</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">worlds</span>
+          <span class="chip chip-own">districts</span>
+          <span class="chip chip-own">buildings</span>
+          <span class="chip chip-own">achievements</span>
+          <span class="chip chip-own">user_achievements</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only</div>
+        <div class="table-chips">
+          <span class="chip chip-read">users</span>
+          <span class="chip chip-read">skill_domains</span>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;">District/achievement update qua event <code>task.completed</code> + <code>quest.completed</code> — không sync call từ Quest Module.</div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">Social Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-go">Go / Fiber</span>
+        <span>Port 8081</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">follows</span>
+          <span class="chip chip-own">activities</span>
+          <span class="chip chip-own">comments</span>
+          <span class="chip chip-own">discussions</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only</div>
+        <div class="table-chips">
+          <span class="chip chip-read">users</span>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;">Writer duy nhất của <code>activities</code> — module khác INSERT outbox_events, Social listener tạo Activity.</div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">Notification Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-go">Go / Fiber</span>
+        <span>Port 8082 · internal</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">notifications</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only</div>
+        <div class="table-chips">
+          <span class="chip chip-read">users</span>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;">Đọc <code>users.notification_prefs</code> + push token, gửi Expo Push / Resend email.</div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">AI Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-python">Python / FastAPI</span>
+        <span>Port 8090 · separate app</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">submission_grades</span>
+          <span class="chip chip-own">coach_sessions</span>
+          <span class="chip chip-own">coach_messages</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only (training + inference)</div>
+        <div class="table-chips">
+          <span class="chip chip-read">quests</span>
+          <span class="chip chip-read">tasks</span>
+          <span class="chip chip-read">learning_paths</span>
+          <span class="chip chip-read">personal_quests</span>
+          <span class="chip chip-read">task_completions</span>
+          <span class="chip chip-read">quiz_attempts</span>
+          <span class="chip chip-read">reviews</span>
+          <span class="chip chip-read">favorites</span>
+          <span class="chip chip-read">users</span>
+          <span class="chip chip-read">skill_domains</span>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;">Dùng read replica hoặc scheduled export khi training — không query production DB trực tiếp. AI Coach chỉ READ — không tool nào write quest.</div>
+    </div>
+  </div>
+
+  <div class="service-card">
+    <div class="service-card-head">
+      <div class="service-card-name">Admin Module</div>
+      <div class="service-card-meta">
+        <span class="lang-badge lang-java">Java / Spring Boot</span>
+        <span>Port 9090</span>
+      </div>
+    </div>
+    <div class="service-card-body">
+      <div class="ownership-group">
+        <div class="ownership-label label-own">Owns</div>
+        <div class="table-chips">
+          <span class="chip chip-own">skill_domains</span>
+          <span class="chip chip-own">feature_flags</span>
+        </div>
+      </div>
+      <div class="ownership-group">
+        <div class="ownership-label label-read">Read-only (tất cả tables — audit only)</div>
+        <div class="table-chips">
+          <span class="chip chip-read">users</span>
+          <span class="chip chip-read">quests</span>
+          <span class="chip chip-read">activities</span>
+          <span class="chip chip-read">reviews</span>
+          <span style="font-size:.7rem;color:var(--muted)">+ all others</span>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;">Domain CRUD ảnh hưởng cả LearningPath lẫn District — thay đổi qua event, không write xuyên module.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Quick-reference matrix -->
+<div class="section-label">Quick-reference matrix</div>
+<div class="matrix-wrap">
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th>Table</th>
+        <th>Identity</th>
+        <th>Quest</th>
+        <th>Marketplace</th>
+        <th>World</th>
+        <th>Social</th>
+        <th>Notif.</th>
+        <th>AI</th>
+        <th>Admin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="table-name">users</td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">skill_domains</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+      </tr>
+      <tr><td class="table-name">learning_paths</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">quests</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">chapters</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">tasks</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">resources</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">worlds</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">districts</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">buildings</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">personal_quests</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">personal_chapters</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">personal_tasks</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">task_completions</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">quiz_attempts</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">reviews</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">comments</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">discussions</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">achievements</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">user_achievements</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">notifications</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">favorites</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">follows</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">activities</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">feature_flags</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+      </tr>
+      <tr><td class="table-name">submission_grades</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">coach_sessions</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">coach_messages</td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-read">R</span></td>
+      </tr>
+      <tr><td class="table-name">outbox_events <span style="font-size:.65rem;color:var(--muted)">(infra)</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-own">W</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+        <td class="own-cell"><span class="badge-none">—</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Rules -->
+<div class="section-label">Rules — enforced khi code</div>
+<ul class="rule-list">
+  <li class="rule-item">
+    <span class="rule-num">1</span>
+    <div class="rule-body"><strong>Không bao giờ JOIN cross-module.</strong> Quest Module không được JOIN quests với activities (Social Module's table). Nếu cần data, gọi internal API hoặc nhận từ event.</div>
+  </li>
+  <li class="rule-item">
+    <span class="rule-num">2</span>
+    <div class="rule-body"><strong>Denormalized fields là exception có chủ đích.</strong> <code>quests.fork_count / avg_rating</code>, <code>districts.completion_count</code>, <code>users.follower_count</code>, <code>personal_quests.progress</code>, <code>personal_tasks.is_completed</code> được update trong module sở hữu hoặc async qua event — không phải cross-module write.</div>
+  </li>
+  <li class="rule-item">
+    <span class="rule-num">3</span>
+    <div class="rule-body"><strong>Social Module là writer duy nhất của <code>activities</code>.</strong> Quest/World/Identity không INSERT activities trực tiếp — INSERT outbox_events → Outbox Relay → Social listener xử lý.</div>
+  </li>
+  <li class="rule-item">
+    <span class="rule-num">4</span>
+    <div class="rule-body"><strong>AI Module không query production DB khi training.</strong> Dùng scheduled export hoặc read replica để tránh ảnh hưởng performance. Inference endpoint (serving) có thể query normal.</div>
+  </li>
+  <li class="rule-item">
+    <span class="rule-num">5</span>
+    <div class="rule-body"><strong>Migrations chỉ do owner module chạy.</strong> Quest Module chạy Flyway migrations cho <code>learning_paths, quests, chapters, tasks, resources, personal_*</code>. World cho <code>worlds, districts, buildings, achievements</code>. Không share migration script.</div>
+  </li>
+  <li class="rule-item">
+    <span class="rule-num">6</span>
+    <div class="rule-body"><strong><code>outbox_events</code> là bảng infra — không có module owner.</strong> Module nào publish domain event thì ghi row trong cùng transaction; Outbox Relay xử lý với idempotency key <code>eventId</code>.</div>
+  </li>
+  <li class="rule-item">
+    <span class="rule-num">7</span>
+    <div class="rule-body"><strong>AI Module là writer duy nhất của <code>submission_grades</code> / <code>coach_sessions</code> / <code>coach_messages</code>.</strong> Quest Module chỉ đọc <code>submission_grades</code> để biết kết quả PASS — không INSERT. AI Coach tools chỉ READ, không có tool write quest.</div>
+  </li>
+</ul>

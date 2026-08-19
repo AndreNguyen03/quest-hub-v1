@@ -1,0 +1,895 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Design System</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Primary — Indigo */
+  --primary-50:  #EEF2FF; --primary-100: #E0E7FF; --primary-200: #C7D2FE;
+  --primary-300: #A5B4FC; --primary-400: #818CF8; --primary-500: #6366F1;
+  --primary-600: #4F46E5; --primary-700: #4338CA; --primary-800: #3730A3; --primary-900: #312E81;
+
+  /* Amber — Achievement / Completion */
+  --amber-50:  #FFFBEB; --amber-100: #FEF3C7; --amber-200: #FDE68A;
+  --amber-300: #FCD34D; --amber-400: #FBBF24; --amber-500: #F59E0B;
+  --amber-600: #D97706; --amber-700: #B45309;
+
+  /* Slate — Neutrals */
+  --slate-50:  #F8FAFC; --slate-100: #F1F5F9; --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1; --slate-400: #94A3B8; --slate-500: #64748B;
+  --slate-600: #475569; --slate-700: #334155; --slate-800: #1E293B; --slate-900: #0F172A;
+
+  /* Semantic */
+  --success: #10B981; --success-bg: #D1FAE5; --success-dark: #064E3B;
+  --warning: #F59E0B; --warning-bg: #FEF3C7; --warning-dark: #451A03;
+  --danger:  #EF4444; --danger-bg:  #FEE2E2; --danger-dark:  #450A0A;
+  --info:    #3B82F6; --info-bg:    #DBEAFE; --info-dark:    #1E3A5F;
+
+  /* Surface tokens — Light */
+  --bg:        var(--slate-50);
+  --surface:   #FFFFFF;
+  --surface-2: var(--slate-100);
+  --border:    var(--slate-200);
+  --text:      var(--slate-900);
+  --text-muted:var(--slate-500);
+  --accent:    var(--primary-500);
+  --accent-hover: var(--primary-600);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        var(--slate-900);
+    --surface:   var(--slate-800);
+    --surface-2: #162032;
+    --border:    var(--slate-700);
+    --text:      var(--slate-50);
+    --text-muted:var(--slate-400);
+    --accent:    var(--primary-400);
+    --accent-hover: var(--primary-300);
+  }
+}
+:root[data-theme="light"] {
+  --bg:var(--slate-50);--surface:#FFF;--surface-2:var(--slate-100);--border:var(--slate-200);
+  --text:var(--slate-900);--text-muted:var(--slate-500);--accent:var(--primary-500);--accent-hover:var(--primary-600);
+}
+:root[data-theme="dark"] {
+  --bg:var(--slate-900);--surface:var(--slate-800);--surface-2:#162032;--border:var(--slate-700);
+  --text:var(--slate-50);--text-muted:var(--slate-400);--accent:var(--primary-400);--accent-hover:var(--primary-300);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;padding:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.page-header{background:var(--surface);border-bottom:1px solid var(--border);padding:2rem 2.5rem;position:sticky;top:0;z-index:100}
+.page-header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1rem}
+.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-size:1rem;font-weight:700;color:var(--text)}
+.logo-sub{font-size:.75rem;color:var(--text-muted);margin-left:.25rem}
+.version-tag{margin-left:auto;font-size:.7rem;font-weight:600;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:.2em .7em;color:var(--text-muted)}
+
+.content{max-width:1100px;margin:0 auto;padding:3rem 2.5rem}
+
+/* Sections */
+.ds-section{margin-bottom:4rem}
+.ds-section-title{font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.ds-label{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem;margin-top:1.5rem}
+.ds-label:first-child{margin-top:0}
+
+/* ============================================================
+   COLOR SWATCHES
+   ============================================================ */
+.swatch-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.swatch{
+  flex:1;min-width:64px;max-width:88px;
+  border-radius:6px;overflow:hidden;
+  border:1px solid rgba(0,0,0,.06);
+}
+.swatch-color{height:48px}
+.swatch-meta{padding:.35rem .4rem;background:var(--surface);font-size:.625rem;line-height:1.4}
+.swatch-name{font-weight:600;color:var(--text);display:block}
+.swatch-hex{color:var(--text-muted);font-family:'SFMono-Regular',Consolas,monospace}
+
+.semantic-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-bottom:1.25rem}
+.semantic-card{border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.semantic-preview{height:56px;display:flex;align-items:center;padding:0 1rem;gap:.5rem;font-size:.8125rem;font-weight:600}
+.semantic-meta{background:var(--surface);padding:.5rem .75rem;font-size:.6875rem;color:var(--text-muted)}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.type-row{display:flex;align-items:baseline;gap:1.5rem;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.type-row:last-child{border-bottom:none}
+.type-meta{width:120px;flex-shrink:0;font-size:.7rem;color:var(--text-muted);font-family:'SFMono-Regular',Consolas,monospace;line-height:1.3}
+.type-sample{flex:1;color:var(--text)}
+.type-row.display .type-sample{font-size:2.25rem;font-weight:700;line-height:1.1;letter-spacing:-.02em}
+.type-row.h1 .type-sample{font-size:1.75rem;font-weight:700;line-height:1.2;letter-spacing:-.01em}
+.type-row.h2 .type-sample{font-size:1.375rem;font-weight:700;line-height:1.25}
+.type-row.h3 .type-sample{font-size:1.125rem;font-weight:600;line-height:1.3}
+.type-row.h4 .type-sample{font-size:.9375rem;font-weight:600;line-height:1.4}
+.type-row.body .type-sample{font-size:.875rem;line-height:1.6;color:var(--text-muted)}
+.type-row.sm .type-sample{font-size:.8125rem;line-height:1.5;color:var(--text-muted)}
+.type-row.xs .type-sample{font-size:.75rem;line-height:1.5;color:var(--text-muted)}
+.type-row.label .type-sample{font-size:.6875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.type-row.mono .type-sample{font-family:'SFMono-Regular',Consolas,monospace;font-size:.8125rem;color:var(--accent)}
+
+/* ============================================================
+   SPACING
+   ============================================================ */
+.spacing-row{display:flex;align-items:center;gap:1rem;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.spacing-row:last-child{border-bottom:none}
+.spacing-bar{background:var(--accent);opacity:.7;height:16px;border-radius:3px;flex-shrink:0}
+.spacing-meta{font-size:.75rem;font-family:'SFMono-Regular',Consolas,monospace;color:var(--text-muted);min-width:80px}
+.spacing-label{font-size:.75rem;color:var(--text-muted)}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-row{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-bottom:1rem}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:none;border-radius:6px;cursor:pointer;font-size:.875rem;font-weight:600;line-height:1;transition:background .15s,box-shadow .15s,opacity .15s;text-decoration:none;white-space:nowrap;font-family:inherit}
+
+/* Sizes */
+.btn-sm{padding:.375rem .75rem;font-size:.8125rem;border-radius:5px}
+.btn-md{padding:.5rem 1rem}
+.btn-lg{padding:.6875rem 1.375rem;font-size:.9375rem;border-radius:7px}
+.btn-xl{padding:.875rem 1.75rem;font-size:1rem;border-radius:8px}
+
+/* Variants */
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+
+.btn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid transparent}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{opacity:.88}
+
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{opacity:.88}
+
+.btn-outline{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn-outline:hover{background:var(--primary-50)}
+@media(prefers-color-scheme:dark){.btn-outline:hover{background:var(--primary-900)}}
+:root[data-theme="dark"] .btn-outline:hover{background:var(--primary-900)}
+
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-icon{width:2.25rem;height:2.25rem;padding:0;border-radius:6px}
+.btn-icon.btn-sm{width:1.875rem;height:1.875rem}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+.input-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.input-label{font-size:.8125rem;font-weight:600;color:var(--text)}
+.input-hint{font-size:.75rem;color:var(--text-muted)}
+.input-error-msg{font-size:.75rem;color:var(--danger)}
+
+.input{
+  width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:6px;padding:.5rem .75rem;font-size:.875rem;color:var(--text);
+  font-family:inherit;line-height:1.5;transition:border-color .15s,box-shadow .15s;outline:none;
+}
+.input::placeholder{color:var(--text-muted)}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+.input.error{border-color:var(--danger)}
+.input.error:focus{box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+.input:disabled{opacity:.5;cursor:not-allowed;background:var(--surface-2)}
+
+.input-with-icon{position:relative}
+.input-with-icon .input{padding-left:2.25rem}
+.input-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.9rem;pointer-events:none}
+
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.input-grid{grid-template-columns:1fr}}
+
+textarea.input{resize:vertical;min-height:80px}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem;cursor:pointer}
+
+/* ============================================================
+   BADGES & TAGS
+   ============================================================ */
+.badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.6875rem;font-weight:600;padding:.2em .55em;border-radius:4px;white-space:nowrap;letter-spacing:.01em}
+.badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+.badge-default  {background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}
+.badge-primary  {background:var(--primary-100);color:var(--primary-700)}
+.badge-success  {background:var(--success-bg); color:var(--success)}
+.badge-warning  {background:var(--warning-bg); color:var(--amber-700)}
+.badge-danger   {background:var(--danger-bg);  color:var(--danger)}
+.badge-info     {background:var(--info-bg);    color:var(--info)}
+
+@media(prefers-color-scheme:dark){
+  .badge-primary{background:var(--primary-900);color:var(--primary-300)}
+  .badge-success{background:var(--success-dark);color:#6EE7B7}
+  .badge-warning{background:var(--warning-dark);color:#FCD34D}
+  .badge-danger {background:var(--danger-dark); color:#FCA5A5}
+  .badge-info   {background:var(--info-dark);   color:#93C5FD}
+}
+:root[data-theme="dark"] .badge-primary{background:var(--primary-900);color:var(--primary-300)}
+:root[data-theme="dark"] .badge-success{background:var(--success-dark);color:#6EE7B7}
+:root[data-theme="dark"] .badge-warning{background:var(--warning-dark);color:#FCD34D}
+:root[data-theme="dark"] .badge-danger {background:var(--danger-dark);color:#FCA5A5}
+:root[data-theme="dark"] .badge-info   {background:var(--info-dark);color:#93C5FD}
+
+/* Quest visibility status */
+.badge-private   {background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}
+.badge-public    {background:var(--primary-100);color:var(--primary-700)}
+.badge-active    {background:var(--success-bg);color:var(--success)}
+.badge-completed {background:var(--amber-100);color:var(--amber-700)}
+.badge-abandoned {background:var(--surface-2);color:var(--text-muted)}
+@media(prefers-color-scheme:dark){
+  .badge-public   {background:var(--primary-900);color:var(--primary-300)}
+  .badge-active   {background:var(--success-dark);color:#6EE7B7}
+  .badge-completed{background:var(--warning-dark);color:#FCD34D}
+}
+:root[data-theme="dark"] .badge-public   {background:var(--primary-900);color:var(--primary-300)}
+:root[data-theme="dark"] .badge-active   {background:var(--success-dark);color:#6EE7B7}
+:root[data-theme="dark"] .badge-completed{background:var(--warning-dark);color:#FCD34D}
+
+/* Module tags */
+.tag-quest       {background:#EDE9FE;color:#5B21B6}
+.tag-marketplace {background:#DBEAFE;color:#1D4ED8}
+.tag-world       {background:#CFFAFE;color:#155E75}
+.tag-social      {background:#FCE7F3;color:#9D174D}
+.tag-ai          {background:#D1FAE5;color:#065F46}
+.tag-admin       {background:#FFE4E6;color:#9F1239}
+@media(prefers-color-scheme:dark){
+  .tag-quest      {background:#2E1065;color:#C4B5FD}
+  .tag-marketplace{background:#1E3A5F;color:#93C5FD}
+  .tag-world      {background:#083344;color:#67E8F9}
+  .tag-social     {background:#500724;color:#F9A8D4}
+  .tag-ai         {background:#064E3B;color:#6EE7B7}
+  .tag-admin      {background:#4C0519;color:#FCA5A5}
+}
+:root[data-theme="dark"] .tag-quest      {background:#2E1065;color:#C4B5FD}
+:root[data-theme="dark"] .tag-marketplace{background:#1E3A5F;color:#93C5FD}
+:root[data-theme="dark"] .tag-world      {background:#083344;color:#67E8F9}
+:root[data-theme="dark"] .tag-social     {background:#500724;color:#F9A8D4}
+:root[data-theme="dark"] .tag-ai         {background:#064E3B;color:#6EE7B7}
+:root[data-theme="dark"] .tag-admin      {background:#4C0519;color:#FCA5A5}
+
+.badge-row-wrap{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem}
+
+/* ============================================================
+   PROGRESS
+   ============================================================ */
+.progress-wrap{margin-bottom:1.25rem}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+.progress-label-text{font-size:.8125rem;font-weight:500;color:var(--text)}
+.progress-pct{font-size:.75rem;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.progress-track{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+.progress-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.progress-fill.primary{background:var(--accent)}
+.progress-fill.success{background:var(--success)}
+.progress-fill.amber{background:var(--amber-500)}
+
+.progress-track.lg{height:10px}
+.progress-track.sm{height:4px}
+
+/* ============================================================
+   AVATAR
+   ============================================================ */
+.avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;flex-shrink:0;overflow:hidden}
+.avatar-xl{width:64px;height:64px;font-size:1.5rem}
+.avatar-lg{width:48px;height:48px;font-size:1.125rem}
+.avatar-md{width:36px;height:36px;font-size:.875rem}
+.avatar-sm{width:28px;height:28px;font-size:.75rem}
+.avatar-xs{width:20px;height:20px;font-size:.5rem}
+.avatar-indigo{background:var(--primary-100);color:var(--primary-700)}
+.avatar-amber {background:var(--amber-100); color:var(--amber-700)}
+.avatar-emerald{background:var(--success-bg);color:var(--success)}
+.avatar-slate {background:var(--surface-2); color:var(--text-muted);border:1px solid var(--border)}
+@media(prefers-color-scheme:dark){
+  .avatar-indigo{background:var(--primary-900);color:var(--primary-300)}
+  .avatar-amber {background:var(--warning-dark);color:#FCD34D}
+  .avatar-emerald{background:var(--success-dark);color:#6EE7B7}
+}
+:root[data-theme="dark"] .avatar-indigo{background:var(--primary-900);color:var(--primary-300)}
+:root[data-theme="dark"] .avatar-amber {background:var(--warning-dark);color:#FCD34D}
+:root[data-theme="dark"] .avatar-emerald{background:var(--success-dark);color:#6EE7B7}
+
+.avatar-group{display:flex}
+.avatar-group .avatar{margin-left:-8px;border:2px solid var(--surface)}
+.avatar-group .avatar:first-child{margin-left:0}
+
+.avatar-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+
+/* ============================================================
+   TOGGLE & CHECKBOX
+   ============================================================ */
+.toggle-label{display:inline-flex;align-items:center;gap:.625rem;cursor:pointer;user-select:none}
+.toggle-input{position:absolute;opacity:0;width:0;height:0}
+.toggle-track{width:36px;height:20px;background:var(--border);border-radius:99px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-input:checked ~ .toggle-track{background:var(--accent)}
+.toggle-input:checked ~ .toggle-track .toggle-thumb{transform:translateX(16px)}
+.toggle-text{font-size:.875rem;color:var(--text)}
+
+.checkbox-label{display:inline-flex;align-items:flex-start;gap:.625rem;cursor:pointer;user-select:none}
+.checkbox-input{position:absolute;opacity:0;width:0;height:0}
+.checkbox-box{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;background:var(--surface);flex-shrink:0;margin-top:.15rem;transition:background .15s,border-color .15s;display:flex;align-items:center;justify-content:center}
+.checkbox-input:checked ~ .checkbox-box{background:var(--accent);border-color:var(--accent)}
+.checkbox-input:checked ~ .checkbox-box::after{content:'✓';color:#fff;font-size:.6rem;font-weight:700;line-height:1}
+.checkbox-text{font-size:.875rem;color:var(--text);line-height:1.4}
+.checkbox-sub{font-size:.75rem;color:var(--text-muted);display:block;margin-top:.1rem}
+
+.control-row{display:flex;flex-wrap:wrap;gap:1.25rem 2rem;margin-bottom:.75rem}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+/* Quest Card */
+.quest-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;transition:box-shadow .2s,border-color .2s;cursor:pointer;
+}
+.quest-card:hover{border-color:var(--primary-300);box-shadow:0 4px 16px rgba(99,102,241,.1)}
+.quest-cover{height:100px;background:linear-gradient(135deg,var(--primary-600),var(--primary-400));display:flex;align-items:center;justify-content:center;font-size:2rem}
+.quest-body{padding:1rem}
+.quest-meta{display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem}
+.quest-title{font-size:.9375rem;font-weight:700;color:var(--text);margin-bottom:.3rem;line-height:1.3}
+.quest-desc{font-size:.775rem;color:var(--text-muted);line-height:1.5;margin-bottom:.75rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.quest-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.6rem;border-top:1px solid var(--border)}
+.quest-stat{display:flex;align-items:center;gap:.25rem;font-size:.75rem;color:var(--text-muted)}
+.quest-creator{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--text-muted)}
+
+.quest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-bottom:1.5rem}
+
+/* Task item */
+.obj-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem}
+.obj-item{
+  display:flex;align-items:flex-start;gap:.75rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:.75rem 1rem;
+  transition:border-color .15s,background .15s;
+}
+.obj-item.completed{background:var(--surface-2);opacity:.7}
+.obj-item.completed .obj-title{text-decoration:line-through;color:var(--text-muted)}
+.obj-check{width:18px;height:18px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,border-color .15s}
+.obj-item.completed .obj-check{background:var(--success);border-color:var(--success);color:#fff;font-size:.6rem;font-weight:700}
+.obj-body{flex:1}
+.obj-title{font-size:.875rem;font-weight:500;color:var(--text);line-height:1.4}
+.obj-sub{font-size:.75rem;color:var(--text-muted);margin-top:.15rem}
+.obj-date{font-size:.7rem;color:var(--success);margin-top:.2rem;font-weight:500}
+
+/* Activity item */
+.activity-list{display:flex;flex-direction:column;gap:0;margin-bottom:1.5rem}
+.activity-item{
+  display:flex;align-items:flex-start;gap:.875rem;
+  padding:.875rem 0;border-bottom:1px solid var(--border);
+}
+.activity-item:last-child{border-bottom:none}
+.activity-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.activity-icon.complete{background:var(--success-bg)}
+.activity-icon.fork   {background:var(--primary-100)}
+.activity-icon.follow {background:var(--amber-100)}
+@media(prefers-color-scheme:dark){
+  .activity-icon.complete{background:var(--success-dark)}
+  .activity-icon.fork   {background:var(--primary-900)}
+  .activity-icon.follow {background:var(--warning-dark)}
+}
+:root[data-theme="dark"] .activity-icon.complete{background:var(--success-dark)}
+:root[data-theme="dark"] .activity-icon.fork   {background:var(--primary-900)}
+:root[data-theme="dark"] .activity-icon.follow {background:var(--warning-dark)}
+.activity-body{flex:1}
+.activity-text{font-size:.8125rem;color:var(--text);line-height:1.45}
+.activity-text strong{font-weight:600}
+.activity-text a{color:var(--accent);text-decoration:none}
+.activity-time{font-size:.7rem;color:var(--text-muted);margin-top:.15rem}
+
+/* Notification / Toast */
+.toast-stack{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem}
+.toast{
+  display:flex;align-items:flex-start;gap:.75rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:.875rem 1rem;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  border-left:4px solid;
+}
+.toast.success{border-left-color:var(--success)}
+.toast.warning{border-left-color:var(--warning)}
+.toast.danger {border-left-color:var(--danger)}
+.toast.info   {border-left-color:var(--info)}
+.toast-icon{font-size:1rem;line-height:1;margin-top:.1rem}
+.toast-body{flex:1}
+.toast-title{font-size:.875rem;font-weight:600;color:var(--text);margin-bottom:.1rem}
+.toast-msg{font-size:.775rem;color:var(--text-muted);line-height:1.4}
+.toast-close{color:var(--text-muted);font-size:1rem;cursor:pointer;line-height:1;margin-left:.5rem;opacity:.6}
+.toast-close:hover{opacity:1}
+
+/* ============================================================
+   BORDER RADIUS SCALE
+   ============================================================ */
+.radius-row{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem}
+.radius-box{background:var(--accent);opacity:.8;width:60px;height:60px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:.35rem}
+.radius-label{font-size:.6rem;font-weight:700;color:#fff;text-align:center;line-height:1.3}
+
+/* ============================================================
+   SHADOW SCALE
+   ============================================================ */
+.shadow-row{display:flex;flex-wrap:wrap;gap:1.5rem;margin-bottom:1rem}
+.shadow-box{background:var(--surface);width:80px;height:60px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:var(--text-muted);text-align:center;padding:.5rem}
+
+@media(max-width:640px){
+  .content{padding:2rem 1.25rem}
+  .quest-grid{grid-template-columns:1fr}
+  .input-grid{grid-template-columns:1fr}
+}
+</style>
+
+<h2 class="sr-only">QuestHub UI Design System — Color tokens, typography, components</h2>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="logo-mark">⚔️</div>
+    <span class="logo-text">QuestHub <span class="logo-sub">Design System</span></span>
+    <span class="version-tag">v0.1</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ======================== COLORS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Color Tokens</div>
+
+    <div class="ds-label">Primary — Indigo (brand, interactive)</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="swatch-color" style="background:#EEF2FF"></div><div class="swatch-meta"><span class="swatch-name">50</span><span class="swatch-hex">#EEF2FF</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#C7D2FE"></div><div class="swatch-meta"><span class="swatch-name">200</span><span class="swatch-hex">#C7D2FE</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#818CF8"></div><div class="swatch-meta"><span class="swatch-name">400</span><span class="swatch-hex">#818CF8</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#6366F1"></div><div class="swatch-meta"><span class="swatch-name">500 ★</span><span class="swatch-hex">#6366F1</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#4F46E5"></div><div class="swatch-meta"><span class="swatch-name">600</span><span class="swatch-hex">#4F46E5</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#4338CA"></div><div class="swatch-meta"><span class="swatch-name">700</span><span class="swatch-hex">#4338CA</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#312E81"></div><div class="swatch-meta"><span class="swatch-name">900</span><span class="swatch-hex">#312E81</span></div></div>
+    </div>
+
+    <div class="ds-label">Amber — Achievement / Completion</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="swatch-color" style="background:#FEF3C7"></div><div class="swatch-meta"><span class="swatch-name">100</span><span class="swatch-hex">#FEF3C7</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FCD34D"></div><div class="swatch-meta"><span class="swatch-name">300</span><span class="swatch-hex">#FCD34D</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FBBF24"></div><div class="swatch-meta"><span class="swatch-name">400</span><span class="swatch-hex">#FBBF24</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#F59E0B"></div><div class="swatch-meta"><span class="swatch-name">500 ★</span><span class="swatch-hex">#F59E0B</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#D97706"></div><div class="swatch-meta"><span class="swatch-name">600</span><span class="swatch-hex">#D97706</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#B45309"></div><div class="swatch-meta"><span class="swatch-name">700</span><span class="swatch-hex">#B45309</span></div></div>
+    </div>
+
+    <div class="ds-label">Slate — Neutrals</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="swatch-color" style="background:#F8FAFC;border:1px solid #E2E8F0"></div><div class="swatch-meta"><span class="swatch-name">50</span><span class="swatch-hex">#F8FAFC</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#E2E8F0"></div><div class="swatch-meta"><span class="swatch-name">200</span><span class="swatch-hex">#E2E8F0</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#94A3B8"></div><div class="swatch-meta"><span class="swatch-name">400</span><span class="swatch-hex">#94A3B8</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#64748B"></div><div class="swatch-meta"><span class="swatch-name">500</span><span class="swatch-hex">#64748B</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#334155"></div><div class="swatch-meta"><span class="swatch-name">700</span><span class="swatch-hex">#334155</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#1E293B"></div><div class="swatch-meta"><span class="swatch-name">800</span><span class="swatch-hex">#1E293B</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#0F172A"></div><div class="swatch-meta"><span class="swatch-name">900</span><span class="swatch-hex">#0F172A</span></div></div>
+    </div>
+
+    <div class="ds-label">Semantic Colors</div>
+    <div class="semantic-row">
+      <div class="semantic-card">
+        <div class="semantic-preview" style="background:#D1FAE5;color:#065F46">✓ Success</div>
+        <div class="semantic-meta">#10B981 · Completion, done state</div>
+      </div>
+      <div class="semantic-card">
+        <div class="semantic-preview" style="background:#FEF3C7;color:#92400E">⚠ Warning</div>
+        <div class="semantic-meta">#F59E0B · Caution, pending</div>
+      </div>
+      <div class="semantic-card">
+        <div class="semantic-preview" style="background:#FEE2E2;color:#991B1B">✕ Danger</div>
+        <div class="semantic-meta">#EF4444 · Error, destructive</div>
+      </div>
+      <div class="semantic-card">
+        <div class="semantic-preview" style="background:#DBEAFE;color:#1E40AF">ℹ Info</div>
+        <div class="semantic-meta">#3B82F6 · Informational</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== TYPOGRAPHY ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Typography</div>
+    <div class="type-row display"><div class="type-meta">Display<br>36px / 700<br>ls: -0.02em</div><div class="type-sample">Achieve your goals</div></div>
+    <div class="type-row h1"><div class="type-meta">H1<br>28px / 700<br>ls: -0.01em</div><div class="type-sample">My Knowledge World</div></div>
+    <div class="type-row h2"><div class="type-meta">H2<br>22px / 700</div><div class="type-sample">Quest Marketplace</div></div>
+    <div class="type-row h3"><div class="type-meta">H3<br>18px / 600</div><div class="type-sample">Become a Java Backend Developer</div></div>
+    <div class="type-row h4"><div class="type-meta">H4<br>15px / 600</div><div class="type-sample">Technology District · 24 completions</div></div>
+    <div class="type-row body"><div class="type-meta">Body<br>14px / 400<br>lh: 1.6</div><div class="type-sample">A structured roadmap to help you master Java backend development — from fundamentals to production-ready systems.</div></div>
+    <div class="type-row sm"><div class="type-meta">Small<br>13px / 400<br>lh: 1.5</div><div class="type-sample">Forked from "Java Backend Roadmap" by @creator · 12 chapters · 48 tasks · 4.8 ★</div></div>
+    <div class="type-row xs"><div class="type-meta">XSmall<br>12px / 400</div><div class="type-sample">Completed 3 days ago · Technology District</div></div>
+    <div class="type-row label"><div class="type-meta">Label<br>11px / 700<br>ls: 0.08em</div><div class="type-sample">Acceptance criteria</div></div>
+    <div class="type-row mono"><div class="type-meta">Mono<br>13px<br>SFMono</div><div class="type-sample">TaskCompleted · US-06 · GET /api/v1/quests</div></div>
+  </div>
+
+  <!-- ======================== SPACING ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Spacing Scale (base 4px)</div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:4px"></div><div class="spacing-meta">4px / 0.25rem</div><div class="spacing-label">xs — icon gaps, tight inline</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:8px"></div><div class="spacing-meta">8px / 0.5rem</div><div class="spacing-label">sm — badge padding, compact elements</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:12px"></div><div class="spacing-meta">12px / 0.75rem</div><div class="spacing-label">md — button padding, form gaps</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:16px"></div><div class="spacing-meta">16px / 1rem</div><div class="spacing-label">base — card padding, list gaps</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:24px"></div><div class="spacing-meta">24px / 1.5rem</div><div class="spacing-label">lg — section gaps, card margins</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:32px"></div><div class="spacing-meta">32px / 2rem</div><div class="spacing-label">xl — page padding, section spacing</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:48px"></div><div class="spacing-meta">48px / 3rem</div><div class="spacing-label">2xl — large section breaks</div></div>
+    <div class="spacing-row"><div class="spacing-bar" style="width:64px"></div><div class="spacing-meta">64px / 4rem</div><div class="spacing-label">3xl — hero spacing, page top</div></div>
+  </div>
+
+  <!-- ======================== BORDER RADIUS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Border Radius</div>
+    <div class="radius-row">
+      <div><div class="radius-box" style="border-radius:4px"><div class="radius-label">4px<br>Badge</div></div></div>
+      <div><div class="radius-box" style="border-radius:6px"><div class="radius-label">6px<br>Button</div></div></div>
+      <div><div class="radius-box" style="border-radius:8px"><div class="radius-label">8px<br>Card</div></div></div>
+      <div><div class="radius-box" style="border-radius:10px"><div class="radius-label">10px<br>Quest card</div></div></div>
+      <div><div class="radius-box" style="border-radius:12px"><div class="radius-label">12px<br>Modal</div></div></div>
+      <div><div class="radius-box" style="border-radius:9999px;width:60px"><div class="radius-label">Full<br>Pill, Avatar</div></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== BUTTONS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Buttons</div>
+
+    <div class="ds-label">Variants</div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-md">Primary</button>
+      <button class="btn btn-secondary btn-md">Secondary</button>
+      <button class="btn btn-outline btn-md">Outline</button>
+      <button class="btn btn-ghost btn-md">Ghost</button>
+      <button class="btn btn-success btn-md">Success</button>
+      <button class="btn btn-danger btn-md">Danger</button>
+    </div>
+
+    <div class="ds-label">Sizes</div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-sm">Small</button>
+      <button class="btn btn-primary btn-md">Medium</button>
+      <button class="btn btn-primary btn-lg">Large</button>
+      <button class="btn btn-primary btn-xl">X-Large</button>
+    </div>
+
+    <div class="ds-label">States</div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-md" disabled>Disabled</button>
+      <button class="btn btn-secondary btn-md" disabled>Disabled</button>
+      <button class="btn btn-icon btn-secondary btn-md">⚙</button>
+      <button class="btn btn-icon btn-ghost btn-md">♥</button>
+      <button class="btn btn-primary btn-md">⚔️ Use Quest</button>
+      <button class="btn btn-success btn-md">✓ Complete</button>
+    </div>
+  </div>
+
+  <!-- ======================== INPUTS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Form Inputs</div>
+
+    <div class="input-grid">
+      <div class="input-group">
+        <label class="input-label">Quest Title</label>
+        <input class="input" type="text" placeholder="e.g. Become a Java Backend Developer">
+        <span class="input-hint">Be specific — good titles attract more users</span>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Category</label>
+        <select class="input">
+          <option>Programming</option>
+          <option>Fitness</option>
+          <option>Language</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Search</label>
+        <div class="input-with-icon">
+          <span class="input-icon">🔍</span>
+          <input class="input" type="text" placeholder="Search quests...">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password (error)</label>
+        <input class="input error" type="password" placeholder="Enter password" value="short">
+        <span class="input-error-msg">Password must be at least 8 characters</span>
+      </div>
+    </div>
+
+    <div class="input-group" style="max-width:480px">
+      <label class="input-label">Description</label>
+      <textarea class="input" placeholder="Describe what this quest covers and who it's for..."></textarea>
+    </div>
+  </div>
+
+  <!-- ======================== BADGES ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Badges & Tags</div>
+
+    <div class="ds-label">Semantic</div>
+    <div class="badge-row-wrap">
+      <span class="badge badge-default">Default</span>
+      <span class="badge badge-primary">Primary</span>
+      <span class="badge badge-success"><span class="badge-dot" style="background:var(--success)"></span>Success</span>
+      <span class="badge badge-warning"><span class="badge-dot" style="background:var(--warning)"></span>Warning</span>
+      <span class="badge badge-danger"><span class="badge-dot" style="background:var(--danger)"></span>Danger</span>
+      <span class="badge badge-info"><span class="badge-dot" style="background:var(--info)"></span>Info</span>
+    </div>
+
+    <div class="ds-label">Quest Status</div>
+    <div class="badge-row-wrap">
+      <span class="badge badge-private">🔒 Private</span>
+      <span class="badge badge-public">🌐 Public</span>
+      <span class="badge badge-active"><span class="badge-dot" style="background:var(--success)"></span>Active</span>
+      <span class="badge badge-completed">⭐ Completed</span>
+      <span class="badge badge-abandoned">Abandoned</span>
+    </div>
+
+    <div class="ds-label">Module Tags</div>
+    <div class="badge-row-wrap">
+      <span class="badge tag-quest">Quest</span>
+      <span class="badge tag-marketplace">Marketplace</span>
+      <span class="badge tag-world">World</span>
+      <span class="badge tag-social">Social</span>
+      <span class="badge tag-ai">AI</span>
+      <span class="badge tag-admin">Admin</span>
+    </div>
+  </div>
+
+  <!-- ======================== PROGRESS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Progress</div>
+    <div class="progress-wrap">
+      <div class="progress-header"><span class="progress-label-text">Become a Java Backend Developer</span><span class="progress-pct">72%</span></div>
+      <div class="progress-track lg"><div class="progress-fill primary" style="width:72%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-header"><span class="progress-label-text">Fitness — 30 Day Challenge</span><span class="progress-pct">100%</span></div>
+      <div class="progress-track"><div class="progress-fill success" style="width:100%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-header"><span class="progress-label-text">Learn Spanish — A2 Level</span><span class="progress-pct">34%</span></div>
+      <div class="progress-track sm"><div class="progress-fill amber" style="width:34%"></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== AVATARS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Avatars</div>
+    <div class="ds-label">Sizes</div>
+    <div class="avatar-row">
+      <span class="avatar avatar-xl avatar-indigo">AN</span>
+      <span class="avatar avatar-lg avatar-indigo">AN</span>
+      <span class="avatar avatar-md avatar-indigo">AN</span>
+      <span class="avatar avatar-sm avatar-indigo">AN</span>
+      <span class="avatar avatar-xs avatar-indigo">A</span>
+    </div>
+    <div class="ds-label">Colors</div>
+    <div class="avatar-row">
+      <span class="avatar avatar-lg avatar-indigo">QH</span>
+      <span class="avatar avatar-lg avatar-amber">★</span>
+      <span class="avatar avatar-lg avatar-emerald">✓</span>
+      <span class="avatar avatar-lg avatar-slate">?</span>
+    </div>
+    <div class="ds-label">Group</div>
+    <div class="avatar-group">
+      <span class="avatar avatar-md avatar-indigo">AN</span>
+      <span class="avatar avatar-md avatar-amber">BT</span>
+      <span class="avatar avatar-md avatar-emerald">CL</span>
+      <span class="avatar avatar-md avatar-slate">+5</span>
+    </div>
+  </div>
+
+  <!-- ======================== TOGGLES ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Toggle & Checkbox</div>
+    <div class="ds-label">Toggle</div>
+    <div class="control-row">
+      <label class="toggle-label">
+        <input type="checkbox" class="toggle-input" checked>
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <span class="toggle-text">Public profile</span>
+      </label>
+      <label class="toggle-label">
+        <input type="checkbox" class="toggle-input">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <span class="toggle-text">Email notifications</span>
+      </label>
+    </div>
+    <div class="ds-label">Checkbox</div>
+    <div class="control-row" style="flex-direction:column;align-items:flex-start">
+      <label class="checkbox-label">
+        <input type="checkbox" class="checkbox-input" checked>
+        <div class="checkbox-box"></div>
+        <div class="checkbox-text">Read DDIA (Designing Data-Intensive Applications)<span class="checkbox-sub">Completed · 3 days ago</span></div>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" class="checkbox-input">
+        <div class="checkbox-box"></div>
+        <div class="checkbox-text">Build a Kafka producer/consumer demo<span class="checkbox-sub">Not started</span></div>
+      </label>
+    </div>
+  </div>
+
+  <!-- ======================== QUEST CARD ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Quest Cards</div>
+    <div class="quest-grid">
+      <div class="quest-card">
+        <div class="quest-cover" style="background:linear-gradient(135deg,#4338CA,#818CF8)">⚔️</div>
+        <div class="quest-body">
+          <div class="quest-meta">
+            <span class="badge tag-quest">Programming</span>
+            <span class="badge badge-public">🌐 Public</span>
+          </div>
+          <div class="quest-title">Become a Java Backend Developer</div>
+          <div class="quest-desc">From OOP basics to microservices. Covers Spring Boot, Kafka, PostgreSQL, and system design fundamentals.</div>
+          <div class="quest-footer">
+            <div style="display:flex;gap:.75rem">
+              <span class="quest-stat">🔀 128 forks</span>
+              <span class="quest-stat">⭐ 4.8</span>
+            </div>
+            <div class="quest-creator">
+              <span class="avatar avatar-xs avatar-indigo">AN</span>
+              <span>anh.nguyen</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="quest-card">
+        <div class="quest-cover" style="background:linear-gradient(135deg,#059669,#34D399)">🏃</div>
+        <div class="quest-body">
+          <div class="quest-meta">
+            <span class="badge tag-world">Fitness</span>
+            <span class="badge badge-active"><span class="badge-dot" style="background:var(--success)"></span>Active</span>
+          </div>
+          <div class="quest-title">30-Day Running Challenge</div>
+          <div class="quest-desc">Build a consistent running habit from zero. Progressive distance plan, rest days included.</div>
+          <div class="quest-footer">
+            <div style="display:flex;gap:.75rem">
+              <span class="quest-stat">🔀 64 forks</span>
+              <span class="quest-stat">⭐ 4.6</span>
+            </div>
+            <div class="quest-creator">
+              <span class="avatar avatar-xs avatar-emerald">BT</span>
+              <span>b.tran</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="quest-card">
+        <div class="quest-cover" style="background:linear-gradient(135deg,#D97706,#FBBF24)">🇯🇵</div>
+        <div class="quest-body">
+          <div class="quest-meta">
+            <span class="badge tag-social">Language</span>
+            <span class="badge badge-completed">⭐ Completed</span>
+          </div>
+          <div class="quest-title">Japanese N5 in 60 Days</div>
+          <div class="quest-desc">Hiragana, katakana, 800 vocab, and basic grammar patterns for JLPT N5.</div>
+          <div class="quest-footer">
+            <div style="display:flex;gap:.75rem">
+              <span class="quest-stat">🔀 203 forks</span>
+              <span class="quest-stat">⭐ 4.9</span>
+            </div>
+            <div class="quest-creator">
+              <span class="avatar avatar-xs avatar-amber">CL</span>
+              <span>c.le</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== CHAPTER & TASK LIST ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Chapter & Task List</div>
+    <div class="obj-list" style="max-width:560px">
+      <div class="obj-item completed">
+        <div class="obj-check">✓</div>
+        <div class="obj-body">
+          <div class="obj-title">Read DDIA — Chapters 1–4</div>
+          <div class="obj-date">✓ Completed 3 days ago</div>
+        </div>
+      </div>
+      <div class="obj-item completed">
+        <div class="obj-check">✓</div>
+        <div class="obj-body">
+          <div class="obj-title">Build a REST API with Spring Boot</div>
+          <div class="obj-date">✓ Completed 1 week ago</div>
+        </div>
+      </div>
+      <div class="obj-item">
+        <div class="obj-check"></div>
+        <div class="obj-body">
+          <div class="obj-title">Set up Kafka producer & consumer</div>
+          <div class="obj-sub">Event streaming fundamentals</div>
+        </div>
+      </div>
+      <div class="obj-item">
+        <div class="obj-check"></div>
+        <div class="obj-body">
+          <div class="obj-title">Deploy to AWS with Docker Compose</div>
+          <div class="obj-sub">Production deployment basics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== ACTIVITY FEED ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Activity Feed Items</div>
+    <div class="activity-list" style="max-width:520px">
+      <div class="activity-item">
+        <div class="activity-icon complete">✅</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>anh.nguyen</strong> completed <a href="#">Java Backend Roadmap</a></div>
+          <div class="activity-time">2 hours ago</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon fork">🔀</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>b.tran</strong> started <a href="#">30-Day Running Challenge</a></div>
+          <div class="activity-time">5 hours ago</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon follow">⭐</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>c.le</strong> followed you</div>
+          <div class="activity-time">Yesterday</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== TOASTS ======================== -->
+  <div class="ds-section">
+    <div class="ds-section-title">Notifications / Toasts</div>
+    <div class="toast-stack" style="max-width:440px">
+      <div class="toast success">
+        <span class="toast-icon">✅</span>
+        <div class="toast-body">
+          <div class="toast-title">Task completed!</div>
+          <div class="toast-msg">Technology District updated · 72% → 75%</div>
+        </div>
+        <span class="toast-close">✕</span>
+      </div>
+      <div class="toast warning">
+        <span class="toast-icon">⚠️</span>
+        <div class="toast-body">
+          <div class="toast-title">Quest cannot be edited</div>
+          <div class="toast-msg">This quest has been forked by 12 users. Only metadata can be changed.</div>
+        </div>
+        <span class="toast-close">✕</span>
+      </div>
+      <div class="toast danger">
+        <span class="toast-icon">❌</span>
+        <div class="toast-body">
+          <div class="toast-title">Failed to save</div>
+          <div class="toast-msg">Connection lost. Please try again.</div>
+        </div>
+        <span class="toast-close">✕</span>
+      </div>
+      <div class="toast info">
+        <span class="toast-icon">ℹ️</span>
+        <div class="toast-body">
+          <div class="toast-title">AI is generating your quest</div>
+          <div class="toast-msg">This may take a few seconds…</div>
+        </div>
+        <span class="toast-close">✕</span>
+      </div>
+    </div>
+  </div>
+
+</div>

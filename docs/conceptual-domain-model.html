@@ -1,0 +1,396 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Conceptual Domain Model</title>
+<style>
+  :root {
+    --bg:        #F8FAFC;
+    --surface:   #FFFFFF;
+    --surface-2: #F1F5F9;
+    --border:    #E2E8F0;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #7C3AED;
+    --accent-bg: #EDE9FE;
+    --code-bg:   #F1F5F9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #0F172A;
+      --surface:   #1E293B;
+      --surface-2: #162032;
+      --border:    #2D3F55;
+      --text:      #F1F5F9;
+      --muted:     #94A3B8;
+      --accent:    #A78BFA;
+      --accent-bg: #2E1065;
+      --code-bg:   #0F172A;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;--border:#E2E8F0;
+    --text:#0F172A;--muted:#64748B;--accent:#7C3AED;--accent-bg:#EDE9FE;--code-bg:#F1F5F9;
+  }
+  :root[data-theme="dark"] {
+    --bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;
+    --text:#F1F5F9;--muted:#94A3B8;--accent:#A78BFA;--accent-bg:#2E1065;--code-bg:#0F172A;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; text-wrap: balance; }
+  .subtitle { color: var(--muted); font-size: 0.8125rem; margin-top: 0.35rem; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .card-pad { padding: 1.75rem; }
+
+  .mermaid { display: flex; justify-content: center; }
+
+  /* Zoom */
+  .zoom-toolbar {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .6rem 1rem; border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .zoom-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border: 1px solid var(--border);
+    border-radius: 5px; background: var(--surface); color: var(--text);
+    font-size: 1rem; font-weight: 600; cursor: pointer; line-height: 1;
+    transition: background .15s; user-select: none;
+  }
+  .zoom-btn:hover { background: var(--accent-bg); color: var(--accent); }
+  .zoom-level {
+    font-size: .75rem; font-family: 'SFMono-Regular', Consolas, monospace;
+    color: var(--muted); min-width: 3rem; text-align: center;
+  }
+  .zoom-hint { margin-left: auto; font-size: .7rem; color: var(--muted); }
+
+  .diagram-viewport {
+    height: 520px; overflow: hidden; cursor: grab; position: relative;
+  }
+  .diagram-viewport:active { cursor: grabbing; }
+
+  .diagram-inner {
+    transform-origin: 0 0; display: inline-block; padding: 2rem; width: 100%;
+  }
+
+  /* Ubiquitous Language table */
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.8125rem;
+  }
+  th {
+    text-align: left; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--muted); padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-2); }
+  td:first-child {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.75rem; color: var(--accent); white-space: nowrap;
+    font-weight: 600;
+  }
+  td:nth-child(2) { color: var(--muted); font-size: 0.8125rem; }
+
+  /* Design notes */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    border-left: 3px solid var(--accent);
+    font-size: 0.775rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .note-card strong { display: block; color: var(--text); font-size: 0.8rem; margin-bottom: 0.3rem; }
+
+  /* Notation table */
+  .notation-row {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .notation-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.3rem 0.7rem;
+    font-size: 0.75rem; color: var(--muted);
+  }
+  .notation-item code {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.7rem; color: var(--accent);
+    background: var(--accent-bg); padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+</style>
+
+<h2 class="sr-only">QuestHub Conceptual Domain Model — Entity Relationship Diagram</h2>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Conceptual Domain Model</h1>
+  <p class="subtitle">Ubiquitous Language · Entity relationships · Design decisions</p>
+</header>
+
+<!-- DIAGRAM -->
+<div class="section-label">Entity Relationship Diagram</div>
+<div class="card">
+  <div class="zoom-toolbar">
+    <button class="zoom-btn" id="btn-in"    title="Zoom in">+</button>
+    <button class="zoom-btn" id="btn-out"   title="Zoom out">−</button>
+    <button class="zoom-btn" id="btn-reset" title="Reset" style="width:auto;padding:0 .6rem;font-size:.75rem;">Reset</button>
+    <span class="zoom-level" id="zoom-level">100%</span>
+    <span class="zoom-hint">Scroll để zoom · Kéo để di chuyển</span>
+  </div>
+  <div class="diagram-viewport" id="viewport">
+    <div class="diagram-inner" id="diagram-inner">
+    <pre class="mermaid">
+classDiagram
+    direction TB
+
+    User "1" --> "0..*" LearningPath : authors
+    User "1" --> "0..*" Quest : creates
+    User "1" --> "0..*" PersonalQuest : owns
+    User "1" *-- "1" World : has
+    User "0..*" --> "0..*" User : follows
+    User "1" --> "0..*" Review : gives
+    User "1" --> "0..*" Favorite : saves
+    User "1" --> "0..*" Activity : generates
+    User "1" --> "0..*" Comment : writes
+    User "1" --> "0..*" Discussion : opens
+    User "1" --> "0..*" UserAchievement : unlocks
+    User "1" --> "0..*" Notification : receives
+
+    SkillDomain "1" *-- "1..*" LearningPath : contains
+    LearningPath "1" *-- "1..*" Quest : contains
+    Quest "1" *-- "1..*" Chapter : contains
+    Quest "1" --> "0..*" Review : receives
+    Quest "1" --> "0..*" Favorite : saved by
+    Quest "1" --> "0..*" PersonalQuest : forked into
+    Quest "1" --> "0..*" Discussion : about
+    Chapter "1" *-- "1..*" Task : contains
+    Task "1" --> "0..*" Resource : has
+    Task "1" --> "0..*" PersonalTask : forked into
+
+    PersonalQuest "1" *-- "1..*" PersonalChapter : contains
+    PersonalChapter "1" *-- "1..*" PersonalTask : contains
+    PersonalTask "1" --> "0..1" TaskCompletion : tracks
+    PersonalTask "1" --> "0..*" QuizAttempt : records
+
+    World "1" *-- "1..*" District : contains
+    District "0..*" --> "1" SkillDomain : represents
+    District "1" *-- "0..*" Building : contains
+    Achievement "1" --> "0..*" UserAchievement : unlocked as
+    </pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var scale = 1, tx = 0, ty = 0;
+    var dragging = false, ox = 0, oy = 0;
+    var viewport = document.getElementById('viewport');
+    var inner    = document.getElementById('diagram-inner');
+    var label    = document.getElementById('zoom-level');
+
+    function apply() {
+      inner.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+      label.textContent = Math.round(scale * 100) + '%';
+    }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    document.getElementById('btn-in').addEventListener('click', function() {
+      scale = clamp(scale * 1.25, 0.25, 5); apply();
+    });
+    document.getElementById('btn-out').addEventListener('click', function() {
+      scale = clamp(scale / 1.25, 0.25, 5); apply();
+    });
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      scale = 1; tx = 0; ty = 0; apply();
+    });
+
+    viewport.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var rect = viewport.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      var factor = e.deltaY < 0 ? 1.12 : 0.89;
+      var ns = clamp(scale * factor, 0.25, 5);
+      tx = mx - (mx - tx) * (ns / scale);
+      ty = my - (my - ty) * (ns / scale);
+      scale = ns;
+      apply();
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', function(e) {
+      dragging = true; ox = e.clientX - tx; oy = e.clientY - ty;
+      viewport.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      tx = e.clientX - ox; ty = e.clientY - oy; apply();
+    });
+    window.addEventListener('mouseup', function() {
+      dragging = false; viewport.style.cursor = 'grab';
+    });
+
+    var lastDist = null;
+    viewport.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) lastDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY);
+    }, { passive: true });
+    viewport.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && lastDist) {
+        e.preventDefault();
+        var d = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY);
+        scale = clamp(scale * (d / lastDist), 0.25, 5);
+        lastDist = d; apply();
+      }
+    }, { passive: false });
+    viewport.addEventListener('touchend', function() { lastDist = null; });
+  })();
+</script>
+
+<!-- NOTATION -->
+<div class="section-label">Ký hiệu quan hệ</div>
+<div class="notation-row">
+  <div class="notation-item"><code>──▶</code> Association — quan hệ thông thường giữa hai entity</div>
+  <div class="notation-item"><code>◆──</code> Composition — phần tử con không tồn tại độc lập (chết theo cha)</div>
+</div>
+<div class="notation-row">
+  <div class="notation-item"><code>1</code> đúng 1</div>
+  <div class="notation-item"><code>0..*</code> 0 hoặc nhiều</div>
+  <div class="notation-item"><code>1..*</code> 1 hoặc nhiều</div>
+  <div class="notation-item"><code>0..1</code> 0 hoặc 1</div>
+</div>
+
+<!-- UBIQUITOUS LANGUAGE -->
+<div class="section-label">Ubiquitous Language</div>
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Thuật ngữ</th>
+        <th>Định nghĩa</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Domain</td><td>Lĩnh vực kỹ năng lớn (Programming, Language, Fitness...) — đỉnh của hierarchy.</td></tr>
+      <tr><td>LearningPath</td><td>Lộ trình hoàn chỉnh để đạt một mục tiêu (vd: Java Backend Engineer), gồm nhiều Quest.</td></tr>
+      <tr><td>Quest</td><td>Đơn vị tiến bộ chính, template bất biến do creator tạo (vd: Spring Security Fundamentals).</td></tr>
+      <tr><td>Chapter</td><td>Nhóm task trong Quest, chia quest lớn thành phần nhỏ (Authentication, Authorization, JWT).</td></tr>
+      <tr><td>Task</td><td>Đơn vị nhỏ nhất user thực hiện, có type riêng (LEARN/QUIZ/PRACTICE/SUBMISSION/REFLECTION).</td></tr>
+      <tr><td>Resource</td><td>Tài liệu đính kèm Task LEARN (video, article, book, course...).</td></tr>
+      <tr><td>TaskType</td><td>Enum chuẩn hóa loại task: LEARN, QUIZ, PRACTICE, SUBMISSION, REFLECTION.</td></tr>
+      <tr><td>CompletionRule</td><td>Luật hoàn thành Quest có thể cấu hình (all tasks / quiz ≥ 80% / có submission...).</td></tr>
+      <tr><td>Reward</td><td>Phần thưởng intrinsic khi hoàn thành Quest — không phải XP/Level/điểm số.</td></tr>
+      <tr><td>PersonalQuest</td><td>Bản fork của Quest về tay user, độc lập hoàn toàn với bản gốc.</td></tr>
+      <tr><td>PersonalChapter</td><td>Chapter tương ứng trong PersonalQuest.</td></tr>
+      <tr><td>PersonalTask</td><td>Task tương ứng trong PersonalChapter — nơi ghi nhận trạng thái hoàn thành.</td></tr>
+      <tr><td>TaskCompletion</td><td>Bản ghi khi user hoàn thành một PersonalTask (source of truth cho World).</td></tr>
+      <tr><td>QuizAttempt</td><td>Kết quả một lần làm quiz của Task loại QUIZ.</td></tr>
+      <tr><td>Review</td><td>Đánh giá 1–5 sao + nội dung text của user cho Quest đã fork.</td></tr>
+      <tr><td>Favorite</td><td>Quest được user lưu lại, không cần fork.</td></tr>
+      <tr><td>Comment</td><td>Bình luận của user trên Quest hoặc Discussion.</td></tr>
+      <tr><td>Discussion</td><td>Chủ đề thảo luận gắn với Quest (hỏi đáp, chia sẻ).</td></tr>
+      <tr><td>World</td><td>Thế giới cá nhân của user, reflect tiến bộ thật.</td></tr>
+      <tr><td>District</td><td>Khu vực trong World, đại diện cho một Domain (SkillDomain).</td></tr>
+      <tr><td>Building</td><td>Công trình visualize trong District — thuần trang trí, loại building tùy ý.</td></tr>
+      <tr><td>Achievement</td><td>Thành tựu intrinsic gắn mốc thật (quest đầu tiên, X tasks...) — không gắn XP.</td></tr>
+      <tr><td>Activity</td><td>Sự kiện do user tạo ra, dùng cho Feed.</td></tr>
+      <tr><td>Notification</td><td>Thông báo trong app (đồng bộ) + push/email (bất đồng bộ).</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DESIGN NOTES -->
+<div class="section-label">Design Decisions</div>
+<div class="notes-grid">
+  <div class="note-card">
+    <strong>Hierarchy 4 tầng</strong>
+    Domain → LearningPath → Quest → Chapter → Task. Task là đơn vị nhỏ nhất; Resource chỉ gắn với Task loại LEARN.
+  </div>
+  <div class="note-card">
+    <strong>CompletionRule cấu hình được</strong>
+    Không còn cứng nhắc "hoàn thành 100% objective". Quest có thể yêu cầu quiz ≥ 80% AND có submission.
+  </div>
+  <div class="note-card">
+    <strong>Không XP, không Level</strong>
+    Không game loop giả tạo — Reward intrinsic, Achievement gắn mốc thật, không điểm số ảo.
+  </div>
+  <div class="note-card">
+    <strong>Building chỉ để visualize</strong>
+    District reflect tiến bộ thật từ TaskCompletion. Building là lớp trang trí, không ảnh hưởng logic.
+  </div>
+  <div class="note-card">
+    <strong>Quest là template bất biến</strong>
+    Khi user fork, bản gốc không bị ảnh hưởng. PersonalQuest/PersonalChapter/PersonalTask là bản copy độc lập.
+  </div>
+  <div class="note-card">
+    <strong>Purchase/Subscription ≠ commerce</strong>
+    Chỉ là mô hình visibility public/private (DRAFT/PUBLIC/HIDDEN), không phải giao dịch.
+  </div>
+  <div class="note-card">
+    <strong>AI làm 4 việc</strong>
+    Gợi ý quest, sinh quest mới, chấm bài SUBMISSION/PRACTICE (AI Grader), coach cá nhân (AI Coach — <strong>chỉ đọc</strong> progress, không tự ý sửa quest).
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    securityLevel: 'loose'
+  });
+</script>

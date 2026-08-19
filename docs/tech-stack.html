@@ -1,0 +1,741 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Tech Stack</title>
+<style>
+  :root {
+    --bg:        #F0FDF4;
+    --surface:   #FFFFFF;
+    --surface-2: #F0FDF4;
+    --border:    #BBF7D0;
+    --border-std:#E2E8F0;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #065F46;
+    --accent-bg: #D1FAE5;
+    --mono-bg:   #F1F5F9;
+    --decided:   #065F46; --decided-bg: #D1FAE5;
+    --open:      #92400E; --open-bg:    #FEF3C7;
+    --risk:      #9F1239; --risk-bg:    #FFE4E6;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-std);
+  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .875rem; margin-top: 2.5rem;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  /* Stack grid */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: .75rem;
+    margin-bottom: 2.5rem;
+  }
+  .stack-card {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stack-card-header {
+    padding: .75rem 1rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border-std);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stack-item {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--border-std);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .75rem;
+    align-items: start;
+  }
+  .stack-item:last-child { border-bottom: none; }
+  .stack-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    margin-top: .1rem;
+  }
+  .stack-name {
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .2rem;
+  }
+  .stack-version {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .675rem;
+    background: var(--mono-bg);
+    color: var(--muted);
+    padding: .1em .4em;
+    border-radius: 3px;
+    margin-left: .35rem;
+  }
+  .stack-reason { font-size: .775rem; color: var(--muted); line-height: 1.5; }
+
+  /* Decision log */
+  .decision-table { width: 100%; border-collapse: collapse; font-size: .8125rem; }
+  .decision-table th {
+    text-align: left; font-size: 9.5px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    padding: .5rem 1rem; border-bottom: 1px solid var(--border-std);
+    background: var(--surface-2);
+  }
+  .decision-table td {
+    padding: .65rem 1rem;
+    border-bottom: 1px solid var(--border-std);
+    vertical-align: top;
+  }
+  .decision-table tr:last-child td { border-bottom: none; }
+  .decision-table tbody tr:hover td { background: #FAFFFE; }
+  .decision-card {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: .15em .55em;
+    border-radius: 3px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .badge-decided { background: var(--decided-bg); color: var(--decided); }
+  .badge-open    { background: var(--open-bg);    color: var(--open); }
+  .badge-risk    { background: var(--risk-bg);    color: var(--risk); }
+
+  code {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .75rem;
+    background: var(--mono-bg);
+    color: var(--accent);
+    padding: .1em .4em;
+    border-radius: 3px;
+    border: 1px solid var(--border-std);
+  }
+
+  /* Env table */
+  .env-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .5rem;
+    margin-bottom: 2rem;
+  }
+  .env-card {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 6px;
+    padding: .75rem 1rem;
+  }
+  .env-name {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .3rem;
+  }
+  .env-desc { font-size: .775rem; color: var(--muted); }
+
+  @media(max-width: 640px) {
+    body { padding: 1.25rem 1rem; }
+    h1 { font-size: 1.25rem; }
+    .stack-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Tech Stack</h1>
+  <p class="subtitle">Decisions, trade-offs, và open questions đã được resolve</p>
+</header>
+
+<!-- ARCHITECTURE STRATEGY -->
+<div class="section-label">Architecture Strategy — 2 Phases</div>
+<div class="stack-grid" style="margin-bottom:2rem">
+  <div class="stack-card" style="border-top:3px solid var(--accent-std)">
+    <div class="stack-card-header">Phase 1 · Modular Monolith + DDD</div>
+    <div class="stack-item">
+      <span class="stack-icon">🏗️</span>
+      <div>
+        <div class="stack-name">1 Spring Boot app, nhiều Bounded Contexts</div>
+        <div class="stack-reason">Toàn bộ backend là 1 deployable unit. Bên trong được tổ chức thành modules theo DDD: <code>identity/</code>, <code>quest/</code>, <code>marketplace/</code>, <code>world/</code>, <code>social/</code>, <code>notification/</code>, <code>admin/</code>. Mỗi module có 4 layer: <strong>domain → application → infrastructure → presentation</strong>. Modules không import nhau trực tiếp — giao tiếp qua Domain Events.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📦</span>
+      <div>
+        <div class="stack-name">DDD Layers per Module</div>
+        <div class="stack-reason"><code>domain/</code> — Entities, Value Objects, Domain Events, Repository interfaces (không phụ thuộc framework) · <code>application/</code> — Use Cases / Application Services, Event Handlers · <code>infrastructure/</code> — JPA implementations, Outbox publisher · <code>presentation/</code> — REST Controllers. Dependency chỉ đi 1 chiều: presentation → application → domain.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📨</span>
+      <div>
+        <div class="stack-name">Cross-module communication via Outbox</div>
+        <div class="stack-reason">Khi Quest Module hoàn thành một task, nó INSERT vào <code>outbox_events</code> trong cùng 1 DB transaction. Outbox Relay (<code>@Scheduled</code>) poll bảng này và publish <code>ApplicationEvent</code> tới World/Social/Notification modules. At-least-once delivery, không bao giờ mất event.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🎓</span>
+      <div>
+        <div class="stack-name">Tại sao Monolith trước?</div>
+        <div class="stack-reason">Microservices không giải quyết vấn đề — chúng chia vấn đề ra. Bắt đầu bằng Monolith giúp hiểu rõ domain boundaries trước khi tách. Martin Fowler: <em>"Don't start with microservices — start by building the monolith."</em> Khi thấy module nào cần scale độc lập → tách ra lúc đó.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack-card" style="border-top:3px solid #9CA3AF;opacity:.85">
+    <div class="stack-card-header" style="color:var(--muted)">Phase 2 · Microservices (future)</div>
+    <div class="stack-item">
+      <span class="stack-icon">✂️</span>
+      <div>
+        <div class="stack-name">Extract theo module boundaries</div>
+        <div class="stack-reason">Khi Phase 1 hoạt động tốt, tách từng module thành service riêng. Outbox Relay thay <code>ApplicationEvent</code> bằng <code>RabbitTemplate.send()</code> — transaction logic không thay đổi. Thêm API Gateway (Go/Fiber). AI Service (Python/FastAPI) được tách ra từ đầu vì độc lập về runtime.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔬</span>
+      <div>
+        <div class="stack-name">Học được gì từ quá trình tách?</div>
+        <div class="stack-reason">Distributed transactions, saga pattern, eventual consistency, network failures, service discovery, circuit breaker. Hiểu <em>tại sao</em> microservices khó — không chỉ <em>cách</em> làm. Go/Python services được thêm khi cần high concurrency hay AI runtime.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STACK OVERVIEW -->
+<div class="section-label">Stack Overview</div>
+<div class="stack-grid">
+
+  <!-- Frontend -->
+  <div class="stack-card">
+    <div class="stack-card-header">Frontend</div>
+    <div class="stack-item">
+      <span class="stack-icon">⚛️</span>
+      <div>
+        <div class="stack-name">Next.js<span class="stack-version">14 App Router</span></div>
+        <div class="stack-reason">SSR cho Marketplace và Quest Detail pages — SEO critical. App Router + React Server Components giảm client JS bundle.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📱</span>
+      <div>
+        <div class="stack-name">React Native + Expo<span class="stack-version">SDK 51</span></div>
+        <div class="stack-reason">Cross-platform iOS/Android. Expo giảm native config overhead. Focus trên daily tracking UX — phù hợp mobile-first usage pattern.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🎨</span>
+      <div>
+        <div class="stack-name">Tailwind CSS</div>
+        <div class="stack-reason">Utility-first, consistent với design tokens. Không cần CSS-in-JS runtime. Web only.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔄</span>
+      <div>
+        <div class="stack-name">TanStack Query</div>
+        <div class="stack-reason">Server state management, cache, optimistic updates. Đặc biệt hữu ích cho progress tracking (real-time-ish feel).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend Java -->
+  <div class="stack-card">
+    <div class="stack-card-header">Backend — Java (main services)</div>
+    <div class="stack-item">
+      <span class="stack-icon">☕</span>
+      <div>
+        <div class="stack-name">Java 21 + Spring Boot<span class="stack-version">3.x</span></div>
+        <div class="stack-reason">Main language cho Quest, Marketplace, World, Identity, Admin services. Virtual Threads (Project Loom) giảm overhead concurrency. Strong typing, mature ecosystem, enterprise-grade.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🛡️</span>
+      <div>
+        <div class="stack-name">Spring Security + JJWT</div>
+        <div class="stack-reason">JWT authentication/authorization. Method-level security (@PreAuthorize). OAuth2 resource server support. Mature, battle-tested.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🗺️</span>
+      <div>
+        <div class="stack-name">Spring Data JPA + Hibernate + Flyway</div>
+        <div class="stack-reason">JPA cho CRUD. Native queries khi cần performance. Flyway cho DB migrations — versioned SQL files, reproducible schema.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📨</span>
+      <div>
+        <div class="stack-name">Spring AMQP (RabbitMQ)</div>
+        <div class="stack-reason">Chuyển từ BullMQ sang RabbitMQ — học proper message broker. Dead-letter queues, retry policies, routing keys. Java ecosystem tích hợp tốt hơn.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend Go -->
+  <div class="stack-card">
+    <div class="stack-card-header">Backend — Go (high-concurrent services)</div>
+    <div class="stack-item">
+      <span class="stack-icon">🐹</span>
+      <div>
+        <div class="stack-name">Go 1.22 + Fiber<span class="stack-version">v2</span></div>
+        <div class="stack-reason"><strong>API Gateway</strong> — xử lý mọi incoming request, JWT verify, rate limiting, routing. Go goroutines handle concurrent connections cực tốt với memory footprint thấp.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔔</span>
+      <div>
+        <div class="stack-name">Go — Notification Service</div>
+        <div class="stack-reason">Fan-out notifications tới nhiều users cùng lúc (followers nhận event). Go channel pattern phù hợp — mỗi notification là goroutine nhẹ. Thấy rõ sự khác biệt với Java threads.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📣</span>
+      <div>
+        <div class="stack-name">Go — Social/Feed Service</div>
+        <div class="stack-reason">Feed aggregation từ nhiều users đồng thời — concurrent fan-in pattern. goroutine per follower, merge results. Học cách Go xử lý I/O-bound concurrent workloads.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend Python -->
+  <div class="stack-card">
+    <div class="stack-card-header">Backend — Python (AI service)</div>
+    <div class="stack-item">
+      <span class="stack-icon">🐍</span>
+      <div>
+        <div class="stack-name">Python 3.12 + FastAPI</div>
+        <div class="stack-reason">AI Service — quest recommendation, generation, submission grading (AI Grader), AI Coach (read-only agent). FastAPI async + auto OpenAPI docs + StreamingResponse cho coach chat. Python là ngôn ngữ tự nhiên cho AI/ML tooling.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🤖</span>
+      <div>
+        <div class="stack-name">Anthropic Python SDK</div>
+        <div class="stack-reason">Claude API integration. Streaming responses + <strong>tool calling</strong> cho AI Coach (get_progress / get_streak / get_achievements / get_upcoming_tasks — read-only). Prompt engineering dễ iterate trong Python. Học cách build production AI features.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔗</span>
+      <div>
+        <div class="stack-name">LangChain (optional)</div>
+        <div class="stack-reason">Nếu cần RAG hoặc chain phức tạp hơn (vd: coach trả lời dựa trên nội dung quest — embeddings + vector search). Bắt đầu plain SDK + native tool calling; thêm LangChain khi cần abstraction.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Broker -->
+  <div class="stack-card">
+    <div class="stack-card-header">Message Broker</div>
+    <div class="stack-item">
+      <span class="stack-icon">🐇</span>
+      <div>
+        <div class="stack-name">RabbitMQ<span class="stack-version">3.x</span></div>
+        <div class="stack-reason">Thay BullMQ. Proper message broker với Exchange → Queue routing (topic, fanout, direct). Persistent messages, acknowledgment, dead-letter queue. Học AMQP protocol thực sự.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔀</span>
+      <div>
+        <div class="stack-name">Exchange patterns</div>
+        <div class="stack-reason"><strong>Topic exchange</strong> cho event routing: <code>quest.completed</code>, <code>quest.forked</code> → consumers subscribe theo pattern. <strong>Fanout</strong> cho notification broadcast. Học khi nào dùng loại nào.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data -->
+  <div class="stack-card">
+    <div class="stack-card-header">Data Layer</div>
+    <div class="stack-item">
+      <span class="stack-icon">🐘</span>
+      <div>
+        <div class="stack-name">PostgreSQL<span class="stack-version">16</span></div>
+        <div class="stack-reason">Single DB cho learning project. JSONB cho activity payload. Row-level security khi cần. Strong consistency cho quest/completion data.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">⚡</span>
+      <div>
+        <div class="stack-name">Redis<span class="stack-version">7.x via Upstash</span></div>
+        <div class="stack-reason">Cache trending/popular lists, refresh tokens, feature flags, search results. Upstash = serverless Redis, không cần manage instance.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔍</span>
+      <div>
+        <div class="stack-name">Elasticsearch<span class="stack-version">8.x via Bonsai</span></div>
+        <div class="stack-reason">Full-text search với relevance ranking. Bonsai = managed ES, free tier đủ cho MVP. Sync từ PostgreSQL qua QuestPublished event.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🐇</span>
+      <div>
+        <div class="stack-name">RabbitMQ <span style="font-size:.7rem;color:var(--muted)">(message broker)</span></div>
+        <div class="stack-reason">Message queue chính — topic/fanout/direct exchanges, routing keys, DLQ, persistent messages. Phase 1: Outbox Relay publish Spring ApplicationEvent; Phase 2: Relay gửi qua RabbitTemplate. Không dùng BullMQ nữa.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container & Orchestration -->
+  <div class="stack-card">
+    <div class="stack-card-header">Container &amp; Orchestration</div>
+    <div class="stack-item">
+      <span class="stack-icon">🐳</span>
+      <div>
+        <div class="stack-name">Docker + Docker Compose</div>
+        <div class="stack-reason">Mỗi service có Dockerfile riêng. docker-compose.yml spin up toàn bộ stack local: Java services, Go services, Python AI, Postgres, Redis, RabbitMQ, Elasticsearch, Prometheus, Grafana — 1 lệnh.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">☸️</span>
+      <div>
+        <div class="stack-name">Kubernetes (k3s local / EKS staging)</div>
+        <div class="stack-reason">Học production orchestration thực sự. k3s trên local hoặc VM nhẹ. Deployment, Service, Ingress, ConfigMap, Secret, HPA. Mỗi microservice là 1 Deployment + Service.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">⛵</span>
+      <div>
+        <div class="stack-name">Helm Charts</div>
+        <div class="stack-reason">Package K8s manifests thành charts. Học cách template K8s configs cho nhiều environments (dev/staging/prod). Dùng community charts cho Postgres, Redis, RabbitMQ, Elasticsearch.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔄</span>
+      <div>
+        <div class="stack-name">GitHub Actions (CI/CD)</div>
+        <div class="stack-reason">Build Docker images → push DockerHub/GHCR → deploy to K8s via kubectl. PR → run tests → build → deploy to staging. Merge main → deploy to prod. Học GitOps flow.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- K8s Management -->
+  <div class="stack-card">
+    <div class="stack-card-header">Kubernetes Management Tools</div>
+    <div class="stack-item">
+      <span class="stack-icon">🐄</span>
+      <div>
+        <div class="stack-name">Rancher</div>
+        <div class="stack-reason">GUI platform quản lý cluster. Import k3s cluster vào Rancher để có UI đầy đủ: deploy workloads, xem pods/logs, RBAC, resource quotas. Cách hầu hết team production quản lý K8s thực tế — không ai <code>kubectl</code> thuần.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🖥️</span>
+      <div>
+        <div class="stack-name">k9s</div>
+        <div class="stack-reason">Terminal UI cho K8s — developer's daily driver. Navigate pods, xem logs realtime, exec vào container, describe resources, port-forward — tất cả bằng keyboard. Nhanh hơn <code>kubectl</code> rất nhiều cho debug hàng ngày.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔭</span>
+      <div>
+        <div class="stack-name">Lens / OpenLens</div>
+        <div class="stack-reason">Desktop app GUI cho K8s (alternative của Rancher cho local dev). Connect nhiều cluster, xem resource metrics inline, terminal trong pod. Lens là commercial, OpenLens là open-source fork.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🚀</span>
+      <div>
+        <div class="stack-name">ArgoCD</div>
+        <div class="stack-reason">GitOps CD tool — sync K8s cluster từ Git repo tự động. Khi merge vào main, ArgoCD detect thay đổi trong Helm chart / manifests và apply lên cluster. UI Web đẹp, thấy diff trước khi sync. Chuẩn GitOps.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Observability -->
+  <div class="stack-card">
+    <div class="stack-card-header">Observability — Metrics · Logs · Traces</div>
+    <div class="stack-item">
+      <span class="stack-icon">📡</span>
+      <div>
+        <div class="stack-name">OpenTelemetry (OTel)</div>
+        <div class="stack-reason">Instrumentation layer chuẩn — một SDK, export ra nhiều backends. Java auto-instrumentation agent (zero-code), Go/Python manual SDK. Học concepts: spans, traces, context propagation.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📊</span>
+      <div>
+        <div class="stack-name">Prometheus + Alertmanager</div>
+        <div class="stack-reason">Metrics scraping từ mọi service (Spring Actuator /metrics, Go expvar, Python prometheus-client). Alertmanager gửi alert khi latency &gt; threshold. Học PromQL queries.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📈</span>
+      <div>
+        <div class="stack-name">Grafana</div>
+        <div class="stack-reason">Dashboard cho tất cả: Prometheus metrics, Loki logs, Tempo traces — unified UI. Học cách build dashboard: request rate, error rate, latency (RED method), service dependency graph.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📋</span>
+      <div>
+        <div class="stack-name">Grafana Loki</div>
+        <div class="stack-reason">Log aggregation. Promtail agent collect logs từ containers và push lên Loki. Query bằng LogQL. Học cách correlate logs với traces (trace ID trong log lines).</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔭</span>
+      <div>
+        <div class="stack-name">Grafana Tempo</div>
+        <div class="stack-reason">Distributed tracing backend. Nhận traces từ OTel Collector. Trace một request từ API Gateway → Java service → DB → RabbitMQ → Go consumer. Thấy latency breakdown end-to-end.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔀</span>
+      <div>
+        <div class="stack-name">OTel Collector</div>
+        <div class="stack-reason">Central pipeline: nhận metrics/logs/traces từ tất cả services → route/transform → export sang Prometheus, Loki, Tempo. Học cách config pipeline, batch export, sampling.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DevSecOps -->
+  <div class="stack-card">
+    <div class="stack-card-header">DevSecOps — Security Pipeline</div>
+    <div class="stack-item">
+      <span class="stack-icon">🔑</span>
+      <div>
+        <div class="stack-name">Gitleaks</div>
+        <div class="stack-reason">Secret scanning — phát hiện API keys, passwords hardcoded trong code ngay tại commit. Chạy đầu tiên trong pipeline vì nhanh nhất và critical nhất.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔍</span>
+      <div>
+        <div class="stack-name">SonarCloud <span style="font-size:.7rem;color:var(--muted)">(free for OSS)</span></div>
+        <div class="stack-reason">SAST — static analysis tìm security bugs (SQLi, XSS, insecure deserialization) + code quality gate (coverage, duplication). Decoration trực tiếp lên PR.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📦</span>
+      <div>
+        <div class="stack-name">OWASP Dependency-Check + Dependabot</div>
+        <div class="stack-reason">SCA — scan CVE trong Maven dependencies (NVD database). Dependabot tự tạo PR update dependency khi có security fix. Block build nếu CVSS ≥ 9.0.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔬</span>
+      <div>
+        <div class="stack-name">Trivy (Aqua Security)</div>
+        <div class="stack-reason">All-in-one scanner: Docker image CVE (OS packages + language libs) + IaC misconfiguration (K8s YAML, Helm charts). Một tool, nhiều scan targets.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🌐</span>
+      <div>
+        <div class="stack-name">OWASP ZAP</div>
+        <div class="stack-reason">DAST — scan running app trên staging environment. Tìm OWASP Top 10: SQLi, XSS, CSRF, insecure headers. Baseline Scan mode chạy được trong CI/CD.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">🔏</span>
+      <div>
+        <div class="stack-name">Cosign (Sigstore)</div>
+        <div class="stack-reason">Image signing — sign Docker image sau khi build, verify trước khi deploy. Ngăn supply chain attack: đảm bảo image chạy production đúng là image đã pass CI.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">👁️</span>
+      <div>
+        <div class="stack-name">Falco</div>
+        <div class="stack-reason">Runtime security — K8s DaemonSet monitor syscalls. Alert khi có anomalous behavior: shell trong container, unexpected file write, privilege escalation. Lớp bảo vệ cuối cùng.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Infrastructure -->
+  <div class="stack-card">
+    <div class="stack-card-header">Infrastructure &amp; Tooling</div>
+    <div class="stack-item">
+      <span class="stack-icon">🖼️</span>
+      <div>
+        <div class="stack-name">Cloudinary (Media)</div>
+        <div class="stack-reason">Avatar upload + transformation (resize, crop, optimize). Free tier 25GB. Tránh cần setup S3 + CloudFront.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">📧</span>
+      <div>
+        <div class="stack-name">Resend (Email)</div>
+        <div class="stack-reason">Transactional email. 3000 emails/month free. Simple REST API, gọi từ Go Notification Service.</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <span class="stack-icon">▲</span>
+      <div>
+        <div class="stack-name">Vercel (Next.js Web)</div>
+        <div class="stack-reason">First-class Next.js support. Edge CDN cho SSR. Preview deployments per PR. Backend services chạy trên K8s, frontend chạy Vercel.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DECISION LOG -->
+<div class="section-label">Decision Log — Open questions đã được resolve</div>
+<div class="decision-card">
+  <div style="overflow-x:auto">
+  <table class="decision-table">
+    <thead>
+      <tr><th>Question</th><th>Decision</th><th>Lý do</th><th>Trade-off chấp nhận</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Architecture pattern?</td>
+        <td><strong>Modular Monolith + DDD</strong> Phase 1 → <strong>Microservices</strong> Phase 2</td>
+        <td>Nắm domain boundaries + DDD patterns trước khi tách. Monolith cho phép refactor domain model tự do mà không cần lo distributed transactions. Khi boundaries rõ ràng → tách tự nhiên.</td>
+        <td>Cần discipline cao để giữ module boundaries không bị xâm phạm. Dùng ArchUnit để enforce dependency rules.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>Cross-module communication?</td>
+        <td><strong>Outbox Pattern</strong> — INSERT trong cùng transaction, Relay deliver async</td>
+        <td>At-least-once guarantee không cần 2-phase commit. Relay dùng FOR UPDATE SKIP LOCKED — safe với nhiều instances. Phase 2: đổi Relay deliver từ Spring Events sang RabbitMQ, không cần đổi transaction logic.</td>
+        <td>Relay polling delay ~1s cho async events. Consumers phải idempotent (check eventId). Cần monitor FAILED events.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>Backend language strategy?</td>
+        <td><strong>Java 21</strong> main, <strong>Go</strong> concurrent, <strong>Python</strong> AI</td>
+        <td>Học 3 paradigms trong 1 project. Java: OOP/enterprise patterns. Go: goroutine concurrency. Python: AI/ML ecosystem. Mỗi ngôn ngữ ở đúng chỗ mạnh nhất.</td>
+        <td>3 ngôn ngữ = 3 build pipelines, 3 codebases. Phù hợp vì mục tiêu là học, không phải tối ưu team velocity.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>Message Queue?</td>
+        <td><strong>RabbitMQ</strong> với AMQP</td>
+        <td>Học proper message broker: exchange types (topic/fanout/direct), routing keys, DLQ, acknowledgment. Hiểu sâu hơn BullMQ/Redis pub-sub.</td>
+        <td>Phức tạp hơn BullMQ. Cần chạy thêm 1 service. Trade-off chấp nhận được vì mục tiêu là học.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>Container orchestration?</td>
+        <td><strong>Docker Compose</strong> local + <strong>k3s/Kubernetes</strong> staging</td>
+        <td>Docker Compose để dev nhanh (1 lệnh spin up toàn bộ stack). K8s để học production orchestration: deployments, services, ingress, HPA, rolling updates.</td>
+        <td>K8s overhead cao cho local. Dùng k3s (lightweight) hoặc minikube. Không cần managed EKS cho learning.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>Observability stack?</td>
+        <td>OTel + Prometheus + Grafana + Loki + Tempo</td>
+        <td>Học full observability: metrics (Prometheus), logs (Loki), traces (Tempo) — tất cả trong Grafana. OTel Collector là single pipeline. Thấy distributed trace end-to-end qua 3 ngôn ngữ.</td>
+        <td>Nặng hơn ELK Stack nhưng modern và free. Grafana stack tích hợp tốt, không cần nhiều config glue.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>JWT strategy?</td>
+        <td>Access (15m) + Refresh (7d) với rotation</td>
+        <td>Access token ngắn → giảm risk nếu bị leak. Refresh rotation → detect token reuse. httpOnly cookie → XSS safe.</td>
+        <td>Refresh rotation yêu cầu Redis. Silent refresh cần xử lý cẩn thận trên client (race condition).</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>ORM cho Java?</td>
+        <td><strong>Spring Data JPA</strong> + <strong>Flyway</strong></td>
+        <td>JPA cho CRUD standard. Native queries (@Query) cho complex analytics. Flyway cho migrations — SQL files versioned trong git, reproducible schema.</td>
+        <td>Hibernate N+1 query trap — cần discipline. Monitor với Hibernate stats + slow query log.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>Mobile notification?</td>
+        <td><strong>Expo Push Notifications</strong></td>
+        <td>Expo abstraction layer xử lý APNs + FCM. Không cần setup riêng. Đủ cho learning scope.</td>
+        <td>Phụ thuộc Expo infrastructure. Migrate sang direct FCM/APNs nếu cần advanced control.</td>
+        <td><span class="badge badge-decided">Decided</span></td>
+      </tr>
+      <tr>
+        <td>World visualization engine?</td>
+        <td><strong>D3.js</strong> cho web, <strong>Skia (via RN Skia)</strong> cho mobile</td>
+        <td>D3.js flexible cho generative district layout. RN Skia cho GPU-accelerated canvas trên mobile. World là differentiating feature — cần custom rendering.</td>
+        <td>D3 learning curve. Skia thêm native dependency. Implement sau — MVP có thể dùng simple bar chart trước.</td>
+        <td><span class="badge badge-open">Deferred to v2</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ENVIRONMENTS -->
+<div class="section-label">Environments</div>
+<div class="env-grid">
+  <div class="env-card">
+    <div class="env-name">Development</div>
+    <div class="env-desc">Docker Compose: PostgreSQL + Redis + ES + RabbitMQ local. Next.js dev server. Java (Spring Boot), Go (Fiber) và Python (FastAPI) chạy với <code>--watch</code>/hot reload.</div>
+  </div>
+  <div class="env-card">
+    <div class="env-name">Staging</div>
+    <div class="env-desc">k3s/Kubernetes cluster (Rancher) per branch. Vercel preview deployment. Seed DB với fixture data. GitHub Actions build → ArgoCD sync.</div>
+  </div>
+  <div class="env-card">
+    <div class="env-name">Production</div>
+    <div class="env-desc">Kubernetes production (API + services). Vercel production (Web). Expo EAS production build. Upstash Redis + Bonsai ES + RabbitMQ managed.</div>
+  </div>
+</div>
+
+<!-- RISKS -->
+<div class="section-label">Technical Risks</div>
+<div class="stack-grid">
+  <div class="stack-card">
+    <div class="stack-card-header" style="background:#FFF1F2;color:#9F1239;border-color:#FFB3C1">Risk · Elasticsearch sync lag</div>
+    <div class="stack-item">
+      <span class="stack-icon">⚠️</span>
+      <div>
+        <div class="stack-name">Quest mới publish không xuất hiện ngay trong search</div>
+        <div class="stack-reason"><code>quest.published</code> event async → ES index delay 1-5s. <strong>Mitigation:</strong> Hiển thị "Your quest will appear in search shortly" sau publish. Monitor queue lag.</div>
+      </div>
+    </div>
+  </div>
+  <div class="stack-card">
+    <div class="stack-card-header" style="background:#FFF1F2;color:#9F1239;border-color:#FFB3C1">Risk · Denormalized counter drift</div>
+    <div class="stack-item">
+      <span class="stack-icon">⚠️</span>
+      <div>
+        <div class="stack-name">fork_count, avg_rating, completion_count có thể bị stale</div>
+        <div class="stack-reason">Nếu outbox relay event fail và không retry. <strong>Mitigation:</strong> Idempotent consumer (eventId) + exponential backoff. Nightly reconcile job tính lại từ source tables.</div>
+      </div>
+    </div>
+  </div>
+  <div class="stack-card">
+    <div class="stack-card-header" style="background:#FFF1F2;color:#9F1239;border-color:#FFB3C1">Risk · World visualization performance</div>
+    <div class="stack-item">
+      <span class="stack-icon">⚠️</span>
+      <div>
+        <div class="stack-name">User có nhiều skill domains → nhiều districts → render chậm</div>
+        <div class="stack-reason"><strong>Mitigation:</strong> MVP dùng simple layout. D3 force simulation chỉ khi &lt; 20 nodes. Virtualize nếu nhiều hơn. Defer heavy world rendering đến v2.</div>
+      </div>
+    </div>
+  </div>
+</div>

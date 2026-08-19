@@ -1,0 +1,1091 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Wireframes</title>
+<style>
+  :root {
+    --bg:        #FDF4FF;
+    --surface:   #FFFFFF;
+    --surface-2: #FAF5FF;
+    --border:    #E2E8F0;
+    --border-acc:#E9D5FF;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #7E22CE;
+    --accent-bg: #F3E8FF;
+
+    /* Wireframe palette */
+    --wf-bg:       #F8FAFC;
+    --wf-surface:  #FFFFFF;
+    --wf-block:    #E2E8F0;
+    --wf-block-2:  #CBD5E1;
+    --wf-block-3:  #94A3B8;
+    --wf-nav:      #1E293B;
+    --wf-line:     #CBD5E1;
+    --wf-text:     #64748B;
+    --wf-text-dark:#0F172A;
+    --wf-accent:   #7E22CE;
+    --wf-accent-bg:#F3E8FF;
+    --wf-img:      #E2E8F0;
+    --wf-green:    #D1FAE5;
+    --wf-green-d:  #065F46;
+    --wf-amber:    #FEF3C7;
+    --wf-amber-d:  #B45309;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .toc {
+    display: flex; flex-wrap: wrap; gap: .4rem;
+    margin-bottom: 2.5rem;
+  }
+  .toc-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .4rem .875rem;
+    font-size: .8rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: border-color .15s, color .15s;
+  }
+  .toc-item:hover { border-color: var(--accent); color: var(--accent); }
+
+  .screen-section { margin-bottom: 3.5rem; }
+  .screen-meta {
+    display: flex; align-items: center; gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .screen-num {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .7rem; font-weight: 700;
+    background: var(--accent); color: #fff;
+    padding: .25em .6em; border-radius: 4px;
+  }
+  .screen-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .screen-sub { font-size: .8rem; color: var(--muted); }
+
+  /* Wireframe frame */
+  .wf-frame {
+    background: var(--wf-bg);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--wf-text);
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+
+  /* Annotations below wireframe */
+  .annotations {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .5rem;
+    margin-top: .75rem;
+  }
+  .annotation {
+    background: var(--surface);
+    border: 1px solid var(--border-acc);
+    border-radius: 6px;
+    padding: .5rem .75rem;
+    font-size: .75rem;
+  }
+  .annotation-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px;
+    background: var(--accent); color: #fff;
+    border-radius: 50%; font-size: .6rem; font-weight: 700;
+    margin-right: .35rem; flex-shrink: 0;
+    vertical-align: middle;
+  }
+  .annotation strong { color: var(--text); }
+  .annotation p { color: var(--muted); margin-top: .15rem; line-height: 1.4; }
+
+  /* ===== WIREFRAME COMPONENTS ===== */
+
+  /* Navbar */
+  .wf-nav {
+    background: var(--wf-nav);
+    display: flex; align-items: center;
+    padding: 0 1rem;
+    height: 40px;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+  .wf-logo { color: #fff; font-weight: 700; font-size: 12px; }
+  .wf-nav-links { display: flex; gap: .75rem; margin-left: auto; }
+  .wf-nav-link { color: rgba(255,255,255,.6); font-size: 10px; cursor: default; }
+  .wf-nav-link.active { color: #fff; }
+  .wf-nav-btn {
+    background: var(--wf-accent); color: #fff;
+    padding: .2em .6em; border-radius: 4px; font-size: 10px; font-weight: 600;
+  }
+  .wf-nav-avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--wf-block-2);
+  }
+  .wf-search-bar {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 5px;
+    padding: .3em .7em;
+    color: rgba(255,255,255,.7);
+    font-size: 10px;
+    width: 160px;
+  }
+
+  /* Content area */
+  .wf-content { padding: 1rem; }
+  .wf-content-wide { padding: 1rem 1.25rem; }
+
+  /* Cards */
+  .wf-card {
+    background: var(--wf-surface);
+    border: 1px solid var(--wf-line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .wf-card-img {
+    height: 70px;
+    background: var(--wf-img);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wf-text);
+    font-size: 9px;
+  }
+  .wf-card-body { padding: .5rem .625rem; }
+  .wf-card-title {
+    height: 10px; background: var(--wf-block-2);
+    border-radius: 2px; margin-bottom: .35rem; width: 80%;
+  }
+  .wf-card-sub {
+    height: 8px; background: var(--wf-block);
+    border-radius: 2px; margin-bottom: .25rem;
+  }
+  .wf-card-sub.short { width: 55%; }
+  .wf-card-tags { display: flex; gap: .25rem; margin-top: .35rem; }
+  .wf-tag {
+    height: 14px; border-radius: 3px;
+    background: var(--wf-accent-bg);
+    width: 40px;
+  }
+  .wf-tag.green { background: var(--wf-green); }
+  .wf-tag.amber { background: var(--wf-amber); }
+
+  /* Chips / filter row */
+  .wf-filter-row {
+    display: flex; gap: .4rem; flex-wrap: wrap;
+    padding: .5rem 1rem;
+    border-bottom: 1px solid var(--wf-line);
+    background: var(--wf-surface);
+  }
+  .wf-chip {
+    height: 22px; border-radius: 11px;
+    border: 1px solid var(--wf-line);
+    background: var(--wf-surface);
+    display: flex; align-items: center;
+    padding: 0 .6rem;
+    font-size: 9px; color: var(--wf-text);
+    white-space: nowrap;
+  }
+  .wf-chip.active {
+    background: var(--wf-accent-bg);
+    border-color: var(--wf-accent);
+    color: var(--wf-accent);
+    font-weight: 600;
+  }
+
+  /* Section heading */
+  .wf-section-head {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--wf-text);
+    margin-bottom: .5rem; margin-top: .75rem;
+  }
+  .wf-section-head:first-child { margin-top: 0; }
+
+  /* Grid layouts */
+  .wf-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+  .wf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .wf-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+
+  /* Sidebar layout */
+  .wf-layout-sidebar {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  /* Buttons */
+  .wf-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--wf-accent); color: #fff;
+    border-radius: 5px; padding: .35em .75em;
+    font-size: 10px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .wf-btn.secondary {
+    background: var(--wf-surface);
+    color: var(--wf-text);
+    border: 1px solid var(--wf-line);
+  }
+  .wf-btn.success {
+    background: var(--wf-green-d); color: #fff;
+  }
+
+  /* Text blocks */
+  .wf-line-block {
+    height: 8px; background: var(--wf-block);
+    border-radius: 2px; margin-bottom: .3rem;
+  }
+  .wf-line-block.w60 { width: 60%; }
+  .wf-line-block.w80 { width: 80%; }
+  .wf-line-block.w40 { width: 40%; }
+  .wf-line-block.w95 { width: 95%; }
+  .wf-line-block.title {
+    height: 14px; background: var(--wf-block-2);
+    margin-bottom: .4rem;
+  }
+  .wf-line-block.title.w50 { width: 50%; }
+
+  /* Input */
+  .wf-input {
+    background: var(--wf-surface);
+    border: 1px solid var(--wf-line);
+    border-radius: 5px;
+    padding: .4em .6em;
+    font-size: 10px; color: var(--wf-text);
+    width: 100%;
+  }
+  .wf-input-group { margin-bottom: .5rem; }
+  .wf-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+    color: var(--wf-text); margin-bottom: .2rem;
+  }
+
+  /* Progress bar */
+  .wf-progress-track {
+    height: 6px; background: var(--wf-block);
+    border-radius: 3px; overflow: hidden;
+  }
+  .wf-progress-fill {
+    height: 100%; background: var(--wf-accent);
+    border-radius: 3px;
+  }
+  .wf-progress-fill.green { background: var(--wf-green-d); }
+
+  /* Chapter/Task rows */
+  .wf-obj-row {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .4rem .5rem;
+    border-bottom: 1px solid var(--wf-line);
+  }
+  .wf-obj-row:last-child { border-bottom: none; }
+  .wf-checkbox {
+    width: 13px; height: 13px;
+    border: 1.5px solid var(--wf-line);
+    border-radius: 3px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wf-checkbox.checked {
+    background: var(--wf-green-d);
+    border-color: var(--wf-green-d);
+    color: #fff; font-size: 8px; font-weight: 700;
+  }
+  .wf-obj-text { flex: 1; }
+  .wf-obj-text .done { text-decoration: line-through; color: var(--wf-text); opacity: .5; }
+
+  /* Stats row */
+  .wf-stat-row {
+    display: flex; gap: .5rem;
+    padding: .5rem;
+    background: var(--wf-surface);
+    border: 1px solid var(--wf-line);
+    border-radius: 6px;
+  }
+  .wf-stat { flex: 1; text-align: center; }
+  .wf-stat-val {
+    font-size: 13px; font-weight: 700;
+    color: var(--wf-accent);
+  }
+  .wf-stat-lbl { font-size: 8px; color: var(--wf-text); opacity: .6; }
+
+  /* World district blobs */
+  .wf-world { position: relative; height: 200px; background: #F0F9FF; border-radius: 6px; overflow: hidden; }
+  .wf-district {
+    position: absolute;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600;
+    text-align: center; line-height: 1.2;
+  }
+  .wf-district-label { font-size: 8px; color: var(--wf-text-dark); }
+
+  /* Sidebar nav */
+  .wf-sidebar {
+    background: var(--wf-surface);
+    border: 1px solid var(--wf-line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .wf-sidebar-head {
+    padding: .5rem .75rem;
+    background: var(--wf-block);
+    font-size: 9px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .wf-sidebar-item {
+    display: flex; align-items: center; gap: .4rem;
+    padding: .4rem .75rem;
+    border-bottom: 1px solid var(--wf-line);
+    font-size: 10px; cursor: default;
+  }
+  .wf-sidebar-item:last-child { border-bottom: none; }
+  .wf-sidebar-item.active { background: var(--wf-accent-bg); color: var(--wf-accent); font-weight: 600; }
+  .wf-sidebar-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--wf-block-2); flex-shrink: 0;
+  }
+  .wf-sidebar-dot.active { background: var(--wf-accent); }
+
+  /* Hero banner */
+  .wf-hero {
+    background: var(--wf-nav);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    color: #fff;
+  }
+  .wf-hero-title { font-size: 16px; font-weight: 700; margin-bottom: .35rem; color: #fff; }
+  .wf-hero-sub { font-size: 10px; opacity: .7; margin-bottom: .75rem; }
+  .wf-hero-btns { display: flex; gap: .4rem; justify-content: center; }
+
+  /* Tabs */
+  .wf-tabs {
+    display: flex; gap: 0;
+    border-bottom: 2px solid var(--wf-line);
+    background: var(--wf-surface);
+  }
+  .wf-tab {
+    padding: .4rem .875rem;
+    font-size: 10px; font-weight: 600;
+    color: var(--wf-text); cursor: default;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+  }
+  .wf-tab.active { color: var(--wf-accent); border-bottom-color: var(--wf-accent); }
+
+  /* Divider */
+  .wf-divider { height: 1px; background: var(--wf-line); margin: .5rem 0; }
+
+  @media(max-width: 700px) {
+    body { padding: 1.25rem 1rem; }
+    h1 { font-size: 1.25rem; }
+    .wf-grid-3, .wf-grid-4 { grid-template-columns: 1fr 1fr; }
+    .wf-layout-sidebar { grid-template-columns: 1fr; }
+  }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Wireframes</h1>
+  <p class="subtitle">5 key screens · Lo-fi · Web App (1024px viewport)</p>
+</header>
+
+<div class="toc">
+  <a href="#wf1" class="toc-item">1 · Explore</a>
+  <a href="#wf2" class="toc-item">2 · Quest Detail</a>
+  <a href="#wf3" class="toc-item">3 · Personal Quest Tracker</a>
+  <a href="#wf4" class="toc-item">4 · World View</a>
+  <a href="#wf5" class="toc-item">5 · Create Quest</a>
+  <a href="#wf6" class="toc-item">6 · AI Grader</a>
+  <a href="#wf7" class="toc-item">7 · AI Coach</a>
+</div>
+
+<!-- ===== SCREEN 1: EXPLORE ===== -->
+<div class="screen-section" id="wf1">
+  <div class="screen-meta">
+    <span class="screen-num">WF-01</span>
+    <div>
+      <div class="screen-title">Explore (Marketplace Home)</div>
+      <div class="screen-sub">Screen #04 — Web App · Guest-accessible · US-08, US-09, US-10</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <!-- Navbar -->
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-search-bar">Search quests...</div>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link active">Explore</span>
+        <span class="wf-nav-link">My Quests</span>
+        <span class="wf-nav-link">World</span>
+      </div>
+      <span class="wf-nav-btn">Log in</span>
+    </div>
+
+    <!-- Filter row -->
+    <div class="wf-filter-row">
+      <span class="wf-chip active">All</span>
+      <span class="wf-chip">Programming</span>
+      <span class="wf-chip">Fitness</span>
+      <span class="wf-chip">Language</span>
+      <span class="wf-chip">Finance</span>
+      <span class="wf-chip">Design</span>
+      <span class="wf-chip">Science</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--wf-text)">Sort: Popular ▾</span>
+    </div>
+
+    <div class="wf-content">
+      <!-- Featured -->
+      <div class="wf-card" style="margin-bottom:.75rem;display:flex;gap:.75rem;padding:.75rem">
+        <div style="width:160px;height:90px;background:var(--wf-block);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--wf-text)">Featured banner</div>
+        <div style="flex:1">
+          <div style="font-size:10px;font-weight:700;color:var(--wf-accent-bg);background:var(--wf-accent);display:inline-block;padding:.1em .4em;border-radius:3px;margin-bottom:.35rem">Featured</div>
+          <div class="wf-line-block title w50" style="margin-bottom:.3rem"></div>
+          <div class="wf-line-block w80"></div>
+          <div class="wf-line-block w60"></div>
+          <div style="display:flex;gap:.5rem;margin-top:.5rem;align-items:center">
+            <span class="wf-tag"></span>
+            <span style="font-size:9px;color:var(--wf-text)">★★★★☆ 4.2 · 312 learners</span>
+            <span style="margin-left:auto" class="wf-btn">Use Quest</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending -->
+      <div class="wf-section-head">① Trending this week</div>
+      <div class="wf-grid-3" style="margin-bottom:.875rem">
+        <div class="wf-card">
+          <div class="wf-card-img">thumbnail</div>
+          <div class="wf-card-body">
+            <div class="wf-card-title"></div>
+            <div class="wf-card-sub short"></div>
+            <div class="wf-card-tags"><span class="wf-tag"></span><span class="wf-tag green"></span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:9px;color:var(--wf-text)">
+              <span>★ 4.5 · 128 learners</span>
+              <span class="wf-btn" style="font-size:9px;padding:.2em .5em">Use</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-card">
+          <div class="wf-card-img">thumbnail</div>
+          <div class="wf-card-body">
+            <div class="wf-card-title"></div>
+            <div class="wf-card-sub short"></div>
+            <div class="wf-card-tags"><span class="wf-tag amber"></span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:9px;color:var(--wf-text)">
+              <span>★ 4.1 · 87 learners</span>
+              <span class="wf-btn" style="font-size:9px;padding:.2em .5em">Use</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-card">
+          <div class="wf-card-img">thumbnail</div>
+          <div class="wf-card-body">
+            <div class="wf-card-title"></div>
+            <div class="wf-card-sub short"></div>
+            <div class="wf-card-tags"><span class="wf-tag"></span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:9px;color:var(--wf-text)">
+              <span>★ 4.8 · 210 learners</span>
+              <span class="wf-btn" style="font-size:9px;padding:.2em .5em">Use</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Popular -->
+      <div class="wf-section-head">② Popular all time</div>
+      <div class="wf-grid-4">
+        <div class="wf-card"><div class="wf-card-img" style="height:50px">img</div><div class="wf-card-body"><div class="wf-card-title"></div><div class="wf-card-sub short"></div></div></div>
+        <div class="wf-card"><div class="wf-card-img" style="height:50px">img</div><div class="wf-card-body"><div class="wf-card-title"></div><div class="wf-card-sub short"></div></div></div>
+        <div class="wf-card"><div class="wf-card-img" style="height:50px">img</div><div class="wf-card-body"><div class="wf-card-title"></div><div class="wf-card-sub short"></div></div></div>
+        <div class="wf-card"><div class="wf-card-img" style="height:50px">img</div><div class="wf-card-body"><div class="wf-card-title"></div><div class="wf-card-sub short"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>Trending</strong><p>3-col grid. Sorted by recent activity (7 ngày). Scroll → more.</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>Popular</strong><p>4-col grid, compact cards. Sort by avg_rating × log(forks).</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>Filter chips</strong><p>Multi-select. All = no filter. Kết quả update instant, không reload page.</p></div>
+    <div class="annotation"><span class="annotation-num">④</span><strong>Guest CTA</strong><p>"Use Quest" redirect tới Login nếu chưa đăng nhập. Session saved, redirect back sau login.</p></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 2: QUEST DETAIL ===== -->
+<div class="screen-section" id="wf2">
+  <div class="screen-meta">
+    <span class="screen-num">WF-02</span>
+    <div>
+      <div class="screen-title">Quest Detail</div>
+      <div class="screen-sub">Screen #08 — Web App · US-03, US-11, US-12</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link">Explore</span>
+        <span class="wf-nav-link">My Quests</span>
+        <span class="wf-nav-link">World</span>
+      </div>
+      <div class="wf-nav-avatar"></div>
+    </div>
+
+    <div class="wf-content-wide">
+      <div class="wf-layout-sidebar">
+        <!-- Main content -->
+        <div style="grid-column: 1 / -1; margin-bottom: .75rem">
+          <div style="font-size:9px;color:var(--wf-text);margin-bottom:.3rem">Explore / Programming / Backend Development</div>
+          <div style="font-size:17px;font-weight:700;color:var(--wf-text-dark);margin-bottom:.3rem">Learn PostgreSQL from Zero</div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--wf-text)">
+            <span style="display:flex;align-items:center;gap:.3rem"><div class="wf-nav-avatar" style="width:16px;height:16px"></div> by johndoe</span>
+            <span>★★★★☆ 4.3 (48 ratings)</span>
+            <span>215 learners</span>
+            <span>8 chapters</span>
+            <span>~3 months</span>
+            <span class="wf-tag" style="width:auto;height:auto;padding:.1em .4em;font-size:9px;background:var(--wf-accent-bg);color:var(--wf-accent)">PostgreSQL</span>
+          </div>
+        </div>
+
+        <!-- Left: description + chapters/tasks -->
+        <div>
+          <div class="wf-tabs">
+            <span class="wf-tab active">Overview</span>
+            <span class="wf-tab">Chapters & Tasks (8)</span>
+            <span class="wf-tab">Reviews (48)</span>
+          </div>
+          <div style="padding:.75rem 0">
+            <div class="wf-line-block w95"></div>
+            <div class="wf-line-block w80"></div>
+            <div class="wf-line-block w95"></div>
+            <div class="wf-line-block w60" style="margin-bottom:.75rem"></div>
+
+            <div style="font-size:10px;font-weight:700;margin-bottom:.4rem;color:var(--wf-text-dark)">Chapters preview</div>
+            <div class="wf-card">
+              <div class="wf-obj-row"><div class="wf-checkbox" style="background:var(--wf-block)">1</div><div class="wf-obj-text" style="font-size:10px">Install &amp; configure PostgreSQL locally</div></div>
+              <div class="wf-obj-row"><div class="wf-checkbox" style="background:var(--wf-block)">2</div><div class="wf-obj-text" style="font-size:10px">Learn basic SQL: SELECT, INSERT, UPDATE, DELETE</div></div>
+              <div class="wf-obj-row"><div class="wf-checkbox" style="background:var(--wf-block)">3</div><div class="wf-obj-text" style="font-size:10px">Understand indexes and query plans</div></div>
+              <div class="wf-obj-row" style="justify-content:center;font-size:9px;color:var(--wf-text)">+ 5 more chapters</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: action panel -->
+        <div>
+          <div class="wf-card" style="padding:.875rem">
+            <div style="font-size:11px;font-weight:700;margin-bottom:.75rem;color:var(--wf-text-dark)">Start this Quest</div>
+            <div class="wf-stat-row" style="margin-bottom:.75rem">
+              <div class="wf-stat"><div class="wf-stat-val">215</div><div class="wf-stat-lbl">Learners</div></div>
+              <div class="wf-stat"><div class="wf-stat-val">4.3★</div><div class="wf-stat-lbl">Rating</div></div>
+              <div class="wf-stat"><div class="wf-stat-val">68%</div><div class="wf-stat-lbl">Complete</div></div>
+            </div>
+            <div class="wf-btn" style="width:100%;margin-bottom:.4rem;justify-content:center;padding:.5em 0">① Use Quest (Fork)</div>
+            <div class="wf-btn secondary" style="width:100%;justify-content:center;padding:.4em 0">♡ Save to favorites</div>
+            <div class="wf-divider" style="margin:.625rem 0"></div>
+            <div style="font-size:9px;color:var(--wf-text)">Created by <strong>johndoe</strong><br>Last updated 2 weeks ago</div>
+          </div>
+          <div style="margin-top:.5rem;font-size:9px;color:var(--wf-text)">② Already forked? <span style="color:var(--wf-accent)">Go to your quest →</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>Use Quest</strong><p>Fork action. 409 nếu đã fork → button đổi thành "Go to your quest".</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>Already forked</strong><p>Hiển thị link tới PersonalQuest nếu user đã fork quest này.</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>Chapters preview</strong><p>Hiển thị 3 chapters đầu, collapse phần còn lại. Không reveal hết để tạo curiosity.</p></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 3: PERSONAL QUEST TRACKER ===== -->
+<div class="screen-section" id="wf3">
+  <div class="screen-meta">
+    <span class="screen-num">WF-03</span>
+    <div>
+      <div class="screen-title">Personal Quest Tracker</div>
+      <div class="screen-sub">Screen #14 — Web App · US-04, US-05, US-06</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link">Explore</span>
+        <span class="wf-nav-link active">My Quests</span>
+        <span class="wf-nav-link">World</span>
+      </div>
+      <div class="wf-nav-avatar"></div>
+    </div>
+
+    <div class="wf-content-wide">
+      <div class="wf-layout-sidebar">
+        <!-- Sidebar: quest list -->
+        <div>
+          <div style="font-size:10px;font-weight:700;margin-bottom:.5rem;color:var(--wf-text-dark)">My Active Quests</div>
+          <div class="wf-sidebar">
+            <div class="wf-sidebar-item active"><div class="wf-sidebar-dot active"></div>Learn PostgreSQL</div>
+            <div class="wf-sidebar-item"><div class="wf-sidebar-dot"></div>React Native Basics</div>
+            <div class="wf-sidebar-item"><div class="wf-sidebar-dot"></div>System Design 101</div>
+            <div class="wf-sidebar-item"><div class="wf-sidebar-dot"></div>IELTS 7.0 Prep</div>
+          </div>
+          <div style="font-size:10px;font-weight:700;margin:.75rem 0 .5rem;color:var(--wf-text-dark)">Completed</div>
+          <div class="wf-sidebar">
+            <div class="wf-sidebar-item" style="opacity:.6"><div class="wf-sidebar-dot" style="background:var(--wf-green-d)"></div>HTML &amp; CSS Fundamentals</div>
+          </div>
+        </div>
+
+        <!-- Main: active quest detail -->
+        <div>
+          <!-- Header -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--wf-text-dark)">Learn PostgreSQL</div>
+              <div style="font-size:10px;color:var(--wf-text);margin-top:.2rem">Forked from <span style="color:var(--wf-accent)">johndoe's quest</span> · Started Jun 3</div>
+            </div>
+            <div class="wf-btn secondary">Edit chapters/tasks</div>
+          </div>
+
+          <!-- Progress -->
+          <div class="wf-card" style="padding:.75rem;margin-bottom:.75rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+              <div style="font-size:11px;font-weight:600;color:var(--wf-text-dark)">① Progress</div>
+              <div style="font-size:12px;font-weight:700;color:var(--wf-accent)">37.5%</div>
+            </div>
+            <div class="wf-progress-track">
+              <div class="wf-progress-fill" style="width:37.5%"></div>
+            </div>
+            <div style="font-size:9px;color:var(--wf-text);margin-top:.3rem">3 of 8 tasks completed</div>
+          </div>
+
+          <!-- Chapters & Tasks list -->
+          <div style="font-size:10px;font-weight:700;margin-bottom:.4rem;color:var(--wf-text-dark)">② Chapters & Tasks</div>
+          <div class="wf-card">
+            <div class="wf-obj-row">
+              <div class="wf-checkbox checked">✓</div>
+              <div class="wf-obj-text"><span class="done" style="font-size:10px">Install &amp; configure PostgreSQL locally</span></div>
+              <div style="font-size:9px;color:var(--wf-text);white-space:nowrap">Jun 3</div>
+            </div>
+            <div class="wf-obj-row">
+              <div class="wf-checkbox checked">✓</div>
+              <div class="wf-obj-text"><span class="done" style="font-size:10px">Learn basic SQL: SELECT, INSERT, UPDATE, DELETE</span></div>
+              <div style="font-size:9px;color:var(--wf-text);white-space:nowrap">Jun 7</div>
+            </div>
+            <div class="wf-obj-row">
+              <div class="wf-checkbox checked">✓</div>
+              <div class="wf-obj-text"><span class="done" style="font-size:10px">Understand indexes and query plans</span></div>
+              <div style="font-size:9px;color:var(--wf-text);white-space:nowrap">Jun 12</div>
+            </div>
+            <div class="wf-obj-row">
+              <div class="wf-checkbox"></div>
+              <div class="wf-obj-text" style="font-size:10px">JOINs and relationships in depth</div>
+              <div class="wf-btn" style="font-size:9px;padding:.2em .5em">Done</div>
+            </div>
+            <div class="wf-obj-row">
+              <div class="wf-checkbox"></div>
+              <div class="wf-obj-text" style="font-size:10px">Transactions and ACID properties</div>
+              <div class="wf-btn" style="font-size:9px;padding:.2em .5em">Done</div>
+            </div>
+            <div class="wf-obj-row">
+              <div class="wf-checkbox"></div>
+              <div class="wf-obj-text" style="font-size:10px">Build a real project with Prisma ORM</div>
+              <div class="wf-btn" style="font-size:9px;padding:.2em .5em">Done</div>
+            </div>
+            <div class="wf-obj-row" style="border-bottom:none;background:var(--wf-accent-bg)">
+              <div style="font-size:10px;color:var(--wf-accent);flex:1">③ + Add custom chapter/task</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>Progress bar</strong><p>Real-time — update ngay khi tick/untick task. Animated fill.</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>Tick to complete</strong><p>Click checkbox → PATCH API call → optimistic UI update. Undo = click lại.</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>Custom chapter/task</strong><p>Learner tự thêm chapter/task custom vào PersonalQuest — không có trong template gốc (US-06).</p></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 4: WORLD VIEW ===== -->
+<div class="screen-section" id="wf4">
+  <div class="screen-meta">
+    <span class="screen-num">WF-04</span>
+    <div>
+      <div class="screen-title">World View</div>
+      <div class="screen-sub">Screen #18 — Web App · US-14, US-15, US-16</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link">Explore</span>
+        <span class="wf-nav-link">My Quests</span>
+        <span class="wf-nav-link active">World</span>
+      </div>
+      <div class="wf-nav-avatar"></div>
+    </div>
+
+    <div class="wf-content-wide">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--wf-text-dark)">johndoe's Knowledge World</div>
+          <div style="font-size:10px;color:var(--wf-text)">① 4 districts unlocked · 28 tasks completed</div>
+        </div>
+        <div class="wf-btn secondary" style="font-size:10px">Share World</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:.875rem;align-items:start">
+        <!-- World visualization -->
+        <div>
+          <div class="wf-world">
+            <!-- District blobs, positioned absolutely -->
+            <div class="wf-district" style="width:90px;height:90px;background:rgba(99,102,241,.25);border:2px solid rgba(99,102,241,.4);top:50px;left:80px;color:rgba(99,102,241,.9)">
+              <div class="wf-district-label">💻 Programming<br>18 completions</div>
+            </div>
+            <div class="wf-district" style="width:56px;height:56px;background:rgba(16,185,129,.2);border:2px solid rgba(16,185,129,.35);top:30px;right:100px;color:rgba(16,185,129,.9)">
+              <div class="wf-district-label">💪 Fitness<br>5</div>
+            </div>
+            <div class="wf-district" style="width:44px;height:44px;background:rgba(245,158,11,.2);border:2px solid rgba(245,158,11,.35);bottom:30px;right:80px;color:rgba(245,158,11,.9)">
+              <div class="wf-district-label">📚 Language<br>3</div>
+            </div>
+            <div class="wf-district" style="width:36px;height:36px;background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.3);bottom:45px;left:200px;color:rgba(239,68,68,.8)">
+              <div class="wf-district-label">💰 Finance<br>2</div>
+            </div>
+            <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--wf-text)">② Click district để xem chi tiết</div>
+          </div>
+          <div style="font-size:9px;color:var(--wf-text);margin-top:.35rem;text-align:center">District size = số tasks đã hoàn thành (TaskCompletion) trong domain đó</div>
+        </div>
+
+        <!-- District detail panel -->
+        <div>
+          <div style="font-size:10px;font-weight:700;margin-bottom:.4rem;color:var(--wf-text-dark)">③ Programming District</div>
+          <div class="wf-card" style="margin-bottom:.5rem">
+            <div class="wf-stat-row">
+              <div class="wf-stat"><div class="wf-stat-val">18</div><div class="wf-stat-lbl">Completed</div></div>
+              <div class="wf-stat"><div class="wf-stat-val">3</div><div class="wf-stat-lbl">Active</div></div>
+              <div class="wf-stat"><div class="wf-stat-val">2</div><div class="wf-stat-lbl">Quests done</div></div>
+            </div>
+          </div>
+
+          <div style="font-size:10px;font-weight:600;margin-bottom:.35rem;color:var(--wf-text)">Completed quests</div>
+          <div class="wf-card" style="margin-bottom:.5rem">
+            <div class="wf-sidebar-item"><span>✓</span> HTML &amp; CSS Fundamentals</div>
+            <div class="wf-sidebar-item"><span>✓</span> JavaScript Basics</div>
+          </div>
+
+          <div style="font-size:10px;font-weight:600;margin-bottom:.35rem;color:var(--wf-text)">In progress</div>
+          <div class="wf-card">
+            <div class="wf-sidebar-item">
+              <div style="flex:1">
+                <div style="font-size:10px">Learn PostgreSQL</div>
+                <div class="wf-progress-track" style="margin-top:.25rem"><div class="wf-progress-fill" style="width:37%"></div></div>
+              </div>
+            </div>
+            <div class="wf-sidebar-item">
+              <div style="flex:1">
+                <div style="font-size:10px">React Native Basics</div>
+                <div class="wf-progress-track" style="margin-top:.25rem"><div class="wf-progress-fill" style="width:20%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>World summary</strong><p>Districts unlocked = skill domains với ít nhất 1 completion. Tổng tasks là source of truth.</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>District blobs</strong><p>Size proportional to completion_count. Generative layout bằng D3 force simulation. Click để drill down.</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>District detail</strong><p>Right panel hiện khi click district. Completed quests + in-progress quests trong domain đó.</p></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 5: CREATE QUEST ===== -->
+<div class="screen-section" id="wf5">
+  <div class="screen-meta">
+    <span class="screen-num">WF-05</span>
+    <div>
+      <div class="screen-title">Create Quest</div>
+      <div class="screen-sub">Screen #20 — Web App · US-01, US-02, US-07</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link">Explore</span>
+        <span class="wf-nav-link active">My Quests</span>
+        <span class="wf-nav-link">World</span>
+      </div>
+      <div class="wf-nav-avatar"></div>
+    </div>
+
+    <div class="wf-content-wide">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--wf-text-dark)">Create Quest</div>
+          <div style="font-size:10px;color:var(--wf-text)">Draft — không hiển thị trong Marketplace cho đến khi bạn Publish</div>
+        </div>
+        <div style="display:flex;gap:.4rem">
+          <div class="wf-btn secondary">Save draft</div>
+          <div class="wf-btn success">① Publish</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 260px;gap:1rem;align-items:start">
+        <!-- Left: form -->
+        <div>
+          <div class="wf-card" style="padding:1rem;margin-bottom:.75rem">
+            <div style="font-size:11px;font-weight:700;margin-bottom:.625rem;color:var(--wf-text-dark)">Quest Details</div>
+            <div class="wf-input-group">
+              <div class="wf-label">Title *</div>
+              <div class="wf-input">Learn PostgreSQL from Zero</div>
+            </div>
+            <div class="wf-input-group">
+              <div class="wf-label">Description</div>
+              <div class="wf-input" style="height:52px;resize:none">A practical guide to mastering PostgreSQL for backend development...</div>
+            </div>
+            <div class="wf-input-group" style="margin-bottom:0">
+              <div class="wf-label">Domain *</div>
+              <div class="wf-input" style="background:var(--wf-block);color:var(--wf-text)">Backend Development ▾</div>
+            </div>
+          </div>
+
+          <!-- Chapters & Tasks builder -->
+          <div class="wf-card" style="padding:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.625rem">
+              <div style="font-size:11px;font-weight:700;color:var(--wf-text-dark)">② Chapters & Tasks <span style="font-weight:400;color:var(--wf-text)">6 added</span></div>
+            </div>
+            <div style="border:1px solid var(--wf-line);border-radius:5px;overflow:hidden;margin-bottom:.5rem">
+              <div class="wf-obj-row" style="background:var(--wf-surface)">
+                <div style="font-size:9px;color:var(--wf-text);width:16px;text-align:center;flex-shrink:0">⠿</div>
+                <div class="wf-input" style="border:none;padding:.2em .4em;font-size:10px">Install &amp; configure PostgreSQL locally</div>
+                <div style="font-size:9px;color:var(--wf-text)">✕</div>
+              </div>
+              <div class="wf-obj-row" style="background:var(--wf-surface)">
+                <div style="font-size:9px;color:var(--wf-text);width:16px;text-align:center;flex-shrink:0">⠿</div>
+                <div class="wf-input" style="border:none;padding:.2em .4em;font-size:10px">Learn basic SQL: SELECT, INSERT, UPDATE, DELETE</div>
+                <div style="font-size:9px;color:var(--wf-text)">✕</div>
+              </div>
+              <div class="wf-obj-row" style="background:var(--wf-surface)">
+                <div style="font-size:9px;color:var(--wf-text);width:16px;text-align:center;flex-shrink:0">⠿</div>
+                <div class="wf-input" style="border:none;padding:.2em .4em;font-size:10px">Understand indexes and query plans</div>
+                <div style="font-size:9px;color:var(--wf-text)">✕</div>
+              </div>
+              <div class="wf-obj-row" style="background:var(--wf-surface)">
+                <div style="font-size:9px;color:var(--wf-text);width:16px;text-align:center;flex-shrink:0">⠿</div>
+                <div class="wf-input" style="border:none;padding:.2em .4em;font-size:10px">JOINs and relationships in depth</div>
+                <div style="font-size:9px;color:var(--wf-text)">✕</div>
+              </div>
+            </div>
+            <div class="wf-btn secondary" style="width:100%;justify-content:center;padding:.4em 0">③ + Add chapter/task</div>
+          </div>
+        </div>
+
+        <!-- Right: preview + tips -->
+        <div>
+          <div class="wf-card" style="padding:.875rem;margin-bottom:.5rem">
+            <div style="font-size:10px;font-weight:700;margin-bottom:.5rem;color:var(--wf-text-dark)">④ Preview card</div>
+            <div class="wf-card">
+              <div class="wf-card-img" style="height:55px;font-size:9px">Quest cover (auto-generated)</div>
+              <div class="wf-card-body">
+                <div style="font-size:10px;font-weight:600;margin-bottom:.2rem;color:var(--wf-text-dark)">Learn PostgreSQL from Zero</div>
+                <div style="font-size:9px;color:var(--wf-text)">by you · 6 chapters · 18 tasks · Backend Development</div>
+                <div class="wf-card-tags" style="margin-top:.35rem">
+                  <span class="wf-tag" style="height:14px;width:50px"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wf-card" style="padding:.875rem">
+            <div style="font-size:10px;font-weight:700;margin-bottom:.4rem;color:var(--wf-text-dark)">Checklist trước khi Publish</div>
+            <div style="font-size:10px;color:var(--wf-text-dark)">✓ Title &amp; description đã điền</div>
+            <div style="font-size:10px;color:var(--wf-text-dark)">✓ Ít nhất 1 chapter với 1 task</div>
+            <div style="font-size:10px;color:var(--wf-text-dark)">✓ Domain đã chọn</div>
+            <div style="font-size:10px;color:var(--wf-block-2)">✗ Chưa có cover image</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>Publish</strong><p>Disabled nếu chưa có chapter (với ít nhất 1 task). Confirm dialog trước khi publish. Không thể undo chapters/tasks sau khi quest có learner.</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>Drag-to-reorder</strong><p>⠿ handle cho drag-and-drop ordering. Keyboard-accessible (arrow keys).</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>Add chapter/task</strong><p>Thêm chapter/task mới inline, focus vào input ngay. Enter để confirm, Escape để cancel.</p></div>
+    <div class="annotation"><span class="annotation-num">④</span><strong>Live preview</strong><p>Preview card cập nhật real-time theo form input. Creator thấy quest sẽ trông như thế nào trên Marketplace.</p></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 6: AI GRADER ===== -->
+<div class="screen-section" id="wf6">
+  <div class="screen-meta">
+    <span class="screen-num">WF-06</span>
+    <div>
+      <div class="screen-title">AI Grader — Review Submission</div>
+      <div class="screen-sub">Screen #37 — Web App · US-30</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link">Explore</span>
+        <span class="wf-nav-link active">My Quests</span>
+        <span class="wf-nav-link">World</span>
+      </div>
+      <div class="wf-nav-avatar"></div>
+    </div>
+
+    <div class="wf-content-wide">
+      <div class="wf-layout-sidebar">
+        <!-- Left: submission + result -->
+        <div>
+          <div style="font-size:10px;color:var(--wf-text);margin-bottom:.3rem">Chapter 2 · Task 4 — SUBMISSION</div>
+          <div style="font-size:17px;font-weight:700;color:var(--wf-text-dark);margin-bottom:.5rem">Deploy a Docker container to a cloud VM</div>
+
+          <div class="wf-card" style="padding:.875rem;margin-bottom:.75rem">
+            <div style="font-size:10px;font-weight:700;margin-bottom:.5rem;color:var(--wf-text-dark)">Submission (lần 2)</div>
+            <div style="font-size:10px;color:var(--wf-text);margin-bottom:.625rem">github.com/johndoe/learn-docker · mô tả quá trình deploy + kết quả curl</div>
+            <div class="wf-btn success" style="justify-content:center;padding:.45em 0">① Chấm bằng AI</div>
+          </div>
+
+          <div class="wf-card" style="padding:.875rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+              <span style="font-size:10px;font-weight:700;padding:.15em .5em;border-radius:4px;background:var(--wf-green);color:var(--wf-green-d)">② PASS</span>
+              <span style="font-size:10px;color:var(--wf-text)">Score <strong style="color:var(--wf-text-dark)">92/100</strong></span>
+              <span style="font-size:9px;color:var(--wf-text)">· graded by AI · rubric snapshot v2</span>
+            </div>
+            <div style="font-size:10px;color:var(--wf-text-dark);margin-bottom:.35rem"><strong>③ Feedback theo rubric</strong></div>
+            <div style="font-size:10px;color:var(--wf-text);margin-bottom:.25rem">✓ Container chạy đúng — health check pass (criterion: running container)</div>
+            <div style="font-size:10px;color:var(--wf-text);margin-bottom:.25rem">✓ Port mapping + firewall config đầy đủ (criterion: accessibility)</div>
+            <div style="font-size:10px;color:var(--wf-text)">△ Chưa có log rotation — cải thiện ở bài sau (criterion: best practices)</div>
+            <div class="wf-divider" style="margin:.5rem 0"></div>
+            <div style="font-size:9px;color:var(--wf-text)">Lần 1 — FAIL (55/100) · feedback: thiếu health check + port không mở ngoài</div>
+          </div>
+        </div>
+
+        <!-- Right: rubric -->
+        <div>
+          <div class="wf-card" style="padding:.875rem">
+            <div style="font-size:10px;font-weight:700;margin-bottom:.5rem;color:var(--wf-text-dark)">④ Rubric</div>
+            <div class="wf-obj-row" style="font-size:10px">Running container (30%)</div>
+            <div class="wf-obj-row" style="font-size:10px">Accessibility từ ngoài (25%)</div>
+            <div class="wf-obj-row" style="font-size:10px">Documentation &amp; demo (25%)</div>
+            <div class="wf-obj-row" style="font-size:10px">Best practices (20%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>Chấm bằng AI</strong><p>POST /api/v1/ai/grade. Disabled khi đã PASS. Rate limit 20/ngày. Loading state + spinner khi chấm (~5-15s).</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>Kết quả PASS</strong><p>Task tự hoàn thành qua event submission.graded. Có thể undo → nhưng grade vẫn lưu trong lịch sử.</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>Feedback theo rubric</strong><p>Từng tiêu chí có verdict riêng — kèm lịch sử các lần nộp trước để user thấy tiến bộ.</p></div>
+    <div class="annotation"><span class="annotation-num">④</span><strong>Rubric</strong><p>Snapshot từ task.config lúc chấm — hiển thị trọng số từng tiêu chí để user biết căn cứ chấm.</p></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 7: AI COACH ===== -->
+<div class="screen-section" id="wf7">
+  <div class="screen-meta">
+    <span class="screen-num">WF-07</span>
+    <div>
+      <div class="screen-title">AI Coach — Chat</div>
+      <div class="screen-sub">Screen #38 — Web App · US-31</div>
+    </div>
+  </div>
+
+  <div class="wf-frame">
+    <div class="wf-nav">
+      <span class="wf-logo">⚔️ QuestHub</span>
+      <div class="wf-nav-links">
+        <span class="wf-nav-link">Explore</span>
+        <span class="wf-nav-link">My Quests</span>
+        <span class="wf-nav-link">World</span>
+      </div>
+      <div class="wf-nav-avatar"></div>
+    </div>
+
+    <div class="wf-content-wide">
+      <div class="wf-layout-sidebar">
+        <!-- Left: chat -->
+        <div style="display:flex;flex-direction:column;gap:.6rem">
+          <div style="font-size:11px;font-weight:700;color:var(--wf-text-dark)">🤖 AI Coach — "Spring Boot Quest"</div>
+
+          <div style="background:var(--wf-accent-bg);border-radius:8px 8px 8px 2px;padding:.625rem .75rem;font-size:10px;color:var(--wf-text-dark)">
+            Chào bạn! Mình theo dõi quest <strong>Spring Boot Fundamentals</strong> của bạn. ① Bạn đang ở <strong>Chapter 3 · Task 2</strong> — còn 6 task nữa để hoàn thành quest. Hôm nay bạn muốn ôn tiếp hay làm thử quiz chương 2?
+          </div>
+          <div style="align-self:flex-end;background:var(--wf-block);border-radius:8px 8px 2px 8px;padding:.625rem .75rem;font-size:10px;color:var(--wf-text-dark)">
+            Tôi đang kẹt ở Spring Security, nên làm gì tiếp?
+          </div>
+          <div style="background:var(--wf-accent-bg);border-radius:8px 8px 8px 2px;padding:.625rem .75rem;font-size:10px;color:var(--wf-text-dark)">
+            ② Mình đọc progress rồi — bạn làm 4/4 quiz Chapter 2 đạt trên 80%, chắc chắn nắm Authentication. Đề xuất: <strong>làm Task 3 (JWT filter) hôm nay</strong> vì nó nối thẳng vào bài bạn vừa học. Cần mình tóm tắt JWT filter logic không? ③
+          </div>
+
+          <div class="wf-card" style="padding:.625rem;display:flex;gap:.5rem;align-items:center;margin-top:auto">
+            <div class="wf-input" style="flex:1;border:1px solid var(--wf-line);font-size:10px">Hỏi coach về quest của bạn...</div>
+            <div class="wf-btn success" style="padding:.3em .7em">④ Gửi</div>
+          </div>
+          <div style="font-size:9px;color:var(--wf-text)">Coach chỉ đọc progress — không tự ý sửa quest của bạn. ⑤ 60 messages/ngày</div>
+        </div>
+
+        <!-- Right: progress context -->
+        <div>
+          <div class="wf-card" style="padding:.875rem">
+            <div style="font-size:10px;font-weight:700;margin-bottom:.5rem;color:var(--wf-text-dark)">Quest progress</div>
+            <div style="font-size:9px;color:var(--wf-text);margin-bottom:.3rem">Spring Boot Fundamentals — 62%</div>
+            <div class="wf-progress-track" style="margin-bottom:.625rem"><div class="wf-progress-fill" style="width:62%"></div></div>
+            <div class="wf-obj-row" style="font-size:10px">✓ Chương 1 · 5/5</div>
+            <div class="wf-obj-row" style="font-size:10px">✓ Chương 2 · 6/6</div>
+            <div class="wf-obj-row" style="font-size:10px">● Chương 3 · 1/7 (đang làm)</div>
+          </div>
+          <div class="wf-card" style="padding:.875rem;margin-top:.5rem">
+            <div style="font-size:10px;font-weight:700;margin-bottom:.4rem;color:var(--wf-text-dark)">Sessions</div>
+            <div style="font-size:10px;color:var(--wf-text-dark);margin-bottom:.2rem">● Spring Boot Quest — 3 tin</div>
+            <div style="font-size:9px;color:var(--wf-text)">○ Lập trình chung — 12 tin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation-num">①</span><strong>Progress-aware reply</strong><p>Coach đọc progress thật qua tool get_progress/get_streak — trả lời không "bịa". Context snapshot lưu trong coach_sessions.context.</p></div>
+    <div class="annotation"><span class="annotation-num">②</span><strong>Tool calling invisible</strong><p>TOOL calls ẩn với user — chỉ ASSISTANT message hiển thị. Tool_calls lưu trong coach_messages để trace/debug.</p></div>
+    <div class="annotation"><span class="annotation-num">③</span><strong>Gợi ý bước tiếp</strong><p>Dựa trên QuizAttempt (điểm cao) → đề xuất task kế tiếp hợp lý. Streaming SSE.</p></div>
+    <div class="annotation"><span class="annotation-num">④</span><strong>Gửi</strong><p>POST /ai/coach/sessions/:id/messages. Enter gửi, Shift+Enter xuống dòng.</p></div>
+    <div class="annotation"><span class="annotation-num">⑤</span><strong>Read-only cam kết</strong><p>Không tool nào write quest — user tin coach không tự sửa progress. Rate limit 60 messages/ngày.</p></div>
+  </div>
+</div>

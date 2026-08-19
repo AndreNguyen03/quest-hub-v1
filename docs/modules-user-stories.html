@@ -1,0 +1,903 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Modules & User Stories</title>
+<style>
+  :root {
+    --bg:        #F8FAFC;
+    --surface:   #FFFFFF;
+    --surface-2: #F1F5F9;
+    --border:    #E2E8F0;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #059669;
+    --accent-bg: #D1FAE5;
+    --code-bg:   #F1F5F9;
+
+    --m01: #1D4ED8; --m01-bg: #DBEAFE;
+    --m02: #7C3AED; --m02-bg: #EDE9FE;
+    --m03: #0369A1; --m03-bg: #E0F2FE;
+    --m04: #B45309; --m04-bg: #FEF3C7;
+    --m05: #BE185D; --m05-bg: #FCE7F3;
+    --m06: #065F46; --m06-bg: #D1FAE5;
+    --m07: #9F1239; --m07-bg: #FFE4E6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;
+      --text:#F1F5F9;--muted:#94A3B8;--accent:#34D399;--accent-bg:#064E3B;--code-bg:#0F172A;
+      --m01:#93C5FD;--m01-bg:#1E3A5F;
+      --m02:#C4B5FD;--m02-bg:#2E1065;
+      --m03:#7DD3FC;--m03-bg:#0C4A6E;
+      --m04:#FCD34D;--m04-bg:#451A03;
+      --m05:#F9A8D4;--m05-bg:#500724;
+      --m06:#6EE7B7;--m06-bg:#064E3B;
+      --m07:#FCA5A5;--m07-bg:#4C0519;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;--border:#E2E8F0;
+    --text:#0F172A;--muted:#64748B;--accent:#059669;--accent-bg:#D1FAE5;--code-bg:#F1F5F9;
+    --m01:#1D4ED8;--m01-bg:#DBEAFE;--m02:#7C3AED;--m02-bg:#EDE9FE;
+    --m03:#0369A1;--m03-bg:#E0F2FE;--m04:#B45309;--m04-bg:#FEF3C7;
+    --m05:#BE185D;--m05-bg:#FCE7F3;--m06:#065F46;--m06-bg:#D1FAE5;
+    --m07:#9F1239;--m07-bg:#FFE4E6;
+  }
+  :root[data-theme="dark"] {
+    --bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;
+    --text:#F1F5F9;--muted:#94A3B8;--accent:#34D399;--accent-bg:#064E3B;--code-bg:#0F172A;
+    --m01:#93C5FD;--m01-bg:#1E3A5F;--m02:#C4B5FD;--m02-bg:#2E1065;
+    --m03:#7DD3FC;--m03-bg:#0C4A6E;--m04:#FCD34D;--m04-bg:#451A03;
+    --m05:#F9A8D4;--m05-bg:#500724;--m06:#6EE7B7;--m06-bg:#064E3B;
+    --m07:#FCA5A5;--m07-bg:#4C0519;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem}
+  h1{font-size:1.5rem;font-weight:700;line-height:1.25;text-wrap:balance}
+  .subtitle{color:var(--muted);font-size:.8125rem;margin-top:.35rem}
+
+  .section-label{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+
+  /* Module overview table */
+  .overview-table {
+    width:100%;border-collapse:collapse;font-size:.8125rem;
+    background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;
+    margin-bottom:2.5rem;
+  }
+  .overview-table th {
+    text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);padding:.5rem 1rem;border-bottom:1px solid var(--border);background:var(--surface-2);
+  }
+  .overview-table td{padding:.625rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+  .overview-table tr:last-child td{border-bottom:none}
+  .overview-table tr:hover td{background:var(--surface-2)}
+  .core-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:.3rem}
+
+  /* Module tag */
+  .mod-tag {
+    display:inline-flex;align-items:center;font-size:.6875rem;font-weight:700;
+    padding:.2em .55em;border-radius:4px;white-space:nowrap;letter-spacing:.01em;
+  }
+  .m01{color:var(--m01);background:var(--m01-bg)}
+  .m02{color:var(--m02);background:var(--m02-bg)}
+  .m03{color:var(--m03);background:var(--m03-bg)}
+  .m04{color:var(--m04);background:var(--m04-bg)}
+  .m05{color:var(--m05);background:var(--m05-bg)}
+  .m06{color:var(--m06);background:var(--m06-bg)}
+  .m07{color:var(--m07);background:var(--m07-bg)}
+
+  /* Module sections */
+  .module-section { margin-bottom: 2.5rem; }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .module-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .module-desc {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* User story cards */
+  .stories-grid {
+    display: grid;
+    gap: .75rem;
+  }
+
+  .story-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .story-head {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .story-id {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .story-title {
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .persona-tag {
+    font-size: .6875rem;
+    font-weight: 600;
+    padding: .15em .5em;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  .story-body { padding: .875rem 1rem; }
+
+  .story-statement {
+    font-size: .8rem;
+    color: var(--text);
+    margin-bottom: .75rem;
+    line-height: 1.55;
+  }
+
+  .story-statement em {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .ac-label {
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .4rem;
+  }
+
+  .ac-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+
+  .ac-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    font-size: .775rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .ac-list li::before {
+    content: '✓';
+    font-size: .65rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-top: .15rem;
+    flex-shrink: 0;
+  }
+</style>
+
+<h2 class="sr-only">QuestHub Modules and User Stories</h2>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Modules &amp; User Stories</h1>
+  <p class="subtitle">7 modules · 31 user stories · format: As a / I want / So that</p>
+</header>
+
+<!-- OVERVIEW -->
+<div class="section-label">Module Overview</div>
+<table class="overview-table">
+  <thead>
+    <tr><th>Module</th><th>Mô tả</th><th>Stories</th><th>Core?</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="mod-tag m01">MOD-01 Quest</span></td>
+      <td style="color:var(--muted)">Tạo learning path, quest, chapter, task, fork, track, hoàn thành</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-01 → 10</td>
+      <td><span class="core-dot"></span>Core</td>
+    </tr>
+    <tr>
+      <td><span class="mod-tag m02">MOD-02 Marketplace</span></td>
+      <td style="color:var(--muted)">Khám phá, tìm kiếm, đánh giá quest &amp; learning path</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-11 → 15</td>
+      <td><span class="core-dot"></span>Core</td>
+    </tr>
+    <tr>
+      <td><span class="mod-tag m03">MOD-03 World</span></td>
+      <td style="color:var(--muted)">Thế giới cá nhân + district + building + achievement</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-16 → 19</td>
+      <td><span class="core-dot"></span>Core</td>
+    </tr>
+    <tr>
+      <td><span class="mod-tag m04">MOD-04 Identity</span></td>
+      <td style="color:var(--muted)">Đăng ký, đăng nhập, profile, role</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-20 → 21</td>
+      <td style="color:var(--muted)">Supporting</td>
+    </tr>
+    <tr>
+      <td><span class="mod-tag m05">MOD-05 Social</span></td>
+      <td style="color:var(--muted)">Follow, feed, comment, discussion</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-22 → 24</td>
+      <td style="color:var(--muted)">Supporting</td>
+    </tr>
+    <tr>
+      <td><span class="mod-tag m06">MOD-06 AI</span></td>
+      <td style="color:var(--muted)">Gợi ý, sinh quest, chấm bài (grader), coach cá nhân</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-25 → 26, 30 → 31</td>
+      <td style="color:var(--muted)">Supporting</td>
+    </tr>
+    <tr>
+      <td><span class="mod-tag m07">MOD-07 Admin</span></td>
+      <td style="color:var(--muted)">Kiểm duyệt, quản lý domain</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">US-27 → 29</td>
+      <td style="color:var(--muted)">Supporting</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- MOD-01 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m01">MOD-01</span>
+    <span class="module-title">Quest</span>
+    <span class="module-desc">Creator · Learner</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-01</span>
+        <span class="story-title">Tạo learning path</span>
+        <span class="persona-tag">Creator</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Creator</em>, I want to create a learning path with a title, description and difficulty, so that I can bundle multiple quests toward one goal.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Path phải thuộc một Domain (skill_domains)</li>
+          <li>Path mặc định private khi tạo</li>
+          <li>Creator là owner của path</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-02</span>
+        <span class="story-title">Tạo quest</span>
+        <span class="persona-tag">Creator</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Creator</em>, I want to create a quest with chapters and tasks, so that I can structure a roadmap for others to follow.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Quest có thể gắn vào LearningPath (hoặc độc lập)</li>
+          <li>Quest phải có ít nhất 1 chapter, mỗi chapter ít nhất 1 task</li>
+          <li>Quest mặc định là DRAFT khi tạo</li>
+          <li>Mỗi task có type (LEARN/QUIZ/PRACTICE/SUBMISSION/REFLECTION)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-03</span>
+        <span class="story-title">Thêm chapter &amp; task, gắn resource</span>
+        <span class="persona-tag">Creator</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Creator</em>, I want to add chapters, add tasks inside each chapter, and attach resources to LEARN tasks, so that the learning path is clear and logical.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Chapter có title, description, có thể sắp xếp lại thứ tự</li>
+          <li>Task có title, description, type, order — có thể reorder</li>
+          <li>Task LEARN có thể chứa nhiều Resource (VIDEO, ARTICLE, BOOK, DOCUMENT, COURSE, PODCAST, FILE, LINK)</li>
+          <li>Chapter/task có thể xóa nếu quest chưa được fork</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-04</span>
+        <span class="story-title">Cấu hình CompletionRule</span>
+        <span class="persona-tag">Creator</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Creator</em>, I want to set a completion rule for my quest, so that a quest is considered done only when the real criteria are met.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Rule mặc định: ALL_TASKS</li>
+          <li>Hỗ trợ QUIZ_SCORE (quiz ≥ ngưỡng %), SUBMISSION (phải nộp), ALL_OF (AND), ANY_OF (OR)</li>
+          <li>Rule được snapshot vào PersonalQuest khi fork — thay đổi sau không ảnh hưởng</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-05</span>
+        <span class="story-title">Fork quest</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to fork a public quest into my own copy, so that I can track my personal progress without affecting the original.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Tạo ra PersonalQuest + PersonalChapter + PersonalTask (copy toàn bộ)</li>
+          <li>Learner là owner của PersonalQuest</li>
+          <li>Quest gốc không bị thay đổi</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-06</span>
+        <span class="story-title">Hoàn thành task theo loại</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to complete tasks of different types, so that my progress reflects real work done.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>LEARN/PRACTICE/REFLECTION: tick là xong (REFLECTION bắt buộc text ≥ minLength nếu cấu hình)</li>
+          <li>SUBMISSION: phải nộp URL/text vào evidence mới tính hoàn thành</li>
+          <li>QUIZ: phải đạt passThreshold trong task.config mới tính hoàn thành</li>
+          <li>Tạo TaskCompletion record; progress tự tính</li>
+          <li>Completion có thể bị undo</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-07</span>
+        <span class="story-title">Làm quiz và xem kết quả</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to take a quiz and see my score immediately, so that I know if I've passed the task.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Mỗi lần làm quiz ghi 1 QuizAttempt (score, max_score, passed)</li>
+          <li>Đạt ngưỡng → task tự hoàn thành; chưa đạt → được làm lại</li>
+          <li>Lịch sử attempt hiển thị được</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-08</span>
+        <span class="story-title">Hoàn thành quest theo rule</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want my quest to be marked completed automatically when the rule is satisfied, so that I know I have achieved my goal.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Evaluate completion_rule khi task completed/undone</li>
+          <li>Rule thỏa → status = COMPLETED, completed_at được lưu</li>
+          <li>Activity + Notification được tạo ra</li>
+          <li>Achievement được kiểm tra mở khóa</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-09</span>
+        <span class="story-title">Chỉnh sửa PersonalQuest</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to add or modify chapters/tasks in my forked quest, so that I can customize the path to fit my needs.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Chỉ chỉnh sửa được PersonalQuest của mình</li>
+          <li>Không ảnh hưởng Quest gốc</li>
+          <li>Chapter/task thêm mới không ảnh hưởng fork khác</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-10</span>
+        <span class="story-title">Publish quest</span>
+        <span class="persona-tag">Creator</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Creator</em>, I want to publish my quest so others can discover it, so that my work can help the community.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Quest chuyển từ DRAFT sang PUBLIC</li>
+          <li>Quest xuất hiện trong Marketplace</li>
+          <li>Creator có thể unpublish bất cứ lúc nào</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOD-02 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m02">MOD-02</span>
+    <span class="module-title">Marketplace</span>
+    <span class="module-desc">Guest · Learner · Creator</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-11</span>
+        <span class="story-title">Khám phá learning path &amp; quest</span>
+        <span class="persona-tag">Guest</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Guest</em>, I want to browse learning paths and popular/trending quests, so that I can find interesting goals to pursue.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Hiển thị Learning Paths theo Domain (Programming, Language, Fitness...)</li>
+          <li>Hiển thị Popular quests (theo usage count + rating)</li>
+          <li>Hiển thị Trending quests (gần đây được dùng nhiều)</li>
+          <li>Không cần đăng nhập để xem</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-12</span>
+        <span class="story-title">Tìm kiếm quest</span>
+        <span class="persona-tag">Guest</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Guest</em>, I want to search quests by keyword, so that I can find quests relevant to my goal.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Tìm theo title, description, chapter title, task title</li>
+          <li>Kết quả xếp theo relevance</li>
+          <li>Lọc được theo domain, difficulty</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-13</span>
+        <span class="story-title">Review quest</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to rate a quest I have used with stars and optional text, so that I can help others choose quality quests.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Chỉ review được quest đã fork</li>
+          <li>Score từ 1–5 sao + content text (tùy chọn)</li>
+          <li>Chỉ được review 1 lần, có thể cập nhật</li>
+          <li>Average rating hiển thị trên quest card</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-14</span>
+        <span class="story-title">Lưu quest yêu thích</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to save a quest to my favorites, so that I can find it easily later.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Toggle favorite (add/remove)</li>
+          <li>Danh sách favorite trong profile</li>
+          <li>Không cần fork để favorite</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-15</span>
+        <span class="story-title">Xem analytics quest</span>
+        <span class="persona-tag">Creator</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Creator</em>, I want to see how many people are using and completing my quest, so that I can understand its impact.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Hiển thị: fork count, completion rate, average rating</li>
+          <li>Hiển thị task/chapter nào có drop-off nhiều nhất</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOD-03 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m03">MOD-03</span>
+    <span class="module-title">World</span>
+    <span class="module-desc">Learner · Visitor</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-16</span>
+        <span class="story-title">Xem thế giới cá nhân</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to see my Knowledge World, so that I can visualize my progress across different domains.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Mỗi Domain có một District riêng</li>
+          <li>District reflect số TaskCompletion thuộc domain đó</li>
+          <li>World cập nhật ngay khi có completion mới</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-17</span>
+        <span class="story-title">Xem district &amp; building</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to see district details with buildings, so that I can feel my progress visually.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>District hiển thị quest đã complete + quest đang active + tổng task hoàn thành</li>
+          <li>Building mở khóa theo completion_count của district — thuần visualize, không ảnh hưởng logic</li>
+          <li>Building type tự do (house, school, library...) — không gắn game rule nào</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-18</span>
+        <span class="story-title">Xem world người khác</span>
+        <span class="persona-tag">Visitor</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Visitor</em>, I want to view another user's Knowledge World, so that I can be inspired by their progress.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Chỉ xem được nếu user đó có profile public</li>
+          <li>Không thể chỉnh sửa world người khác</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-19</span>
+        <span class="story-title">Mở khóa achievement</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to unlock achievements at real milestones, so that I get intrinsic recognition without fake gamification.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Achievement gắn mốc thật: quest đầu tiên, X quests, X tasks, Y tasks trong 1 domain</li>
+          <li>Không có XP/Level/điểm thưởng</li>
+          <li>Achievement unlock hiển thị trên feed và profile</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOD-04 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m04">MOD-04</span>
+    <span class="module-title">Identity</span>
+    <span class="module-desc">Guest · Learner</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-20</span>
+        <span class="story-title">Đăng ký</span>
+        <span class="persona-tag">Guest</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Guest</em>, I want to create an account, so that I can start tracking my progress.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Đăng ký bằng email hoặc OAuth</li>
+          <li>World được tạo tự động sau khi đăng ký</li>
+          <li>Profile mặc định là public</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-21</span>
+        <span class="story-title">Cập nhật profile</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to update my profile information, so that others can know who I am.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Cập nhật avatar, bio, social links</li>
+          <li>Có thể set profile public hoặc private</li>
+          <li>Role mặc định LEARNER; nâng CREATOR khi có quest published</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOD-05 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m05">MOD-05</span>
+    <span class="module-title">Social</span>
+    <span class="module-desc">Learner</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-22</span>
+        <span class="story-title">Follow user</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to follow other users, so that I can see their progress and be motivated.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Toggle follow/unfollow</li>
+          <li>Số follower hiển thị trên profile</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-23</span>
+        <span class="story-title">Xem feed</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to see a feed of activities from people I follow, so that I can stay updated on their progress.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Hiển thị: quest completed, quest forked, task completed, quest published, achievement unlocked</li>
+          <li>Sắp xếp theo thời gian mới nhất</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-24</span>
+        <span class="story-title">Comment trên quest &amp; discussion</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to comment on quests and reply inside discussions, so that the community can help each other.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Comment trên Quest (target_type = QUEST)</li>
+          <li>Tạo Discussion gắn với Quest (hỏi đáp, chia sẻ)</li>
+          <li>Reply lồng nhau tối đa 2 cấp qua parent_id</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOD-06 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m06">MOD-06</span>
+    <span class="module-title">AI</span>
+    <span class="module-desc">Learner</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-25</span>
+        <span class="story-title">Gợi ý quest theo mục tiêu</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to describe my goal and get quest recommendations, so that I can quickly find a relevant learning path.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Input là text mô tả mục tiêu</li>
+          <li>Output là danh sách quest gợi ý có sẵn</li>
+          <li>Nếu không có quest phù hợp, gợi ý AI sinh quest mới</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-26</span>
+        <span class="story-title">Sinh quest mới bằng AI</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want AI to generate a quest for a goal that has no existing quest, so that I can start immediately without waiting for a creator.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>AI tạo quest với chapters + tasks có type phù hợp</li>
+          <li>Quest được tạo dưới tên user (không phải AI), DRAFT</li>
+          <li>User có thể chỉnh sửa trước khi dùng</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-30</span>
+        <span class="story-title">Chấm bài tự động bằng AI</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want AI to grade my SUBMISSION/PRACTICE submission against the task rubric, so that I know whether my work really meets the requirements.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Chỉ áp dụng cho task SUBMISSION/PRACTICE có rubric trong task.config</li>
+          <li>AI chấm theo rubric → PASS / FAIL / NEEDS_REVISION + score (0–100) + feedback cụ thể</li>
+          <li>PASS → tạo TaskCompletion tự động + evaluate completion_rule</li>
+          <li>FAIL / NEEDS_REVISION → user nộp lại, feedback hiển thị kèm mỗi lần nộp</li>
+          <li>Rate-limited: 20 req/day per user</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-31</span>
+        <span class="story-title">AI Coach cá nhân</span>
+        <span class="persona-tag">Learner</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As a <em>Learner</em>, I want to chat with an AI coach that knows my real progress, so that I can stay on track and know what to do next.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Chat hỏi đáp về trạng thái PersonalQuest thật của user (task đang dở, streak, achievement)</li>
+          <li>AI dùng tool calling để đọc: get_progress, get_streak, get_achievements, get_upcoming_tasks</li>
+          <li>Gợi ý bước tiếp theo dựa trên dữ liệu thật</li>
+          <li>Streaming response; lịch sử chat lưu theo session</li>
+          <li>AI chỉ đọc progress — không tự ý sửa/chấm quest của user</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOD-07 -->
+<div class="module-section">
+  <div class="module-header">
+    <span class="mod-tag m07">MOD-07</span>
+    <span class="module-title">Admin</span>
+    <span class="module-desc">Admin</span>
+  </div>
+  <div class="stories-grid">
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-27</span>
+        <span class="story-title">Ẩn quest vi phạm</span>
+        <span class="persona-tag">Admin</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As an <em>Admin</em>, I want to hide a quest that violates community guidelines, so that the marketplace remains safe and high quality.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Quest bị hidden không xuất hiện trong Marketplace</li>
+          <li>Creator được thông báo lý do</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-28</span>
+        <span class="story-title">Quản lý domain</span>
+        <span class="persona-tag">Admin</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As an <em>Admin</em>, I want to create and manage skill domains, so that quests and paths are organized properly.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Tạo / sửa / ẩn skill_domains</li>
+          <li>Domain ảnh hưởng cả LearningPath lẫn District trong World</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-head">
+        <span class="story-id">US-29</span>
+        <span class="story-title">Bật/tắt feature flag</span>
+        <span class="persona-tag">Admin</span>
+      </div>
+      <div class="story-body">
+        <div class="story-statement">As an <em>Admin</em>, I want to enable or disable specific features, so that I can control the rollout of new functionality.</div>
+        <div class="ac-label">Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Feature flag được quản lý qua admin panel</li>
+          <li>Thay đổi có hiệu lực ngay, không cần deploy lại</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>

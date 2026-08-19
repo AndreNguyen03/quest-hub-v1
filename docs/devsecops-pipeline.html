@@ -1,0 +1,688 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — DevSecOps Pipeline</title>
+<style>
+  :root {
+    --bg:        #F8FAFB;
+    --surface:   #FFFFFF;
+    --surface-2: #F0F4F8;
+    --border:    #DDE3EA;
+    --text:      #111827;
+    --muted:     #6B7280;
+    --accent:    #16A34A;
+    --accent-bg: #DCFCE7;
+
+    --stage-1:   #7C3AED; --stage-1-bg: #EDE9FE;
+    --stage-2:   #2563EB; --stage-2-bg: #DBEAFE;
+    --stage-3:   #0891B2; --stage-3-bg: #CFFAFE;
+    --stage-4:   #D97706; --stage-4-bg: #FEF3C7;
+    --stage-5:   #DC2626; --stage-5-bg: #FEE2E2;
+    --stage-6:   #16A34A; --stage-6-bg: #DCFCE7;
+    --stage-7:   #475569; --stage-7-bg: #F1F5F9;
+
+    --gate-block: #DC2626; --gate-block-bg: #FEE2E2;
+    --gate-warn:  #D97706; --gate-warn-bg:  #FEF3C7;
+    --gate-pass:  #16A34A; --gate-pass-bg:  #DCFCE7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;
+      --text:#F1F5F9;--muted:#94A3B8;--accent:#4ADE80;--accent-bg:#052E16;
+      --stage-1:#C4B5FD;--stage-1-bg:#2E1065;--stage-2:#93C5FD;--stage-2-bg:#1E3A5F;
+      --stage-3:#67E8F9;--stage-3-bg:#083344;--stage-4:#FCD34D;--stage-4-bg:#451A03;
+      --stage-5:#FCA5A5;--stage-5-bg:#4C0519;--stage-6:#4ADE80;--stage-6-bg:#052E16;
+      --stage-7:#94A3B8;--stage-7-bg:#1E293B;
+      --gate-block:#FCA5A5;--gate-block-bg:#4C0519;
+      --gate-warn:#FCD34D;--gate-warn-bg:#451A03;
+      --gate-pass:#4ADE80;--gate-pass-bg:#052E16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#0F172A;--surface:#1E293B;--surface-2:#162032;--border:#2D3F55;
+    --text:#F1F5F9;--muted:#94A3B8;--accent:#4ADE80;--accent-bg:#052E16;
+    --stage-1:#C4B5FD;--stage-1-bg:#2E1065;--stage-2:#93C5FD;--stage-2-bg:#1E3A5F;
+    --stage-3:#67E8F9;--stage-3-bg:#083344;--stage-4:#FCD34D;--stage-4-bg:#451A03;
+    --stage-5:#FCA5A5;--stage-5-bg:#4C0519;--stage-6:#4ADE80;--stage-6-bg:#052E16;
+    --stage-7:#94A3B8;--stage-7-bg:#1E293B;
+    --gate-block:#FCA5A5;--gate-block-bg:#4C0519;
+    --gate-warn:#FCD34D;--gate-warn-bg:#451A03;
+    --gate-pass:#4ADE80;--gate-pass-bg:#052E16;
+  }
+
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    font-size:14px; line-height:1.6;
+    padding:2.5rem 2rem; max-width:1050px; margin:0 auto;
+  }
+  header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.4rem; }
+  h1 { font-size:1.5rem; font-weight:700; }
+  .subtitle { color:var(--muted); font-size:.8125rem; margin-top:.35rem; }
+
+  .section-label {
+    font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:.875rem; margin-top:2rem;
+  }
+
+  .info-box {
+    background:var(--accent-bg); border:1px solid var(--accent);
+    border-radius:8px; padding:.875rem 1.125rem;
+    font-size:.8125rem; color:var(--muted); margin-bottom:2rem; line-height:1.7;
+  }
+  .info-box strong { color:var(--accent); }
+
+  /* Pipeline flow */
+  .pipeline { display:flex; flex-direction:column; gap:0; margin-bottom:2.5rem; }
+
+  .pipe-stage {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:0; position:relative;
+  }
+  .pipe-stage:first-child { border-radius:8px 8px 0 0; }
+  .pipe-stage:last-child  { border-radius:0 0 8px 8px; }
+  .pipe-stage + .pipe-stage { border-top:none; }
+
+  .pipe-head {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.75rem 1.25rem; cursor:pointer; user-select:none;
+  }
+  .pipe-num {
+    flex-shrink:0; width:26px; height:26px; border-radius:6px;
+    font-size:.7rem; font-weight:800; text-align:center; line-height:26px;
+  }
+  .pipe-title { font-weight:700; font-size:.875rem; flex:1; }
+  .pipe-trigger { font-size:.75rem; color:var(--muted); }
+
+  .pipe-body { padding:.25rem 1.25rem 1rem 1.25rem; }
+
+  .jobs-row { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.75rem; }
+  .job-chip {
+    display:flex; align-items:center; gap:.4rem;
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:6px; padding:.35rem .75rem; font-size:.775rem;
+  }
+  .job-icon { font-size:.875rem; }
+  .job-name { font-weight:600; color:var(--text); }
+  .job-tool { font-size:.7rem; color:var(--muted); margin-left:.1rem; }
+
+  .gate-row { display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; margin-top:.5rem; }
+  .gate-label { font-size:.7rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-right:.2rem; }
+  .gate {
+    display:inline-flex; align-items:center; gap:.3rem;
+    font-size:.7rem; font-weight:700; padding:.2em .6em; border-radius:4px;
+  }
+  .gate-block { background:var(--gate-block-bg); color:var(--gate-block); }
+  .gate-warn  { background:var(--gate-warn-bg);  color:var(--gate-warn); }
+  .gate-pass  { background:var(--gate-pass-bg);  color:var(--gate-pass); }
+
+  .arrow-down {
+    text-align:center; color:var(--muted); font-size:1rem;
+    padding:.2rem 0; line-height:1;
+    background:var(--bg);
+  }
+
+  /* Tools table */
+  .tools-table { width:100%; border-collapse:collapse; font-size:.8rem; margin-bottom:2rem; }
+  .tools-table th {
+    text-align:left; font-size:.7rem; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted);
+    padding:.45rem .875rem; background:var(--surface-2);
+    border:1px solid var(--border);
+  }
+  .tools-table td { padding:.55rem .875rem; border:1px solid var(--border); vertical-align:top; }
+  .tools-table tr:hover td { background:var(--surface-2); }
+  .tool-name { font-weight:700; color:var(--text); }
+  .tool-cat {
+    display:inline-block; font-size:.65rem; font-weight:700; letter-spacing:.04em;
+    text-transform:uppercase; padding:.1em .45em; border-radius:3px; margin-left:.4rem;
+  }
+  .cat-sast   { background:var(--stage-2-bg); color:var(--stage-2); }
+  .cat-sca    { background:var(--stage-1-bg); color:var(--stage-1); }
+  .cat-secret { background:var(--stage-5-bg); color:var(--stage-5); }
+  .cat-image  { background:var(--stage-4-bg); color:var(--stage-4); }
+  .cat-dast   { background:var(--stage-5-bg); color:var(--stage-5); }
+  .cat-iac    { background:var(--stage-3-bg); color:var(--stage-3); }
+  .cat-runtime{ background:var(--stage-7-bg); color:var(--stage-7); }
+  .cat-free   { background:var(--gate-pass-bg); color:var(--gate-pass); }
+  .tag-free   { font-size:.65rem; font-weight:700; color:var(--accent); }
+
+  /* GitHub Actions YAML snippet */
+  .yaml-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    overflow:hidden; margin-bottom:2rem;
+  }
+  .yaml-bar {
+    padding:.5rem 1rem; background:var(--surface-2); border-bottom:1px solid var(--border);
+    font-size:.75rem; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:.5rem;
+  }
+  .yaml-dot { width:10px; height:10px; border-radius:50%; }
+  pre.yaml {
+    padding:1.25rem; margin:0; overflow-x:auto;
+    font-family:'SFMono-Regular',Consolas,monospace; font-size:.75rem; line-height:1.7;
+    color:var(--text); background:var(--surface);
+  }
+  .y-key    { color:#2563EB; }
+  .y-val    { color:#16A34A; }
+  .y-str    { color:#D97706; }
+  .y-cmt    { color:var(--muted); font-style:italic; }
+  .y-anchor { color:#7C3AED; }
+
+  /* Shift-left concept */
+  .concept-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.75rem; margin-bottom:2rem; }
+  .concept-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:.875rem 1rem;
+  }
+  .concept-title { font-weight:700; font-size:.875rem; margin-bottom:.3rem; }
+  .concept-body  { font-size:.775rem; color:var(--muted); line-height:1.55; }
+
+  @media(max-width:640px){ body{padding:1.25rem 1rem;} h1{font-size:1.25rem;} }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>DevSecOps Pipeline</h1>
+  <p class="subtitle">Security shift-left — bảo mật ở mọi stage của CI/CD, không phải chỉ sau khi deploy</p>
+</header>
+
+<div class="info-box">
+  <strong>Shift-Left Security:</strong> Thay vì kiểm tra bảo mật sau khi deploy, tích hợp vào ngay từ khi commit code. Phát hiện sớm = fix rẻ hơn. Mỗi stage có <span style="color:var(--gate-block)">security gate</span> — vi phạm nghiêm trọng block build, còn lại warn và track.
+</div>
+
+<div class="section-label">Pipeline Flow</div>
+<div style="overflow-x:auto;margin-bottom:2rem">
+<svg viewBox="0 0 800 715" xmlns="http://www.w3.org/2000/svg" role="img" style="width:100%;max-width:800px;display:block;font-family:system-ui,-apple-system,sans-serif">
+  <title>DevSecOps Pipeline — 7 stages</title>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- TRIGGER -->
+  <rect x="250" y="12" width="300" height="38" rx="8" fill="#0F172A"/>
+  <text x="400" y="36" text-anchor="middle" fill="white" font-size="13" font-weight="700">git push · pull_request</text>
+
+  <!-- Arrow to fork -->
+  <line x1="400" y1="50" x2="400" y2="63" stroke="#94A3B8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- Fork horizontal -->
+  <line x1="183" y1="63" x2="618" y2="63" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="183" y1="63" x2="183" y2="78" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="618" y1="63" x2="618" y2="78" stroke="#94A3B8" stroke-width="1.5"/>
+  <text x="400" y="61" text-anchor="middle" fill="#CBD5E1" font-size="9.5" font-style="italic">runs in parallel</text>
+
+  <!-- STAGE 1: Pre-flight -->
+  <rect x="55" y="78" width="255" height="90" rx="8" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+  <circle cx="80" cy="100" r="13" fill="#7C3AED"/>
+  <text x="80" y="105" text-anchor="middle" fill="white" font-size="11" font-weight="800">1</text>
+  <text x="100" y="105" fill="#4C1D95" font-size="13" font-weight="700">Pre-flight</text>
+  <text x="70" y="123" fill="#6D28D9" font-size="10.5">Gitleaks · License Check</text>
+  <rect x="68" y="141" width="7" height="7" rx="1.5" fill="#DC2626"/>
+  <text x="80" y="149" fill="#B91C1C" font-size="10" font-weight="600">BLOCK — hardcoded secrets</text>
+
+  <!-- STAGE 2: SAST + SCA -->
+  <rect x="490" y="78" width="255" height="90" rx="8" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <circle cx="515" cy="100" r="13" fill="#2563EB"/>
+  <text x="515" y="105" text-anchor="middle" fill="white" font-size="11" font-weight="800">2</text>
+  <text x="535" y="105" fill="#1E3A8A" font-size="13" font-weight="700">SAST + SCA</text>
+  <text x="505" y="123" fill="#1D4ED8" font-size="10.5">SonarCloud · OWASP DC · Dependabot</text>
+  <rect x="503" y="141" width="7" height="7" rx="1.5" fill="#DC2626"/>
+  <text x="515" y="149" fill="#B91C1C" font-size="10" font-weight="600">BLOCK — CVSS ≥ 9.0 · Quality Gate fail</text>
+
+  <!-- Merge lines -->
+  <line x1="183" y1="168" x2="183" y2="197" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="618" y1="168" x2="618" y2="197" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="183" y1="197" x2="618" y2="197" stroke="#94A3B8" stroke-width="1.5"/>
+  <text x="400" y="193" text-anchor="middle" fill="#CBD5E1" font-size="9.5" font-style="italic">needs: both pass</text>
+  <line x1="400" y1="197" x2="400" y2="213" stroke="#94A3B8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- STAGE 3: Build -->
+  <rect x="200" y="213" width="400" height="85" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <circle cx="225" cy="234" r="13" fill="#0891B2"/>
+  <text x="225" y="239" text-anchor="middle" fill="white" font-size="11" font-weight="800">3</text>
+  <text x="245" y="239" fill="#155E75" font-size="13" font-weight="700">Build</text>
+  <text x="215" y="258" fill="#0E7490" font-size="10.5">Unit + Integration Tests · Docker Build (multi-stage) · Syft SBOM</text>
+  <rect x="215" y="274" width="7" height="7" rx="1.5" fill="#DC2626"/>
+  <text x="227" y="282" fill="#B91C1C" font-size="10" font-weight="600">BLOCK — any test failure · image tagged with git SHA</text>
+  <line x1="400" y1="298" x2="400" y2="311" stroke="#94A3B8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- STAGE 4: Image Scan -->
+  <rect x="200" y="311" width="400" height="85" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <circle cx="225" cy="332" r="13" fill="#D97706"/>
+  <text x="225" y="337" text-anchor="middle" fill="white" font-size="11" font-weight="800">4</text>
+  <text x="245" y="337" fill="#78350F" font-size="13" font-weight="700">Image Scan</text>
+  <text x="215" y="356" fill="#B45309" font-size="10.5">Trivy CVE scan · Hadolint · Cosign image signing</text>
+  <rect x="215" y="372" width="7" height="7" rx="1.5" fill="#DC2626"/>
+  <text x="227" y="380" fill="#B91C1C" font-size="10" font-weight="600">BLOCK — CRITICAL CVE in base image or packages</text>
+  <line x1="400" y1="396" x2="400" y2="409" stroke="#94A3B8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- STAGE 5: Deploy Staging + DAST -->
+  <rect x="200" y="409" width="400" height="85" rx="8" fill="#FFF1F2" stroke="#DC2626" stroke-width="1.5"/>
+  <circle cx="225" cy="430" r="13" fill="#DC2626"/>
+  <text x="225" y="435" text-anchor="middle" fill="white" font-size="11" font-weight="800">5</text>
+  <text x="245" y="435" fill="#881337" font-size="13" font-weight="700">Deploy Staging + DAST</text>
+  <text x="215" y="454" fill="#DC2626" font-size="10.5">Trivy IaC · OWASP ZAP Baseline · Kubesec · deploy staging</text>
+  <rect x="215" y="470" width="7" height="7" rx="1.5" fill="#DC2626"/>
+  <text x="227" y="478" fill="#B91C1C" font-size="10" font-weight="600">BLOCK — OWASP Top 10 detected · container running as root</text>
+
+  <!-- Manual approval badge -->
+  <line x1="400" y1="494" x2="400" y2="503" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="305" y="503" width="190" height="20" rx="4" fill="#FEF3C7" stroke="#D97706" stroke-width="1"/>
+  <text x="400" y="517" text-anchor="middle" fill="#92400E" font-size="10" font-weight="700">⏸  manual approval required</text>
+  <line x1="400" y1="523" x2="400" y2="537" stroke="#94A3B8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- STAGE 6: Deploy Production -->
+  <rect x="200" y="537" width="400" height="85" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
+  <circle cx="225" cy="558" r="13" fill="#16A34A"/>
+  <text x="225" y="563" text-anchor="middle" fill="white" font-size="11" font-weight="800">6</text>
+  <text x="245" y="563" fill="#14532D" font-size="13" font-weight="700">Deploy Production</text>
+  <text x="215" y="582" fill="#15803D" font-size="10.5">Cosign verify · ArgoCD GitOps sync · K8s rolling update</text>
+  <rect x="215" y="598" width="7" height="7" rx="1.5" fill="#16A34A"/>
+  <text x="227" y="606" fill="#166534" font-size="10" font-weight="600">PASS — ArgoCD health check green · rollout complete</text>
+  <line x1="400" y1="622" x2="400" y2="635" stroke="#94A3B8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- STAGE 7: Runtime Security (dashed = always on) -->
+  <rect x="200" y="635" width="400" height="72" rx="8" fill="#F8FAFC" stroke="#64748B" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <circle cx="225" cy="656" r="13" fill="#475569"/>
+  <text x="225" y="661" text-anchor="middle" fill="white" font-size="11" font-weight="800">7</text>
+  <text x="245" y="661" fill="#0F172A" font-size="13" font-weight="700">Runtime Security</text>
+  <text x="215" y="680" fill="#475569" font-size="10.5">Falco DaemonSet · Trivy weekly rescan · Grafana alerts</text>
+  <text x="400" y="697" text-anchor="middle" fill="#94A3B8" font-size="10" font-style="italic">always on · independent of pipeline trigger</text>
+</svg>
+</div>
+
+<div class="section-label">Pipeline — 7 stages · GitHub Actions</div>
+<div class="pipeline">
+
+  <!-- Stage 1 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-1-bg);color:var(--stage-1)">1</div>
+      <div class="pipe-title">Pre-flight — Secret &amp; License Scan</div>
+      <div class="pipe-trigger">trigger: every push &amp; PR</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">🔑</span>
+          <span class="job-name">Secret Scan</span>
+          <span class="job-tool">Gitleaks</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">📄</span>
+          <span class="job-name">License Check</span>
+          <span class="job-tool">FOSSA / license-checker</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Gates</span>
+        <span class="gate gate-block">🚫 Block — hardcoded secret found (API key, password, JWT secret)</span>
+        <span class="gate gate-warn">⚠ Warn — GPL license trong commercial context</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 2 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-2-bg);color:var(--stage-2)">2</div>
+      <div class="pipe-title">SAST + SCA — Code &amp; Dependency Analysis</div>
+      <div class="pipe-trigger">parallel với stage 1</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">🔍</span>
+          <span class="job-name">SAST</span>
+          <span class="job-tool">SonarCloud (free for OSS)</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">📦</span>
+          <span class="job-name">Dependency CVE</span>
+          <span class="job-tool">OWASP Dependency-Check</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🤖</span>
+          <span class="job-name">Auto-update deps</span>
+          <span class="job-tool">Dependabot (GitHub native)</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Gates</span>
+        <span class="gate gate-block">🚫 Block — CVSS ≥ 9.0 (Critical) trong dependency</span>
+        <span class="gate gate-block">🚫 Block — SonarCloud Quality Gate fail (coverage &lt; 70%, blocker issues)</span>
+        <span class="gate gate-warn">⚠ Warn — CVSS 7.0–8.9 (High)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 3 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-3-bg);color:var(--stage-3)">3</div>
+      <div class="pipe-title">Build — Test &amp; Docker Image</div>
+      <div class="pipe-trigger">sau khi stage 1 &amp; 2 pass</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">🧪</span>
+          <span class="job-name">Unit + Integration Tests</span>
+          <span class="job-tool">JUnit 5 · Testcontainers</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🐳</span>
+          <span class="job-name">Docker Build</span>
+          <span class="job-tool">Multi-stage Dockerfile</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">📋</span>
+          <span class="job-name">SBOM Generate</span>
+          <span class="job-tool">Syft (Software Bill of Materials)</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Gates</span>
+        <span class="gate gate-block">🚫 Block — any test failure</span>
+        <span class="gate gate-pass">✓ Pass — image tagged với git SHA (immutable)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 4 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-4-bg);color:var(--stage-4)">4</div>
+      <div class="pipe-title">Image Scan — Container Vulnerability</div>
+      <div class="pipe-trigger">sau khi Docker build xong</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">🔬</span>
+          <span class="job-name">Image CVE Scan</span>
+          <span class="job-tool">Trivy (OS packages + app deps)</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">📐</span>
+          <span class="job-name">Dockerfile Lint</span>
+          <span class="job-tool">Hadolint</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Gates</span>
+        <span class="gate gate-block">🚫 Block — CRITICAL vuln trong base image (update base image)</span>
+        <span class="gate gate-warn">⚠ Warn — HIGH vuln → create GitHub Issue tự động</span>
+        <span class="gate gate-pass">✓ Pass — push image to GHCR với digest SHA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 5 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-5-bg);color:var(--stage-5)">5</div>
+      <div class="pipe-title">Deploy Staging — IaC Scan + DAST</div>
+      <div class="pipe-trigger">merge to main · staging env</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">📜</span>
+          <span class="job-name">K8s Manifest Scan</span>
+          <span class="job-tool">Trivy IaC / Checkov</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🌐</span>
+          <span class="job-name">DAST — API Scan</span>
+          <span class="job-tool">OWASP ZAP (Baseline Scan)</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🔒</span>
+          <span class="job-name">K8s Hardening</span>
+          <span class="job-tool">Kubesec</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Gates</span>
+        <span class="gate gate-block">🚫 Block — container running as root, privileged mode, hostNetwork=true</span>
+        <span class="gate gate-block">🚫 Block — ZAP phát hiện OWASP Top 10 (SQLi, XSS, IDOR)</span>
+        <span class="gate gate-warn">⚠ Warn — missing resource limits, no readiness probe</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 6 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-6-bg);color:var(--stage-6)">6</div>
+      <div class="pipe-title">Deploy Production — GitOps via ArgoCD</div>
+      <div class="pipe-trigger">manual approval → ArgoCD sync</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">✍️</span>
+          <span class="job-name">Image Tag Update</span>
+          <span class="job-tool">Update Helm values.yaml với SHA digest</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🚀</span>
+          <span class="job-name">GitOps Deploy</span>
+          <span class="job-tool">ArgoCD auto-sync từ Git</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🔏</span>
+          <span class="job-name">Image Signing</span>
+          <span class="job-tool">Cosign (Sigstore) — verify provenance</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Gates</span>
+        <span class="gate gate-block">🚫 Block — image digest không khớp (supply chain attack prevention)</span>
+        <span class="gate gate-pass">✓ Pass — ArgoCD health check green → rollout complete</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 7 -->
+  <div class="pipe-stage">
+    <div class="pipe-head">
+      <div class="pipe-num" style="background:var(--stage-7-bg);color:var(--stage-7)">7</div>
+      <div class="pipe-title">Runtime Security — Continuous Monitoring</div>
+      <div class="pipe-trigger">always on · production</div>
+    </div>
+    <div class="pipe-body">
+      <div class="jobs-row">
+        <div class="job-chip">
+          <span class="job-icon">👁️</span>
+          <span class="job-name">Behavioral Anomaly</span>
+          <span class="job-tool">Falco (K8s runtime security)</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">📊</span>
+          <span class="job-name">Security Dashboard</span>
+          <span class="job-tool">Grafana + Falco alerts</span>
+        </div>
+        <div class="job-chip">
+          <span class="job-icon">🔄</span>
+          <span class="job-name">Vuln Re-scan</span>
+          <span class="job-tool">Trivy scheduled weekly</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-label">Alerts</span>
+        <span class="gate gate-block">🚫 Alert — shell spawned inside container, unexpected outbound connection</span>
+        <span class="gate gate-warn">⚠ Alert — new CVE xuất hiện cho image đang chạy (weekly scan)</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Tools overview -->
+<div class="section-label">Tools — tất cả free / open source</div>
+<div style="overflow-x:auto;margin-bottom:2rem">
+<table class="tools-table">
+  <thead>
+    <tr><th>Tool</th><th>Category</th><th>Tích hợp</th><th>Phát hiện</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="tool-name">Gitleaks</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-secret">Secret</span></td>
+      <td>GitHub Actions pre-commit hook</td>
+      <td>API keys, JWT secrets, passwords, private keys hardcoded trong code</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">SonarCloud</span> <span class="tag-free">free for OSS</span></td>
+      <td><span class="tool-cat cat-sast">SAST</span></td>
+      <td>GitHub Actions + PR decoration</td>
+      <td>SQL injection, XSS, insecure deserialization, code smells, test coverage</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">OWASP Dependency-Check</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-sca">SCA</span></td>
+      <td>Maven plugin + GitHub Actions</td>
+      <td>CVE trong Maven dependencies (NVD database)</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">Dependabot</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-sca">SCA</span></td>
+      <td>GitHub native (enable trong Settings)</td>
+      <td>Auto-creates PRs khi có dependency update / security fix</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">Trivy</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-image">Image</span> <span class="tool-cat cat-iac">IaC</span></td>
+      <td>GitHub Actions, pre-push hook</td>
+      <td>CVE trong OS packages + language libs trong Docker image; misconfig trong K8s YAML / Helm</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">Hadolint</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-iac">IaC</span></td>
+      <td>GitHub Actions</td>
+      <td>Dockerfile bad practices: no COPY --chown, running as root, no health check, latest tag</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">OWASP ZAP</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-dast">DAST</span></td>
+      <td>GitHub Actions (Baseline Scan mode)</td>
+      <td>OWASP Top 10 trên running app: SQLi, XSS, CSRF, insecure headers, open redirects</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">Kubesec</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-iac">IaC</span></td>
+      <td>GitHub Actions</td>
+      <td>K8s security score: privileged containers, host mounts, missing securityContext</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">Cosign (Sigstore)</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-image">Image</span></td>
+      <td>GitHub Actions post-build</td>
+      <td>Sign image digest → verify không ai tamper image trước khi deploy (supply chain)</td>
+    </tr>
+    <tr>
+      <td><span class="tool-name">Falco</span> <span class="tag-free">free</span></td>
+      <td><span class="tool-cat cat-runtime">Runtime</span></td>
+      <td>K8s DaemonSet</td>
+      <td>Anomalous behavior trong container lúc runtime: unexpected shell, file write to /etc, privilege escalation</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- GitHub Actions YAML -->
+<div class="section-label">GitHub Actions — Workflow structure</div>
+<div class="yaml-card">
+  <div class="yaml-bar">
+    <div class="yaml-dot" style="background:#EF4444"></div>
+    <div class="yaml-dot" style="background:#F59E0B"></div>
+    <div class="yaml-dot" style="background:#10B981"></div>
+    <span style="margin-left:.5rem">.github/workflows/devsecops.yml</span>
+  </div>
+  <pre class="yaml"><span class="y-cmt"># Chạy trên mọi push và PR</span>
+<span class="y-key">on</span>: [<span class="y-val">push</span>, <span class="y-val">pull_request</span>]
+
+<span class="y-key">jobs</span>:
+  <span class="y-anchor">secret-scan</span>:            <span class="y-cmt"># Stage 1 — nhanh nhất, chạy đầu tiên</span>
+    <span class="y-key">runs-on</span>: <span class="y-str">ubuntu-latest</span>
+    <span class="y-key">steps</span>:
+      - <span class="y-key">uses</span>: <span class="y-str">actions/checkout@v4</span>
+      - <span class="y-key">uses</span>: <span class="y-str">gitleaks/gitleaks-action@v2</span>
+
+  <span class="y-anchor">sast-and-sca</span>:           <span class="y-cmt"># Stage 2 — parallel với secret-scan</span>
+    <span class="y-key">runs-on</span>: <span class="y-str">ubuntu-latest</span>
+    <span class="y-key">steps</span>:
+      - <span class="y-key">uses</span>: <span class="y-str">actions/checkout@v4</span>
+      - <span class="y-key">name</span>: <span class="y-str">OWASP Dependency-Check</span>
+        <span class="y-key">run</span>: <span class="y-str">mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9</span>
+      - <span class="y-key">name</span>: <span class="y-str">SonarCloud Scan</span>
+        <span class="y-key">uses</span>: <span class="y-str">SonarSource/sonarcloud-github-action@master</span>
+
+  <span class="y-anchor">build-and-scan</span>:          <span class="y-cmt"># Stage 3+4 — chỉ chạy sau khi 1&2 pass</span>
+    <span class="y-key">needs</span>: [<span class="y-val">secret-scan</span>, <span class="y-val">sast-and-sca</span>]
+    <span class="y-key">runs-on</span>: <span class="y-str">ubuntu-latest</span>
+    <span class="y-key">steps</span>:
+      - <span class="y-key">name</span>: <span class="y-str">Run tests</span>
+        <span class="y-key">run</span>: <span class="y-str">mvn test</span>
+      - <span class="y-key">name</span>: <span class="y-str">Build Docker image</span>
+        <span class="y-key">run</span>: <span class="y-str">docker build -t questhub:${{ github.sha }} .</span>
+      - <span class="y-key">name</span>: <span class="y-str">Trivy image scan</span>
+        <span class="y-key">uses</span>: <span class="y-str">aquasecurity/trivy-action@master</span>
+        <span class="y-key">with</span>:
+          <span class="y-key">image-ref</span>: <span class="y-str">questhub:${{ github.sha }}</span>
+          <span class="y-key">severity</span>: <span class="y-str">CRITICAL</span>
+          <span class="y-key">exit-code</span>: <span class="y-str">'1'</span>       <span class="y-cmt"># block nếu tìm thấy CRITICAL</span>
+      - <span class="y-key">name</span>: <span class="y-str">Sign image (Cosign)</span>
+        <span class="y-key">run</span>: <span class="y-str">cosign sign --key cosign.key questhub:${{ github.sha }}</span>
+      - <span class="y-key">name</span>: <span class="y-str">Push to GHCR</span>
+        <span class="y-key">run</span>: <span class="y-str">docker push ghcr.io/questhub:${{ github.sha }}</span>
+
+  <span class="y-anchor">staging-security</span>:       <span class="y-cmt"># Stage 5 — deploy + DAST (main branch only)</span>
+    <span class="y-key">needs</span>: [<span class="y-val">build-and-scan</span>]
+    <span class="y-key">if</span>: <span class="y-str">github.ref == 'refs/heads/main'</span>
+    <span class="y-key">steps</span>:
+      - <span class="y-key">name</span>: <span class="y-str">Trivy IaC scan (K8s manifests)</span>
+        <span class="y-key">uses</span>: <span class="y-str">aquasecurity/trivy-action@master</span>
+        <span class="y-key">with</span>: { <span class="y-key">scan-type</span>: <span class="y-str">'config'</span>, <span class="y-key">scan-ref</span>: <span class="y-str">'./k8s'</span> }
+      - <span class="y-key">name</span>: <span class="y-str">Deploy to staging</span>
+        <span class="y-key">run</span>: <span class="y-str">kubectl apply -f k8s/staging/</span>
+      - <span class="y-key">name</span>: <span class="y-str">OWASP ZAP Baseline Scan</span>
+        <span class="y-key">uses</span>: <span class="y-str">zaproxy/action-baseline@v0.12.0</span>
+        <span class="y-key">with</span>:
+          <span class="y-key">target</span>: <span class="y-str">https://staging.questhub.app</span>
+          <span class="y-key">fail_action</span>: <span class="y-str">true</span></pre>
+</div>
+
+<!-- Shift-left concepts -->
+<div class="section-label">Core Concepts</div>
+<div class="concept-grid">
+  <div class="concept-card">
+    <div class="concept-title">🏃 Shift-Left</div>
+    <div class="concept-body">Phát hiện security issue sớm nhất có thể. Fix ở commit rẻ hơn 100× so với fix sau khi đã deploy. Pre-commit hook nhanh hơn CI pipeline.</div>
+  </div>
+  <div class="concept-card">
+    <div class="concept-title">🔗 Supply Chain Security</div>
+    <div class="concept-body">Cosign sign image sau khi build. Khi deploy, K8s verify signature — đảm bảo image chạy production là đúng image đã pass CI, không ai tamper giữa chừng.</div>
+  </div>
+  <div class="concept-card">
+    <div class="concept-title">📋 SBOM</div>
+    <div class="concept-body">Software Bill of Materials — danh sách đầy đủ mọi component trong image. Khi CVE mới xuất hiện, dùng SBOM để biết ngay image nào bị ảnh hưởng mà không cần rescan.</div>
+  </div>
+  <div class="concept-card">
+    <div class="concept-title">🔁 Immutable Images</div>
+    <div class="concept-body">Image được tag bằng git SHA (không dùng <code>latest</code>). Mọi deployment đều reproducible — biết chính xác commit nào đang chạy trên production.</div>
+  </div>
+  <div class="concept-card">
+    <div class="concept-title">👁️ Runtime Security</div>
+    <div class="concept-body">Falco monitor syscalls trong container. Nếu ai exploit app và spawn shell bên trong container — Falco alert ngay. Bảo vệ lớp cuối khi mọi thứ khác đã fail.</div>
+  </div>
+  <div class="concept-card">
+    <div class="concept-title">🚪 Security Gates</div>
+    <div class="concept-body">CRITICAL block build ngay. HIGH tạo GitHub Issue tự động. Medium/Low log vào dashboard để review định kỳ. Không để alert fatigue làm team ignore warning.</div>
+  </div>
+</div>

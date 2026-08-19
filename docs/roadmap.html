@@ -1,0 +1,279 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Roadmap 12 Tháng</title>
+<style>
+  :root {
+    --bg:        #F5F8FF;
+    --surface:   #FFFFFF;
+    --surface-2: #F5F8FF;
+    --border:    #C7D4F5;
+    --border-std:#E2E8F0;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #1D4ED8;
+    --accent-bg: #DBEAFE;
+    --mono-bg:   #F1F5F9;
+    --green:     #065F46; --green-bg: #D1FAE5;
+    --amber:     #92400E; --amber-bg: #FEF3C7;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-std);
+  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .875rem; margin-top: 2.5rem;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; background: var(--surface); }
+  th, td { text-align: left; padding: .6rem .75rem; font-size: .8125rem; vertical-align: top; border-bottom: 1px solid var(--border-std); }
+  th { font-size: .6875rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface-2); }
+  td code { font-family: SFMono-Regular, Consolas, monospace; font-size: .75rem; background: var(--mono-bg); padding: .1rem .3rem; border-radius: 4px; }
+
+  .month-tag { display: inline-block; font-weight: 700; font-size: .75rem; color: var(--accent); background: var(--accent-bg); padding: .15rem .5rem; border-radius: 5px; }
+  .month-now { display: inline-block; font-weight: 700; font-size: .75rem; color: var(--green); background: var(--green-bg); padding: .15rem .5rem; border-radius: 5px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card-title { font-weight: 700; font-size: .875rem; margin-bottom: .4rem; }
+  .card p, .card li { font-size: .8125rem; color: var(--text); }
+  .card ul { padding-left: 1.2rem; margin-top: .25rem; }
+  .card li { margin: .2rem 0; }
+
+  .badge { display: inline-block; font-size: .6875rem; font-weight: 700; padding: .12rem .45rem; border-radius: 5px; }
+  .badge-dev    { background: var(--accent-bg); color: var(--accent); }
+  .badge-ddia   { background: var(--amber-bg);  color: var(--amber); }
+  .badge-ctci   { background: var(--green-bg);  color: var(--green); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .day-block { display: flex; gap: .6rem; margin: .35rem 0; font-size: .8125rem; }
+  .day-num { flex: 0 0 4.5rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .book-note {
+    background: var(--amber-bg);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 6px 6px 0;
+    padding: .5rem .9rem;
+    margin: .6rem 0;
+    font-size: .8125rem;
+  }
+  .note {
+    background: var(--green-bg);
+    border-left: 3px solid var(--green);
+    border-radius: 0 6px 6px 0;
+    padding: .5rem .9rem;
+    margin: .6rem 0;
+    font-size: .8125rem;
+  }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Roadmap 12 Tháng</h1>
+  <p class="subtitle">Sprint planning · kết hợp đọc DDIA + CTCI · cập nhật theo từng tháng · tháng 1 chi tiết</p>
+</header>
+
+<!-- GIẢ ĐỊNH -->
+<div class="section-label">Giả định &amp; Nhịp độ</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Hồ sơ người học</div>
+    <ul>
+      <li>Đã quen Spring Boot / JPA — không cần học Java lại</li>
+      <li>~10h/tuần: sáng sớm trước giờ làm + chủ nhật</li>
+      <li>Thứ tự frontend: <strong>Web → React Native → Admin page → Landing page</strong></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Nhịp làm việc</div>
+    <ul>
+      <li><strong>2 tuần = 1 sprint</strong>, 1 tháng = 2 sprints</li>
+      <li>Đọc sách <strong>không bao giờ cắt</strong> dù bị trễ việc</li>
+      <li>Bị trễ tháng nào → chỉ làm "Output chính", lùi stretch goals</li>
+      <li>Mỗi sprint có Definition of Done (điều kiện hoàn thành)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- NGUYÊN TẮC -->
+<div class="section-label">Nguyên tắc thứ tự</div>
+<div class="card">
+  <ul>
+    <li><strong>Backend lõi trước, frontend sau</strong> — web cần API ổn định</li>
+    <li><strong>Module phụ thuộc nhau làm trước</strong>: Identity → Quest → Marketplace / World (đọc dữ liệu Quest) → Social / AI / Admin (supporting)</li>
+    <li><strong>Đọc sách song song</strong>: chương DDIA nào, sprint đó áp dụng ngay (học bằng làm)</li>
+    <li><strong>Hạ tầng lồng vào từng tháng</strong>: CI từ Sprint 1, K8s / observability để cuối Phase 1</li>
+  </ul>
+</div>
+
+<!-- ROADMAP -->
+<div class="section-label">Roadmap 12 tháng</div>
+<table>
+  <thead>
+    <tr><th style="width:52px">Tháng</th><th>Dev focus</th><th style="width:110px">DDIA</th><th style="width:100px">CTCI</th><th>Output chính</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="month-now">M1</span></td>
+      <td>Skeleton monolith DDD + Identity + Quest CRUD</td>
+      <td>Ch 1–2</td>
+      <td>Ch 1</td>
+      <td>Đăng ký/login + tạo &amp; publish quest</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M2</span></td>
+      <td>Fork, task completion, quiz, CompletionRule engine + Outbox pattern</td>
+      <td>Ch 3–4</td>
+      <td>Ch 2–3</td>
+      <td>Track tiến độ thật, sự kiện async</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M3</span></td>
+      <td>World (district/building/achievement) + Marketplace browse</td>
+      <td>Ch 5–6</td>
+      <td>Ch 3–4</td>
+      <td>World + duyệt quest</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M4</span></td>
+      <td>Marketplace search (Elasticsearch) + review + favorite + analytics</td>
+      <td>Ch 7</td>
+      <td>Ch 4–5</td>
+      <td>Marketplace hoàn chỉnh</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M5</span></td>
+      <td>Social (Go) + Notification (Go) + RabbitMQ</td>
+      <td>Ch 8–9</td>
+      <td>Ch 5–7</td>
+      <td>Event-driven thật, feed/comment</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M6</span></td>
+      <td>Web Next.js: auth, marketplace, quest detail, tracker</td>
+      <td>Ch 10</td>
+      <td>Ch 7–8</td>
+      <td>MVP web chạy được</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M7</span></td>
+      <td>Web: world, profile, social, review + deploy staging</td>
+      <td>Ch 11</td>
+      <td>Ch 8–9</td>
+      <td>Web đầy đủ trên staging</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M8</span></td>
+      <td>AI service (Python): gợi ý, sinh quest, chấm bài (grader), coach (tool calling) + Admin backend</td>
+      <td>Ch 12</td>
+      <td>Ch 9–10</td>
+      <td>Gợi ý quest + chấm bài AI + AI coach + admin backend</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M9</span></td>
+      <td>Phase 2: tách microservices, API Gateway Go, idempotent consumers</td>
+      <td>Ôn tập</td>
+      <td>Problems</td>
+      <td>Kiến trúc tách</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M10</span></td>
+      <td>K8s (k3s) + DevSecOps pipeline + Observability (OTel/Grafana)</td>
+      <td>Ôn tập</td>
+      <td>Problems</td>
+      <td>Prod-grade infra</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M11</span></td>
+      <td>React Native app (tracking-first)</td>
+      <td>—</td>
+      <td>Problems + mock</td>
+      <td>App mobile</td>
+    </tr>
+    <tr>
+      <td><span class="month-tag">M12</span></td>
+      <td>Admin page + landing page + polish + deploy prod</td>
+      <td>—</td>
+      <td>Tổng ôn</td>
+      <td>Full launch</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- THÁNG 1 -->
+<div class="section-label">Tháng 1 — Chi tiết</div>
+<div class="card">
+  <div class="card-title">Mục tiêu tháng</div>
+  <p>Monolith skeleton chạy Docker, Identity (US-20, US-21), Quest tạo được (US-01, 02, 03, 04, 10). Kết quả: đăng ký → tạo path → tạo quest kèm chapters/tasks → config completion rule → publish.</p>
+  <div class="book-note"><strong>Đọc sách:</strong> DDIA Ch 1–4 · CTCI Ch 1 (Arrays &amp; Strings) + Ch 2 (Linked Lists)</div>
+</div>
+
+<div class="card">
+  <div class="card-title"><span class="badge badge-dev">Sprint 1</span> · Tuần 1–2 · Nền móng + Identity</div>
+  <div class="day-block"><span class="day-num">W1 · D1-2</span><span>Git + repo, Spring Boot 3 + Java 21, package DDD (<code>identity/quest/marketplace/world/admin/...</code>), Docker Compose (postgres:16)</span></div>
+  <div class="day-block"><span class="day-num">W1 · D3</span><span>Flyway migration <code>001_users</code>, JPA User entity + repository</span></div>
+  <div class="day-block"><span class="day-num">W1 · D4-5</span><span>US-20 register (email + bcrypt), validation, GitHub Actions build+test</span></div>
+  <div class="day-block"><span class="day-num">W2 · D1-2</span><span>JWT access + refresh token (rotation), Spring Security, method-level security</span></div>
+  <div class="day-block"><span class="day-num">W2 · D3</span><span>World tự tạo khi đăng ký (AC US-20)</span></div>
+  <div class="day-block"><span class="day-num">W2 · D4-5</span><span>US-21 profile update (avatar/bio/social links, public/private), test identity, sprint review</span></div>
+  <div class="book-note"><strong>Reading:</strong> DDIA Ch 1 (reliable/scalable/maintainable) → áp dụng: thiết kế retry, error handling. DDIA Ch 2 (data models) → áp dụng: JSONB vs relation cho profile/quest. CTCI Ch 1 lý thuyết + giải vài bài arrays/strings.</div>
+</div>
+
+<div class="card">
+  <div class="card-title"><span class="badge badge-dev">Sprint 2</span> · Tuần 3–4 · Quest CRUD</div>
+  <div class="day-block"><span class="day-num">W3 · D1-2</span><span>Domain model Quest/Chapter/Task/Resource/CompletionRule (VO, mặc định <code>ALL_TASKS</code>) + Flyway migration</span></div>
+  <div class="day-block"><span class="day-num">W3 · D3</span><span>US-01 create path (title/description/difficulty, thuộc domain, private mặc định)</span></div>
+  <div class="day-block"><span class="day-num">W3 · D4-5</span><span>US-02 create quest (gắn path hoặc độc lập, ≥1 chapter ≥1 task, DRAFT)</span></div>
+  <div class="day-block"><span class="day-num">W4 · D1-2</span><span>US-03 chapters/tasks/resources + reorder</span></div>
+  <div class="day-block"><span class="day-num">W4 · D3</span><span>US-10 publish/unpublish (DRAFT→PUBLIC)</span></div>
+  <div class="day-block"><span class="day-num">W4 · D4</span><span>US-04 completion rule config (default ALL_TASKS, QUIZ_SCORE/SUBMISSION/ALL_OF/ANY_OF)</span></div>
+  <div class="day-block"><span class="day-num">W4 · D5</span><span>Sprint review: e2e "register → create path → create quest → publish" + tests xanh</span></div>
+  <div class="book-note"><strong>Reading:</strong> DDIA Ch 3 (storage &amp; retrieval) → áp dụng: index cho query quest list. DDIA Ch 4 (encoding &amp; evolution) → áp dụng: schema versioning, event payload. CTCI Ch 2 lý thuyết + luyện.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Definition of Done</div>
+  <ul>
+    <li><strong>Sprint 1:</strong> register/login/refresh token hoạt động qua API, có test, CI build pass</li>
+    <li><strong>Sprint 2:</strong> tạo được quest 3 cấp (path/quest/chapter/task), publish được, quest xuất hiện trong danh sách public</li>
+  </ul>
+</div>
+
+<div class="note"><strong>Defer cho tháng 1:</strong> OAuth (chỉ email/password), Elasticsearch, mọi thứ supporting (Social/AI/Admin). Tập trung 100% vào Identity + Quest CRUD.</div>
+
+<!-- ĐIỂM CẦN QUYẾT ĐỊNH -->
+<div class="section-label">Điểm cần quyết định (sẽ hỏi khi tới tháng)</div>
+<div class="card">
+  <ul>
+    <li><strong>Tháng 5:</strong> Social/Notification là Go app riêng nhưng Phase 1 chưa có RabbitMQ → relay sẽ HTTP-push hay kéo qua polling?</li>
+    <li><strong>Tháng 9:</strong> có cần tách microservices sớm hay giữ monolith lâu hơn?</li>
+    <li><strong>Mọi tháng:</strong> pacing thực tế — cập nhật lại roadmap file này mỗi đầu tháng</li>
+  </ul>
+</div>

@@ -1,0 +1,1029 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Database Schema</title>
+<style>
+  :root {
+    --bg:        #FAFAF8;
+    --surface:   #FFFFFF;
+    --surface-2: #F5F3EE;
+    --border:    #E5E1D8;
+    --text:      #1C1917;
+    --muted:     #78716C;
+    --accent:    #B45309;
+    --accent-bg: #FEF3C7;
+    --accent-light: #FFFBEB;
+    --mono-bg:   #F5F3EE;
+    --pk:        #0F766E; --pk-bg: #CCFBF1;
+    --fk:        #1D4ED8; --fk-bg: #DBEAFE;
+    --idx:       #6D28D9; --idx-bg: #EDE9FE;
+    --null-c:    #64748B;
+    --notnull-c: #B45309;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .875rem;
+  }
+
+  /* Summary grid */
+  .table-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .5rem;
+    margin-bottom: 2.5rem;
+  }
+  .table-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .6rem .875rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8125rem;
+    font-weight: 500;
+  }
+  .table-chip code {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .7rem;
+    background: var(--mono-bg);
+    padding: .1em .35em;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+  .chip-icon { font-size: 1rem; line-height: 1; }
+
+  /* Table definition cards */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .table-card-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .875rem 1.25rem;
+    background: var(--accent-light);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-name {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .table-desc {
+    font-size: .775rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .col-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  .col-table th {
+    text-align: left;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    padding: .45rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .col-table td {
+    padding: .5rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .col-table tr:last-child td { border-bottom: none; }
+  .col-table tbody tr:hover td { background: var(--surface-2); }
+
+  .col-name {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .775rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .col-type {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .725rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .col-note { font-size: .775rem; color: var(--muted); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: .15em .5em;
+    border-radius: 3px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-right: .2rem;
+  }
+  .badge-pk { background: var(--pk-bg); color: var(--pk); }
+  .badge-fk { background: var(--fk-bg); color: var(--fk); }
+  .badge-uq { background: var(--idx-bg); color: var(--idx); }
+  .badge-nn { background: var(--accent-bg); color: var(--accent); }
+  .badge-idx { background: #F0FDF4; color: #166534; }
+
+  /* Constraints section */
+  .constraint-list {
+    padding: .75rem 1.25rem;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    font-size: .775rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .75rem;
+  }
+  .constraint-list span { white-space: nowrap; }
+  .constraint-list code {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .7rem;
+    color: var(--text);
+  }
+
+  /* Indexes section */
+  .idx-table { width: 100%; border-collapse: collapse; font-size: .8125rem; }
+  .idx-table th {
+    text-align: left; font-size: 9.5px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    padding: .45rem 1rem; border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .idx-table td { padding: .5rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .idx-table tr:last-child td { border-bottom: none; }
+  .idx-table tbody tr:hover td { background: var(--surface-2); }
+  .idx-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; }
+
+  /* Denorm notes */
+  .denorm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; margin-bottom: 2rem; }
+  .denorm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .875rem 1rem;
+    border-left: 3px solid var(--accent);
+    font-size: .775rem;
+  }
+  .denorm-card strong { display: block; font-size: .8rem; color: var(--text); margin-bottom: .3rem; }
+  .denorm-card p { color: var(--muted); line-height: 1.55; }
+
+  .info-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: .875rem 1rem;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--accent); }
+
+  @media(max-width: 640px) {
+    body { padding: 1.25rem 1rem; }
+    h1 { font-size: 1.25rem; }
+    .table-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Database Schema</h1>
+  <p class="subtitle">PostgreSQL · 29 tables · UUID primary keys · TIMESTAMPTZ timestamps · Domain → LearningPath → Quest → Chapter → Task</p>
+</header>
+
+<div class="info-box">
+  <strong>Hierarchy cốt lõi:</strong> <code>skill_domains</code> → <code>learning_paths</code> → <code>quests</code> → <code>chapters</code> → <code>tasks</code>. Bản fork phía user: <code>personal_quests</code> → <code>personal_chapters</code> → <code>personal_tasks</code>. XP/Level không tồn tại. Purchase/Subscription = chỉ là visibility <code>DRAFT/PUBLIC/HIDDEN</code>.
+</div>
+
+<!-- TABLE OVERVIEW -->
+<div class="section-label">Tables — 29 total</div>
+<div class="table-grid">
+  <div class="table-chip"><span class="chip-icon">👤</span> <code>users</code> Identity</div>
+  <div class="table-chip"><span class="chip-icon">🗂️</span> <code>skill_domains</code> Domain</div>
+  <div class="table-chip"><span class="chip-icon">🛤️</span> <code>learning_paths</code> LearningPath</div>
+  <div class="table-chip"><span class="chip-icon">⚔️</span> <code>quests</code> Quest</div>
+  <div class="table-chip"><span class="chip-icon">📚</span> <code>chapters</code> Chapter</div>
+  <div class="table-chip"><span class="chip-icon">🎯</span> <code>tasks</code> Task</div>
+  <div class="table-chip"><span class="chip-icon">🔗</span> <code>resources</code> Resource</div>
+  <div class="table-chip"><span class="chip-icon">🌍</span> <code>worlds</code> World</div>
+  <div class="table-chip"><span class="chip-icon">🏘️</span> <code>districts</code> World</div>
+  <div class="table-chip"><span class="chip-icon">🏗️</span> <code>buildings</code> World (visual)</div>
+  <div class="table-chip"><span class="chip-icon">📋</span> <code>personal_quests</code> Progress</div>
+  <div class="table-chip"><span class="chip-icon">📚</span> <code>personal_chapters</code> Progress</div>
+  <div class="table-chip"><span class="chip-icon">🎯</span> <code>personal_tasks</code> Progress</div>
+  <div class="table-chip"><span class="chip-icon">✅</span> <code>task_completions</code> Progress</div>
+  <div class="table-chip"><span class="chip-icon">🧪</span> <code>quiz_attempts</code> Progress</div>
+  <div class="table-chip"><span class="chip-icon">⭐</span> <code>reviews</code> Community</div>
+  <div class="table-chip"><span class="chip-icon">💬</span> <code>comments</code> Community</div>
+  <div class="table-chip"><span class="chip-icon">🗨️</span> <code>discussions</code> Community</div>
+  <div class="table-chip"><span class="chip-icon">🏅</span> <code>achievements</code> Gamification</div>
+  <div class="table-chip"><span class="chip-icon">🏅</span> <code>user_achievements</code> Gamification</div>
+  <div class="table-chip"><span class="chip-icon">🔔</span> <code>notifications</code> Notification</div>
+  <div class="table-chip"><span class="chip-icon">❤️</span> <code>favorites</code> Marketplace</div>
+  <div class="table-chip"><span class="chip-icon">👥</span> <code>follows</code> Social</div>
+  <div class="table-chip"><span class="chip-icon">📣</span> <code>activities</code> Feed</div>
+  <div class="table-chip"><span class="chip-icon">🚩</span> <code>feature_flags</code> Admin</div>
+  <div class="table-chip"><span class="chip-icon">🧪</span> <code>submission_grades</code> AI Grader</div>
+  <div class="table-chip"><span class="chip-icon">🤖</span> <code>coach_sessions</code> AI Coach</div>
+  <div class="table-chip"><span class="chip-icon">💬</span> <code>coach_messages</code> AI Coach</div>
+  <div class="table-chip"><span class="chip-icon">📨</span> <code>outbox_events</code> Infra</div>
+</div>
+
+<div class="section-label">Table Definitions</div>
+
+<!-- users -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">users</span>
+    <span class="table-desc">Tài khoản người dùng — cả Creator lẫn Learner</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span> DEFAULT gen_random_uuid()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">email</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">Case-insensitive — store lowercase</td></tr>
+      <tr><td class="col-name">username</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">Lowercase alphanumeric + underscore</td></tr>
+      <tr><td class="col-name">password_hash</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">NULL khi đăng nhập qua OAuth</td></tr>
+      <tr><td class="col-name">role</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'LEARNER'</td><td class="col-note">CHECK IN ('LEARNER','CREATOR','ADMIN')</td></tr>
+      <tr><td class="col-name">avatar_url</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Cloudinary URL</td></tr>
+      <tr><td class="col-name">bio</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Max 300 ký tự (validate ở app layer)</td></tr>
+      <tr><td class="col-name">is_public</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT true</td><td class="col-note">Ảnh hưởng visibility của World / profile</td></tr>
+      <tr><td class="col-name">follower_count</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Denormalized — update via UserFollowed event</td></tr>
+      <tr><td class="col-name">following_count</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Denormalized</td></tr>
+      <tr><td class="col-name">notification_prefs</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Channels: {email, push, in_app} — toggle từng loại</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">Trigger auto-update</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- skill_domains -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">skill_domains</span>
+    <span class="table-desc">Đỉnh hierarchy — lĩnh vực kỹ năng lớn (Programming, Language, Fitness...)</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">name</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">e.g. "Programming"</td></tr>
+      <tr><td class="col-name">slug</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">e.g. "programming"</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Mô tả ngắn cho landing/marketplace</td></tr>
+      <tr><td class="col-name">icon</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Emoji icon</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- learning_paths -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">learning_paths</span>
+    <span class="table-desc">Lộ trình hoàn chỉnh đạt một mục tiêu — chứa nhiều Quest</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">domain_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → skill_domains</span></td><td class="col-note">Path thuộc một Domain</td></tr>
+      <tr><td class="col-name">author_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">SET NULL khi user bị xóa</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">e.g. "Java Backend Engineer"</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Mục tiêu của path + lộ trình tổng quan</td></tr>
+      <tr><td class="col-name">difficulty</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'BEGINNER'</td><td class="col-note">CHECK IN ('BEGINNER','INTERMEDIATE','ADVANCED')</td></tr>
+      <tr><td class="col-name">estimated_duration</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Tổng số phút ước tính — tổng của các Quest</td></tr>
+      <tr><td class="col-name">is_public</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT false</td><td class="col-note">Public = xuất hiện trên Marketplace</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- quests -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">quests</span>
+    <span class="table-desc">Template bất biến — đơn vị tiến bộ chính của hệ thống</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">learning_path_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → learning_paths</span> NULLABLE</td><td class="col-note">SET NULL khi path bị xóa. NULL = quest độc lập</td></tr>
+      <tr><td class="col-name">creator_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">SET NULL khi user bị xóa</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Max 120 ký tự</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Markdown supported</td></tr>
+      <tr><td class="col-name">difficulty</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'BEGINNER'</td><td class="col-note">CHECK IN ('BEGINNER','INTERMEDIATE','ADVANCED')</td></tr>
+      <tr><td class="col-name">estimated_duration</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Số phút ước tính — tổng của các task</td></tr>
+      <tr><td class="col-name">completion_rule</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{"type":"ALL_TASKS"}'</td><td class="col-note">Rule cấu hình được — xem bên dưới</td></tr>
+      <tr><td class="col-name">reward</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Intrinsic — {message, icon}. KHÔNG chứa XP/Level</td></tr>
+      <tr><td class="col-name">visibility</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'DRAFT'</td><td class="col-note">CHECK IN ('DRAFT','PUBLIC','HIDDEN') — purchase/subscription = public/private</td></tr>
+      <tr><td class="col-name">fork_count</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Denormalized — increment via QuestForked event</td></tr>
+      <tr><td class="col-name">avg_rating</td><td class="col-type">NUMERIC(3,2)</td><td>NULLABLE</td><td class="col-note">Denormalized — recalc via QuestRated event</td></tr>
+      <tr><td class="col-name">rating_count</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Denormalized</td></tr>
+      <tr><td class="col-name">published_at</td><td class="col-type">TIMESTAMPTZ</td><td>NULLABLE</td><td class="col-note">Set khi visibility → PUBLIC</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- completion_rule -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">CompletionRule (JSONB — value object)</span>
+    <span class="table-desc">Cấu trúc chuẩn của quests.completion_rule</span>
+  </div>
+  <div class="constraint-list" style="display:block;line-height:2">
+    <code>{ "type": "ALL_TASKS" }</code> — hoàn thành tất cả task (mặc định)<br>
+    <code>{ "type": "QUIZ_SCORE", "minScore": 80 }</code> — mọi quiz đạt ≥ 80%<br>
+    <code>{ "type": "SUBMISSION", "requiredTaskTypes": ["SUBMISSION"] }</code> — có submission cho mọi task loại đó<br>
+    <code>{ "type": "ALL_OF", "rules": [ {"type":"QUIZ_SCORE","minScore":80}, {"type":"ALL_TASKS"} ] }</code> — kết hợp (AND)<br>
+    <code>{ "type": "ANY_OF", "rules": [...] }</code> — chỉ cần 1 rule thỏa<br>
+    Quest Module evaluate rule khi task completed/undone; đạt → status COMPLETED + publish <code>quest.completed</code>.
+  </div>
+</div>
+
+<!-- chapters -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">chapters</span>
+    <span class="table-desc">Chia Quest lớn thành phần nhỏ — nhóm Task</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → quests</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">e.g. "Authentication"</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">position</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Thứ tự trong quest</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- tasks -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">tasks</span>
+    <span class="table-desc">Đơn vị nhỏ nhất user thực hiện — có TaskType chuẩn hóa</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">chapter_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → chapters</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('LEARN','QUIZ','PRACTICE','SUBMISSION','REFLECTION')</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">e.g. "Watch Spring Security Video"</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">order</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Thứ tự trong chapter</td></tr>
+      <tr><td class="col-name">config</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Type-specific: {passThreshold} cho QUIZ, {minLength} cho REFLECTION</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list">
+    <span><strong>TaskType</strong> — LEARN (đọc/xem/nghe) · QUIZ (trắc nghiệm) · PRACTICE (luyện tập) · SUBMISSION (nộp kết quả) · REFLECTION (chia sẻ bài học)</span>
+  </div>
+</div>
+
+<!-- resources -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">resources</span>
+    <span class="table-desc">Tài liệu đính kèm Task LEARN</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">task_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → tasks</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('VIDEO','ARTICLE','BOOK','DOCUMENT','COURSE','PODCAST','FILE','LINK')</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">url</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Link tài liệu</td></tr>
+      <tr><td class="col-name">estimated_minutes</td><td class="col-type">INT</td><td>NULLABLE</td><td class="col-note">Dùng tính estimated_duration của quest</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- worlds -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">worlds</span>
+    <span class="table-desc">1:1 với users — tạo tự động khi đăng ký</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- districts -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">districts</span>
+    <span class="table-desc">Khu vực trong World — tạo lazy khi có completion đầu tiên trong domain đó</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">world_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → worlds</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">skill_domain_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → skill_domains</span></td><td class="col-note">District = một Domain</td></tr>
+      <tr><td class="col-name">completion_count</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Denormalized — tăng khi nhận TaskCompleted event</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list"><span><strong>UNIQUE</strong> <code>(world_id, skill_domain_id)</code></span></div>
+</div>
+
+<!-- buildings -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">buildings</span>
+    <span class="table-desc">Công trình visualize trong District — THUẦN TRANG TRÍ, loại tùy ý</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">district_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → districts</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Tự do: HOUSE, SCHOOL, LIBRARY, GYM, LAB... không enforce enum</td></tr>
+      <tr><td class="col-name">name</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Hiển thị trên map</td></tr>
+      <tr><td class="col-name">position</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Vị trí layout</td></tr>
+      <tr><td class="col-name">unlocked_at</td><td class="col-type">TIMESTAMPTZ</td><td>NULLABLE</td><td class="col-note">Mốc khi mở khóa building (thường theo completion_count của district)</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- personal_quests -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">personal_quests</span>
+    <span class="table-desc">Bản fork của Quest thuộc về Learner — độc lập hoàn toàn</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → quests</span> NULLABLE</td><td class="col-note">SET NULL nếu quest gốc bị xóa</td></tr>
+      <tr><td class="col-name">learning_path_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → learning_paths</span> NULLABLE</td><td class="col-note">Path mà quest này thuộc về (khi fork từ trong path)</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Copy từ quest lúc fork</td></tr>
+      <tr><td class="col-name">completion_rule</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Snapshot của rule lúc fork — bản gốc đổi không ảnh hưởng</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'ACTIVE'</td><td class="col-note">CHECK IN ('ACTIVE','COMPLETED','ABANDONED')</td></tr>
+      <tr><td class="col-name">progress</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">0–100, denormalized. Recalc khi task completed/undone</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">completed_at</td><td class="col-type">TIMESTAMPTZ</td><td>NULLABLE</td><td class="col-note">Set khi completion_rule thỏa</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list">
+    <span><strong>UNIQUE</strong> <code>(user_id, quest_id)</code> WHERE quest_id IS NOT NULL — mỗi user chỉ fork một quest một lần</span>
+  </div>
+</div>
+
+<!-- personal_chapters -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">personal_chapters</span>
+    <span class="table-desc">Chapters của PersonalQuest — copy từ template hoặc user tự thêm</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">personal_quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → personal_quests</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">source_chapter_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → chapters</span> NULLABLE</td><td class="col-note">NULL = user tự thêm. SET NULL khi chapter gốc xóa</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">position</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- personal_tasks -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">personal_tasks</span>
+    <span class="table-desc">Tasks của PersonalChapter — nơi ghi nhận trạng thái hoàn thành</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">personal_chapter_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → personal_chapters</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">source_task_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → tasks</span> NULLABLE</td><td class="col-note">NULL = user tự thêm. SET NULL khi task gốc xóa</td></tr>
+      <tr><td class="col-name">type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Copy từ task gốc</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">order</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">config</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Snapshot type-config lúc fork</td></tr>
+      <tr><td class="col-name">is_completed</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT false</td><td class="col-note">Denormalized — tránh JOIN khi tính progress</td></tr>
+      <tr><td class="col-name">completed_at</td><td class="col-type">TIMESTAMPTZ</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- task_completions -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">task_completions</span>
+    <span class="table-desc">Bản ghi khi Learner hoàn thành một Task — source of truth cho World</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">personal_task_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → personal_tasks</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">UNIQUE enforces "mỗi task complete 1 lần"</td></tr>
+      <tr><td class="col-name">evidence</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">{submissionUrl, text, ...} — bắt buộc cho SUBMISSION/REFLECTION</td></tr>
+      <tr><td class="col-name">completed_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">Thời điểm thật sự hoàn thành</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list">
+    <span>Xóa row này = undo completion. ON DELETE CASCADE từ personal_tasks.</span>
+  </div>
+</div>
+
+<!-- quiz_attempts -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">quiz_attempts</span>
+    <span class="table-desc">Kết quả từng lần làm quiz — dùng để evaluate CompletionRule</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">personal_task_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → personal_tasks</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">score</td><td class="col-type">NUMERIC(5,2)</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">max_score</td><td class="col-type">NUMERIC(5,2)</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">passed</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT false</td><td class="col-note">score/max_score ≥ passThreshold trong task.config</td></tr>
+      <tr><td class="col-name">answers</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Lưu câu trả lời để review</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- reviews -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">reviews</span>
+    <span class="table-desc">Đánh giá 1–5 sao + nội dung text — chỉ sau khi fork quest</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → quests</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">score</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> CHECK(1–5)</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">content</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Nội dung review — tùy chọn</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list"><span><strong>UNIQUE</strong> <code>(user_id, quest_id)</code></span></div>
+</div>
+
+<!-- discussions + comments -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">discussions</span>
+    <span class="table-desc">Chủ đề thảo luận gắn với Quest — hỏi đáp, chia sẻ kinh nghiệm</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → quests</span> NULLABLE</td><td class="col-note">NULL = discussion toàn cộng đồng (không gắn quest)</td></tr>
+      <tr><td class="col-name">author_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">body</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Markdown supported</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'OPEN'</td><td class="col-note">CHECK IN ('OPEN','CLOSED')</td></tr>
+      <tr><td class="col-name">is_pinned</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT false</td><td class="col-note">Admin pin topic nổi bật</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">comments</span>
+    <span class="table-desc">Bình luận — cho phép reply lồng nhau qua parent_id</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">target_type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('DISCUSSION','QUEST')</td></tr>
+      <tr><td class="col-name">target_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">ID của discussion hoặc quest</td></tr>
+      <tr><td class="col-name">parent_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → comments</span> NULLABLE</td><td class="col-note">NULL = comment gốc. Reply lồng nhau tối đa 2 cấp</td></tr>
+      <tr><td class="col-name">body</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Max 2000 ký tự</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- achievements -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">achievements</span>
+    <span class="table-desc">Thành tựu intrinsic — không gắn XP/Level, chỉ gắn mốc tiến bộ thật</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">code</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-uq">UNIQUE</span></td><td class="col-note">e.g. 'FIRST_QUEST_COMPLETED'</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">e.g. "First Blood"</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">icon</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Emoji/icon</td></tr>
+      <tr><td class="col-name">criteria_type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('FIRST_QUEST','QUEST_COUNT','TASK_COUNT','DOMAIN_TASK_COUNT','STREAK_DAYS')</td></tr>
+      <tr><td class="col-name">criteria_value</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 1</td><td class="col-note">Ngưỡng — e.g. 10 task completed</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">user_achievements</span>
+    <span class="table-desc">Achievement đã mở khóa bởi user</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">achievement_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → achievements</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">unlocked_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list"><span><strong>UNIQUE</strong> <code>(user_id, achievement_id)</code></span></div>
+</div>
+
+<!-- notifications -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">notifications</span>
+    <span class="table-desc">Thông báo trong app — push/email đi qua Notification Service</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('TASK_COMPLETED','QUEST_COMPLETED','ACHIEVEMENT','FOLLOWED','COMMENT','REVIEW','ADMIN')</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">body</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">payload</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">{questId, activityId...} — deep link</td></tr>
+      <tr><td class="col-name">is_read</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT false</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- favorites + follows + activities -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">favorites</span>
+    <span class="table-desc">Quest được user lưu lại — không cần fork</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span><span class="badge badge-fk">FK → quests</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">follows</span>
+    <span class="table-desc">Quan hệ follow giữa users</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">follower_id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">following_id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list"><span>CHECK <code>follower_id != following_id</code> — không tự follow bản thân</span></div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">activities</span>
+    <span class="table-desc">Sự kiện của user — nguồn dữ liệu cho Feed</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('QUEST_COMPLETED','QUEST_FORKED','TASK_COMPLETED','QUEST_PUBLISHED','ACHIEVEMENT_UNLOCKED')</td></tr>
+      <tr><td class="col-name">payload</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Chứa questId, title, chapterTitle... để render feed không cần JOIN</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">feature_flags</span>
+    <span class="table-desc">Feature toggles — cập nhật runtime không cần redeploy</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">key</td><td class="col-type">TEXT</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">e.g. 'ai_quest_generation'</td></tr>
+      <tr><td class="col-name">is_enabled</td><td class="col-type">BOOLEAN</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT false</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- outbox_events -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">outbox_events</span>
+    <span class="table-desc">Transactional Outbox — đảm bảo domain events được deliver ít nhất 1 lần (at-least-once)</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span> DEFAULT gen_random_uuid()</td><td class="col-note">Idempotency key cho consumers</td></tr>
+      <tr><td class="col-name">aggregate_type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">'Quest', 'PersonalQuest', 'User', 'Task', v.v.</td></tr>
+      <tr><td class="col-name">aggregate_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">ID của aggregate đã raise event này</td></tr>
+      <tr><td class="col-name">event_type</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">'task.completed', 'quest.forked', v.v. — khớp với routing key</td></tr>
+      <tr><td class="col-name">payload</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Full event payload — schema định nghĩa trong Event Contracts</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'PENDING'</td><td class="col-note">CHECK IN ('PENDING','PROCESSING','PROCESSED','FAILED')</td></tr>
+      <tr><td class="col-name">retry_count</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 0</td><td class="col-note">Relay tăng lên mỗi lần retry. Max 5 → chuyển FAILED</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">processed_at</td><td class="col-type">TIMESTAMPTZ</td><td>NULLABLE</td><td class="col-note">Set khi status → PROCESSED</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list">
+    <span>Relay dùng <code>SELECT ... FOR UPDATE SKIP LOCKED</code> để tránh nhiều relay thread xử lý cùng 1 row.</span>
+    <span>Row INSERT trong <strong>cùng transaction</strong> với DB write chính (task_completions, v.v.) — đây là core của Outbox Pattern.</span>
+    <span>Nếu transaction rollback → outbox row cũng rollback → không bao giờ deliver ghost event.</span>
+  </div>
+</div>
+
+<!-- submission_grades -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">submission_grades</span>
+    <span class="table-desc">Kết quả AI chấm bài task SUBMISSION/PRACTICE — status + score + feedback (AI Grader)</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">personal_task_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → personal_tasks</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → quests</span></td><td class="col-note">Denorm — biết rubric mà không JOIN</td></tr>
+      <tr><td class="col-name">attempt_no</td><td class="col-type">INT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 1</td><td class="col-note">Lần nộp thứ mấy của task này</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('PASS','FAIL','NEEDS_REVISION')</td></tr>
+      <tr><td class="col-name">score</td><td class="col-type">NUMERIC(5,2)</td><td><span class="badge badge-nn">NOT NULL</span> CHECK(0–100)</td><td class="col-note">Điểm theo rubric</td></tr>
+      <tr><td class="col-name">feedback</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Feedback cụ thể theo từng tiêu chí rubric</td></tr>
+      <tr><td class="col-name">rubric_snapshot</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Snapshot rubric lúc chấm — chống thay đổi sau</td></tr>
+      <tr><td class="col-name">model</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">Claude model dùng để chấm</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="constraint-list">
+    <span>Mỗi lần nộp = 1 row. Kết quả mới nhất = row có <code>attempt_no</code> cao nhất (hoặc created_at mới nhất).</span>
+    <span><code>task_completions.personal_task_id</code> UNIQUE vẫn chặn duplicate completion — PASS chỉ tạo completion 1 lần.</span>
+  </div>
+</div>
+
+<!-- coach_sessions -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">coach_sessions</span>
+    <span class="table-desc">Phiên trò chuyện với AI Coach — gắn context 1 PersonalQuest (tùy chọn)</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → users</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">personal_quest_id</td><td class="col-type">UUID</td><td><span class="badge badge-fk">FK → personal_quests</span> NULLABLE</td><td class="col-note">NULL = chat tổng quát</td></tr>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">AI tự đặt từ chủ đề chat</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT 'ACTIVE'</td><td class="col-note">CHECK IN ('ACTIVE','CLOSED')</td></tr>
+      <tr><td class="col-name">context</td><td class="col-type">JSONB</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT '{}'</td><td class="col-note">Snapshot progress context cho agent (không query lại mỗi turn)</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- coach_messages -->
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-name">coach_messages</span>
+    <span class="table-desc">Tin nhắn trong session coach — role USER/ASSISTANT/TOOL, lưu cả tool_calls</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="col-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="badge badge-pk">PK</span></td><td class="col-note">—</td></tr>
+      <tr><td class="col-name">session_id</td><td class="col-type">UUID</td><td><span class="badge badge-nn">NOT NULL</span><span class="badge badge-fk">FK → coach_sessions</span></td><td class="col-note">ON DELETE CASCADE</td></tr>
+      <tr><td class="col-name">role</td><td class="col-type">TEXT</td><td><span class="badge badge-nn">NOT NULL</span></td><td class="col-note">CHECK IN ('USER','ASSISTANT','TOOL')</td></tr>
+      <tr><td class="col-name">content</td><td class="col-type">TEXT</td><td>NULLABLE</td><td class="col-note">Null khi chỉ có tool_calls</td></tr>
+      <tr><td class="col-name">tool_calls</td><td class="col-type">JSONB</td><td>NULLABLE</td><td class="col-note">Danh sách tool + args + result — để trace agent</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td><span class="badge badge-nn">NOT NULL</span> DEFAULT NOW()</td><td class="col-note">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- INDEXES -->
+<div class="section-label">Indexes</div>
+<div class="idx-card">
+  <div style="overflow-x:auto">
+  <table class="idx-table">
+    <thead>
+      <tr><th>Table</th><th>Index</th><th>Columns</th><th>Mục đích</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>users</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">email</td><td class="col-note">Login lookup</td></tr>
+      <tr><td>users</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">username</td><td class="col-note">Profile URL lookup</td></tr>
+      <tr><td>learning_paths</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">domain_id, is_public</td><td class="col-note">Browse paths by domain</td></tr>
+      <tr><td>learning_paths</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">author_id</td><td class="col-note">My paths</td></tr>
+      <tr><td>quests</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">learning_path_id</td><td class="col-note">Quest list trong path</td></tr>
+      <tr><td>quests</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">creator_id</td><td class="col-note">My quests list</td></tr>
+      <tr><td>quests</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">visibility, published_at DESC</td><td class="col-note">Browse PUBLIC + trending</td></tr>
+      <tr><td>quests</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">avg_rating DESC, rating_count DESC</td><td class="col-note">Popular quests sort</td></tr>
+      <tr><td>chapters</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">quest_id, position</td><td class="col-note">Ordered chapter list</td></tr>
+      <tr><td>tasks</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">chapter_id, order</td><td class="col-note">Ordered task list</td></tr>
+      <tr><td>resources</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">task_id</td><td class="col-note">Resource list</td></tr>
+      <tr><td>personal_quests</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, status</td><td class="col-note">My active/completed quests</td></tr>
+      <tr><td>personal_quests</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">learning_path_id</td><td class="col-note">Progress per learning path</td></tr>
+      <tr><td>personal_chapters</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">personal_quest_id, position</td><td class="col-note">Ordered chapters</td></tr>
+      <tr><td>personal_tasks</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">personal_chapter_id, order</td><td class="col-note">Ordered tasks</td></tr>
+      <tr><td>quiz_attempts</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">personal_task_id, created_at DESC</td><td class="col-note">Latest quiz attempt</td></tr>
+      <tr><td>reviews</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">quest_id</td><td class="col-note">Recalculate avg rating</td></tr>
+      <tr><td>discussions</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">quest_id, created_at DESC</td><td class="col-note">Discussion list per quest</td></tr>
+      <tr><td>comments</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">target_type, target_id, created_at</td><td class="col-note">Comment thread load</td></tr>
+      <tr><td>notifications</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, is_read, created_at DESC</td><td class="col-note">Inbox + unread count</td></tr>
+      <tr><td>favorites</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, created_at DESC</td><td class="col-note">My favorites list</td></tr>
+      <tr><td>follows</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">following_id</td><td class="col-note">Ai đang follow user này</td></tr>
+      <tr><td>activities</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, created_at DESC</td><td class="col-note">User activity timeline</td></tr>
+      <tr><td>districts</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">world_id, completion_count DESC</td><td class="col-note">World render — biggest districts first</td></tr>
+      <tr><td>buildings</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">district_id, position</td><td class="col-note">Building layout render</td></tr>
+      <tr><td>user_achievements</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, unlocked_at DESC</td><td class="col-note">Achievement timeline</td></tr>
+      <tr><td>submission_grades</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">personal_task_id, attempt_no DESC</td><td class="col-note">Lịch sử chấm của 1 task</td></tr>
+      <tr><td>submission_grades</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, created_at DESC</td><td class="col-note">Grading history của user</td></tr>
+      <tr><td>coach_sessions</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">user_id, updated_at DESC</td><td class="col-note">Danh sách session của user</td></tr>
+      <tr><td>coach_messages</td><td><span class="badge badge-idx">IDX</span></td><td class="col-type">session_id, created_at</td><td class="col-note">Lịch sử chat của session</td></tr>
+      <tr><td>outbox_events</td><td><span class="badge badge-idx">IDX</span> <span style="font-size:.7rem;color:var(--muted)">(partial)</span></td><td class="col-type">status, created_at WHERE status='PENDING'</td><td class="col-note">Relay polling — chỉ scan PENDING rows, không scan PROCESSED</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- DENORMALIZED FIELDS -->
+<div class="section-label">Denormalized Fields — Tại sao &amp; Khi nào cập nhật</div>
+<div class="denorm-grid">
+  <div class="denorm-card">
+    <strong>quests.fork_count</strong>
+    <p>Increment khi nhận <code>QuestForked</code> event. Dùng cho sort "Popular" mà không cần COUNT(personal_quests).</p>
+  </div>
+  <div class="denorm-card">
+    <strong>quests.avg_rating + rating_count</strong>
+    <p>Recalculate khi nhận <code>QuestRated</code>. Công thức incremental: new_avg = (old_avg × old_count + new_score) / (old_count + 1).</p>
+  </div>
+  <div class="denorm-card">
+    <strong>personal_quests.progress</strong>
+    <p>Recalculate ngay trong Quest Module khi task completed/undone: <code>completed / total × 100</code>. Tránh JOIN nhiều bảng mỗi lần render.</p>
+  </div>
+  <div class="denorm-card">
+    <strong>personal_tasks.is_completed</strong>
+    <p>Mirror của existence trong <code>task_completions</code>. Set true khi insert completion, false khi delete. Giúp tính progress nhanh.</p>
+  </div>
+  <div class="denorm-card">
+    <strong>districts.completion_count</strong>
+    <p>Increment khi World Module nhận <code>TaskCompleted</code> event. Source of truth để render District size + mở khóa building.</p>
+  </div>
+  <div class="denorm-card">
+    <strong>users.follower_count / following_count</strong>
+    <p>Update async khi nhận <code>UserFollowed</code>. Tránh COUNT(follows) mỗi lần render profile.</p>
+  </div>
+  <div class="denorm-card">
+    <strong>activities.payload (JSONB)</strong>
+    <p>Snapshot của quest title, username, chapter title tại thời điểm activity xảy ra. Feed render không cần JOIN nhiều bảng, tránh ghost data nếu quest bị xóa.</p>
+  </div>
+</div>

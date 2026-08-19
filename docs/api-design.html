@@ -1,0 +1,1014 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — API Design</title>
+<style>
+  :root {
+    --bg:        #F8FAFC;
+    --surface:   #FFFFFF;
+    --surface-2: #F0F6FF;
+    --border:    #DBEAFE;
+    --border-std:#E2E8F0;
+    --text:      #0F172A;
+    --muted:     #64748B;
+    --accent:    #0369A1;
+    --accent-bg: #E0F2FE;
+    --mono-bg:   #F1F5F9;
+    --get:       #0369A1; --get-bg: #E0F2FE;
+    --post:      #065F46; --post-bg: #D1FAE5;
+    --put:       #B45309; --put-bg: #FEF3C7;
+    --patch:     #6D28D9; --patch-bg: #EDE9FE;
+    --delete:    #9F1239; --delete-bg: #FFE4E6;
+    --auth:      #1E3A5F; --auth-bg: #DBEAFE;
+    --admin:     #4C0519; --admin-bg: #FFE4E6;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2.5rem 2rem;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-std);
+  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .875rem;
+    margin-top: 2.5rem;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  /* Overview grid */
+  .service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .5rem;
+    margin-bottom: 2.5rem;
+  }
+  .service-chip {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 6px;
+    padding: .7rem 1rem;
+    font-size: .8125rem;
+  }
+  .service-chip-name { font-weight: 600; color: var(--text); margin-bottom: .2rem; }
+  .service-chip-base {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .7rem;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: .1em .4em;
+    border-radius: 3px;
+  }
+  .service-chip-count { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+
+  /* Service sections */
+  .service-section { margin-bottom: 2.5rem; }
+  .service-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .875rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid var(--accent);
+  }
+  .service-title { font-size: .9rem; font-weight: 700; color: var(--text); }
+  .service-base {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .75rem;
+    color: var(--muted);
+    background: var(--mono-bg);
+    padding: .2em .5em;
+    border-radius: 4px;
+  }
+  .service-body {
+    background: var(--surface);
+    border: 1px solid var(--border-std);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+  }
+
+  /* Endpoint rows */
+  .endpoint {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: start;
+    gap: .75rem;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--border-std);
+  }
+  .endpoint:last-child { border-bottom: none; }
+  .endpoint:hover { background: var(--surface-2); }
+
+  .method {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .65rem;
+    font-weight: 800;
+    padding: .25em .6em;
+    border-radius: 4px;
+    letter-spacing: .05em;
+    white-space: nowrap;
+    margin-top: .1rem;
+  }
+  .method-get    { background: var(--get-bg);    color: var(--get); }
+  .method-post   { background: var(--post-bg);   color: var(--post); }
+  .method-put    { background: var(--put-bg);    color: var(--put); }
+  .method-patch  { background: var(--patch-bg);  color: var(--patch); }
+  .method-delete { background: var(--delete-bg); color: var(--delete); }
+
+  .endpoint-path {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .8rem;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: .2rem;
+  }
+  .endpoint-path .param { color: var(--accent); }
+  .endpoint-desc { font-size: .775rem; color: var(--muted); line-height: 1.5; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .3rem; }
+  .tag {
+    font-size: .6rem; font-weight: 600;
+    padding: .15em .5em; border-radius: 3px;
+    white-space: nowrap; letter-spacing: .02em;
+  }
+  .tag-auth  { background: var(--auth-bg); color: var(--auth); }
+  .tag-admin { background: var(--admin-bg); color: var(--admin); }
+  .tag-pub   { background: #F0FDF4; color: #166534; }
+
+  .endpoint-detail { grid-column: 2 / 4; }
+  .endpoint-body {
+    background: var(--mono-bg);
+    border: 1px solid var(--border-std);
+    border-radius: 5px;
+    padding: .6rem .875rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .725rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-top: .5rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .body-key { color: var(--accent); }
+  .body-str { color: #065F46; }
+  .body-num { color: var(--put); }
+  .body-bool { color: var(--patch); }
+  .body-comment { color: var(--muted); font-style: italic; }
+
+  /* Pagination note */
+  .info-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border-std);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: .875rem 1rem;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .info-box strong { color: var(--text); }
+
+  @media(max-width: 640px) {
+    body { padding: 1.25rem 1rem; }
+    h1 { font-size: 1.25rem; }
+    .endpoint { grid-template-columns: 60px 1fr; }
+    .endpoint-detail { grid-column: 2; }
+    .service-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>API Design</h1>
+  <p class="subtitle">REST · Base URL: <code style="font-family:monospace;font-size:.8rem;background:#E0F2FE;color:#0369A1;padding:.1em .4em;border-radius:3px;">/api</code> · JWT Bearer authentication · JSON request &amp; response</p>
+</header>
+
+<div class="info-box">
+  <strong>Pagination</strong> — Tất cả list endpoints hỗ trợ <code>?page=1&limit=20</code>. Response bao gồm <code>{ data: [], meta: { total, page, limit, totalPages } }</code>. <br>
+  <strong>Errors</strong> — <code>{ error: { code: "QUEST_NOT_FOUND", message: "..." } }</code>. HTTP status codes chuẩn: 400 validation, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict. <br>
+  <strong>Routing</strong> — Phase 1: tất cả đi qua <code>/api</code>, gateway/router forward tới module tương ứng (Java modules trong 1 Spring Boot app, Social/Notification là Go apps, AI là Python). Phase 2: mỗi service có host riêng.
+</div>
+
+<!-- Service overview -->
+<div class="section-label">Modules — 8 tổng</div>
+<div class="service-grid">
+  <div class="service-chip"><div class="service-chip-name">Identity Module</div><div><span class="service-chip-base">/auth, /users</span></div><div class="service-chip-count">7 endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">Quest Module</div><div><span class="service-chip-base">/learning-paths, /quests, /personal-quests</span></div><div class="service-chip-count">28 endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">Marketplace Module</div><div><span class="service-chip-base">/marketplace</span></div><div class="service-chip-count">11 endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">World Module</div><div><span class="service-chip-base">/world</span></div><div class="service-chip-count">4 endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">Social Module</div><div><span class="service-chip-base">/feed, /discussions, /comments</span></div><div class="service-chip-count">11 endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">AI Module</div><div><span class="service-chip-base">/ai</span></div><div class="service-chip-count">6 endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">Notification Module</div><div><span class="service-chip-base">internal only</span></div><div class="service-chip-count">no public endpoints</div></div>
+  <div class="service-chip"><div class="service-chip-name">Admin Module</div><div><span class="service-chip-base">/admin</span></div><div class="service-chip-count">9 endpoints</div></div>
+</div>
+
+<!-- IDENTITY -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">Identity Module</span>
+    <span class="service-base">/api/v1/auth · /api/v1/users</span>
+  </div>
+  <div class="service-body">
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/auth/register</div>
+        <div class="endpoint-desc">Tạo tài khoản mới (email hoặc OAuth). World được tạo tự động — Identity publish <code>user.registered</code>.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request body</span>
+{ <span class="body-key">"email"</span>: <span class="body-str">"user@example.com"</span>, <span class="body-key">"username"</span>: <span class="body-str">"john_doe"</span>, <span class="body-key">"displayName"</span>: <span class="body-str">"John Doe"</span>, <span class="body-key">"password"</span>: <span class="body-str">"..."</span> }
+
+<span class="body-comment">// Response 201</span>
+<span class="body-key">"data"</span>: { <span class="body-key">"accessToken"</span>: <span class="body-str">"eyJ..."</span>, <span class="body-key">"refreshToken"</span>: <span class="body-str">"..."</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/auth/login</div>
+        <div class="endpoint-desc">Đăng nhập bằng email/password. Trả về accessToken (15 phút) và refreshToken (7 ngày, httpOnly cookie).</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/auth/refresh</div>
+        <div class="endpoint-desc">Rotate refresh token. Gửi refreshToken trong httpOnly cookie, nhận accessToken mới.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/auth/logout</div>
+        <div class="endpoint-desc">Xóa refresh token khỏi Redis. Invalidate session hiện tại.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/me</div>
+        <div class="endpoint-desc">Profile của current user, bao gồm stats denorm (quest count, follower_count, following_count).</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/users/me</div>
+        <div class="endpoint-desc">Cập nhật avatar, bio, is_public. Không cho đổi email/username qua endpoint này.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/<span class="param">:username</span></div>
+        <div class="endpoint-desc">Public profile của user. Nếu is_public=false, trả 404 với visitor chưa follow.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUEST -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">Quest Module</span>
+    <span class="service-base">/api/v1/learning-paths · /api/v1/quests · /api/v1/personal-quests</span>
+  </div>
+  <div class="service-body">
+
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/learning-paths</div>
+        <div class="endpoint-desc">Tạo learning path mới — mặc định private. Phải thuộc một <code>skill_domain</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator)</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request body</span>
+{ <span class="body-key">"title"</span>: <span class="body-str">"Java Backend Engineer"</span>, <span class="body-key">"description"</span>: <span class="body-str">"..."</span>, <span class="body-key">"domainId"</span>: <span class="body-str">"uuid"</span>, <span class="body-key">"difficulty"</span>: <span class="body-str">"INTERMEDIATE"</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/learning-paths/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Chi tiết path + danh sách quest. Path PUBLIC accessible by anyone; private chỉ author.</div>
+        <div class="tags"><span class="tag tag-pub">Public (if public)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/learning-paths/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Sửa title, description, difficulty, is_public.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (author only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/learning-paths/<span class="param">:id</span>/publish</div>
+        <div class="endpoint-desc">Path is_public = true → xuất hiện trong Marketplace. Unpublish qua PUT với is_public=false.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (author only)</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests</div>
+        <div class="endpoint-desc">Tạo quest mới ở trạng thái DRAFT. Chưa xuất hiện trong Marketplace.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator)</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request body — completionRule là cấu hình được</span>
+{
+  <span class="body-key">"title"</span>: <span class="body-str">"Spring Security Fundamentals"</span>,
+  <span class="body-key">"description"</span>: <span class="body-str">"..."</span>,
+  <span class="body-key">"learningPathId"</span>: <span class="body-str">"uuid"</span>, <span class="body-comment">// nullable</span>
+  <span class="body-key">"difficulty"</span>: <span class="body-str">"INTERMEDIATE"</span>,
+  <span class="body-key">"completionRule"</span>: { <span class="body-key">"type"</span>: <span class="body-str">"ALL_TASKS"</span> },
+  <span class="body-key">"reward"</span>: { <span class="body-key">"message"</span>: <span class="body-str">"..."</span>, <span class="body-key">"icon"</span>: <span class="body-str">"🎖️"</span> }
+}</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Chi tiết quest + chapters + tasks + resources. PUBLIC quests accessible by anyone. DRAFT chỉ creator.</div>
+        <div class="tags"><span class="tag tag-pub">Public (if PUBLIC)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Cập nhật metadata (title, description, difficulty, completionRule, reward). PUBLIC quest chỉ sửa được metadata, không sửa chapters/tasks.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/publish</div>
+        <div class="endpoint-desc">Publish quest → visibility = PUBLIC. Phải có ít nhất 1 chapter với 1 task. Triggers <code>quest.published</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/unpublish</div>
+        <div class="endpoint-desc">Unpublish → visibility = DRAFT. Quest biến mất khỏi Marketplace. PersonalQuests không bị ảnh hưởng.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:questId</span>/chapters</div>
+        <div class="endpoint-desc">Thêm chapter vào quest (title, description, position). Chỉ được khi quest chưa có fork nào.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:questId</span>/chapters/<span class="param">:chapterId</span></div>
+        <div class="endpoint-desc">Sửa title, description, position của chapter.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:questId</span>/chapters/<span class="param">:chapterId</span></div>
+        <div class="endpoint-desc">Xóa chapter. 409 nếu quest đã có fork.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:questId</span>/chapters/<span class="param">:chapterId</span>/tasks</div>
+        <div class="endpoint-desc">Thêm task vào chapter — có <code>type</code> (LEARN/QUIZ/PRACTICE/SUBMISSION/REFLECTION) và config type-specific (passThreshold, minLength...).</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:questId</span>/tasks/<span class="param">:taskId</span></div>
+        <div class="endpoint-desc">Sửa title, description, type, config, order của task.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:questId</span>/tasks/<span class="param">:taskId</span></div>
+        <div class="endpoint-desc">Xóa task. 409 nếu quest đã có fork.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/tasks/<span class="param">:taskId</span>/resources</div>
+        <div class="endpoint-desc">Gắn resource vào task LEARN (VIDEO/ARTICLE/BOOK/DOCUMENT/COURSE/PODCAST/FILE/LINK).</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/resources/<span class="param">:resourceId</span></div>
+        <div class="endpoint-desc">Xóa resource.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/fork</div>
+        <div class="endpoint-desc">Fork quest → tạo PersonalQuest + copy chapters/tasks + snapshot completion_rule. 409 nếu đã fork rồi. Triggers <code>quest.forked</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Response 201</span>
+{ <span class="body-key">"personalQuestId"</span>: <span class="body-str">"uuid"</span>, <span class="body-key">"title"</span>: <span class="body-str">"Spring Security Fundamentals"</span>, <span class="body-key">"progress"</span>: <span class="body-num">0</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/me/quests</div>
+        <div class="endpoint-desc">Quests do current user tạo ra. Filter: <code>?visibility=DRAFT|PUBLIC|HIDDEN</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/analytics</div>
+        <div class="endpoint-desc">Fork count, completion rate, avg rating, task drop-off theo chapter/task. Chỉ creator xem được.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (creator only)</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/personal-quests</div>
+        <div class="endpoint-desc">Danh sách personal quests của current user. Filter: <code>?status=ACTIVE</code> | <code>COMPLETED</code> | <code>ABANDONED</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Chi tiết personal quest + chapters + tasks + completion status từng task.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span>/chapters</div>
+        <div class="endpoint-desc">Thêm custom chapter vào PersonalQuest (source_chapter_id = null).</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span>/chapters/<span class="param">:chapterId</span>/tasks</div>
+        <div class="endpoint-desc">Thêm custom task. Không ảnh hưởng quest gốc hay fork khác.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-patch">PATCH</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span>/tasks/<span class="param">:taskId</span>/complete</div>
+        <div class="endpoint-desc">Hoàn thành task theo type: LEARN/PRACTICE/REFLECTION — tick là xong (REFLECTION bắt buộc <code>evidence.text</code> ≥ minLength); SUBMISSION bắt buộc <code>evidence.submissionUrl</code>. QUIZ → 409, dùng quiz-attempts. Recalc progress + evaluate completion_rule; thỏa → status COMPLETED + publish <code>task.completed</code> / <code>quest.completed</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request body</span>
+{ <span class="body-key">"evidence"</span>: { <span class="body-key">"submissionUrl"</span>: <span class="body-str">"https://..."</span> } } <span class="body-comment">// optional cho LEARN/PRACTICE</span>
+
+<span class="body-comment">// Response 200</span>
+{ <span class="body-key">"progress"</span>: <span class="body-num">75</span>, <span class="body-key">"isCompleted"</span>: <span class="body-bool">false</span>, <span class="body-key">"completedAt"</span>: <span class="body-str">null</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span>/tasks/<span class="param">:taskId</span>/complete</div>
+        <div class="endpoint-desc">Undo completion — xóa TaskCompletion. Recalculate progress. Không revert quest status nếu đã COMPLETED.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span>/tasks/<span class="param">:taskId</span>/quiz-attempts</div>
+        <div class="endpoint-desc">Nộp kết quả quiz → tạo QuizAttempt (score, max_score). Nếu score ≥ passThreshold → task tự hoàn thành.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request body</span>
+{ <span class="body-key">"score"</span>: <span class="body-num">9</span>, <span class="body-key">"maxScore"</span>: <span class="body-num">10</span>, <span class="body-key">"answers"</span>: { <span class="body-key">"q1"</span>: <span class="body-str">"a"</span> } }
+
+<span class="body-comment">// Response 201</span>
+{ <span class="body-key">"attemptId"</span>, <span class="body-key">"passed"</span>: <span class="body-bool">true</span>, <span class="body-key">"taskCompleted"</span>: <span class="body-bool">true</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/personal-quests/<span class="param">:id</span>/tasks/<span class="param">:taskId</span>/quiz-attempts</div>
+        <div class="endpoint-desc">Lịch sử các lần làm quiz — hiển thị score từng attempt.</div>
+        <div class="tags"><span class="tag tag-auth">Auth (owner only)</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MARKETPLACE -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">Marketplace Module</span>
+    <span class="service-base">/api/v1/marketplace · /api/v1/quests/:id/reviews</span>
+  </div>
+  <div class="service-body">
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/marketplace/quests</div>
+        <div class="endpoint-desc">Search + filter quests. Query params: <code>?q=keyword&domain=programming&difficulty=INTERMEDIATE&sort=popular|trending|recent&page=1&limit=20</code>. Backed by Elasticsearch.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Response 200</span>
+{
+  <span class="body-key">"data"</span>: [{ <span class="body-key">"id"</span>, <span class="body-key">"title"</span>, <span class="body-key">"creator"</span>, <span class="body-key">"domain"</span>, <span class="body-key">"difficulty"</span>, <span class="body-key">"forkCount"</span>, <span class="body-key">"avgRating"</span>, <span class="body-key">"taskCount"</span> }],
+  <span class="body-key">"meta"</span>: { <span class="body-key">"total"</span>: <span class="body-num">142</span>, <span class="body-key">"page"</span>: <span class="body-num">1</span>, <span class="body-key">"limit"</span>: <span class="body-num">20</span>, <span class="body-key">"totalPages"</span>: <span class="body-num">8</span> }
+}</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/marketplace/learning-paths</div>
+        <div class="endpoint-desc">Browse learning paths theo domain. Filter: <code>?domain=programming</code>. Path PUBLIC mới xuất hiện.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/marketplace/trending</div>
+        <div class="endpoint-desc">Top 20 quests trending trong 7 ngày qua. Cached trong Redis (TTL 15 phút). Algo: fork_count + completion_count trong window.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/marketplace/popular</div>
+        <div class="endpoint-desc">Top quests mọi thời đại theo avg_rating × log(fork_count + 1). Cached Redis (TTL 1 giờ).</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/reviews</div>
+        <div class="endpoint-desc">Danh sách reviews của quest. Paginated, sorted by created_at DESC.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/reviews</div>
+        <div class="endpoint-desc">Tạo review (score 1–5 + content tùy chọn). 403 nếu user chưa fork quest. 409 nếu đã review rồi. Triggers <code>quest.rated</code> (CREATED).</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request body</span>
+{ <span class="body-key">"score"</span>: <span class="body-num">5</span>, <span class="body-key">"content"</span>: <span class="body-str">"Rất chi tiết, hữu ích!"</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/reviews/me</div>
+        <div class="endpoint-desc">Cập nhật review của current user. Triggers <code>quest.rated</code> (UPDATED) để recalc avg_rating.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/reviews/me</div>
+        <div class="endpoint-desc">Xóa review. Triggers <code>quest.rated</code> (DELETED).</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/favorite</div>
+        <div class="endpoint-desc">Lưu quest vào favorites. Idempotent.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/favorite</div>
+        <div class="endpoint-desc">Xóa khỏi favorites.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/me/favorites</div>
+        <div class="endpoint-desc">Danh sách quests đã favorite. Paginated, sorted by created_at DESC.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WORLD -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">World Module</span>
+    <span class="service-base">/api/v1/world</span>
+  </div>
+  <div class="service-body">
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/world</div>
+        <div class="endpoint-desc">World của current user — tất cả districts (skill_domain + completion_count) + buildings + achievements đã unlock.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/<span class="param">:username</span>/world</div>
+        <div class="endpoint-desc">World của user khác. 404 nếu user.is_public = false.</div>
+        <div class="tags"><span class="tag tag-pub">Public (if user is public)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/world/districts/<span class="param">:skillDomainId</span></div>
+        <div class="endpoint-desc">Chi tiết một district — quest đã complete, quest đang active, tổng task hoàn thành, danh sách buildings.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/world/achievements</div>
+        <div class="endpoint-desc">Danh sách achievements của current user + unlocked_at. <code>?onlyLocked=true</code> để xem achievements chưa mở.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOCIAL -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">Social Module</span>
+    <span class="service-base">/api/v1/feed · /api/v1/discussions · /api/v1/comments · /api/v1/users/:username</span>
+  </div>
+  <div class="service-body">
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/feed</div>
+        <div class="endpoint-desc">Activity feed của những người current user đang follow. Paginated. Sort: created_at DESC. Types: QUEST_COMPLETED, QUEST_FORKED, TASK_COMPLETED, QUEST_PUBLISHED, ACHIEVEMENT_UNLOCKED.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/<span class="param">:username</span>/activities</div>
+        <div class="endpoint-desc">Public activities của một user. Không hiện TASK_COMPLETED (quá nhiều noise).</div>
+        <div class="tags"><span class="tag tag-pub">Public (if user is public)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/users/<span class="param">:username</span>/follow</div>
+        <div class="endpoint-desc">Follow user. Idempotent. Social INSERT follows → publish <code>user.followed</code> để Identity cập nhật follower_count.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-delete">DELETE</span>
+      <div>
+        <div class="endpoint-path">/users/<span class="param">:username</span>/follow</div>
+        <div class="endpoint-desc">Unfollow user. Update denormalized counts tương ứng.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/me/following</div>
+        <div class="endpoint-desc">Danh sách người current user đang follow. Paginated.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/users/<span class="param">:username</span>/followers</div>
+        <div class="endpoint-desc">Danh sách follower của user. Paginated.</div>
+        <div class="tags"><span class="tag tag-pub">Public (if user is public)</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/discussions</div>
+        <div class="endpoint-desc">Danh sách discussions gắn với quest. Filter: <code>?status=OPEN|CLOSED</code>. Paginated.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/discussions</div>
+        <div class="endpoint-desc">Tạo discussion trên quest. Triggers <code>discussion.created</code> → Notification thông báo creator quest.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/discussions/<span class="param">:id</span>/comments</div>
+        <div class="endpoint-desc">Thread comment của discussion. Paginated.</div>
+        <div class="tags"><span class="tag tag-pub">Public</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/discussions/<span class="param">:id</span>/comments</div>
+        <div class="endpoint-desc">Comment vào discussion. <code>parentId</code> để reply (tối đa 2 cấp). Triggers <code>comment.created</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/quests/<span class="param">:id</span>/comments</div>
+        <div class="endpoint-desc">Comment trực tiếp lên quest (target_type = QUEST). Triggers <code>comment.created</code> → thông báo creator.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">AI Module</span>
+    <span class="service-base">/api/v1/ai</span>
+  </div>
+  <div class="service-body">
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/ai/recommend</div>
+        <div class="endpoint-desc">Gợi ý quests có sẵn phù hợp với mục tiêu. Input là text. Claude API xử lý + search Elasticsearch. Rate-limited: 10 req/hour per user.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request</span>
+{ <span class="body-key">"goal"</span>: <span class="body-str">"I want to become a backend developer in 6 months"</span> }
+
+<span class="body-comment">// Response 200</span>
+{ <span class="body-key">"recommendations"</span>: [{ <span class="body-key">"quest"</span>: {...}, <span class="body-key">"reason"</span>: <span class="body-str">"Covers PostgreSQL and REST APIs..."</span> }],
+  <span class="body-key">"canGenerate"</span>: <span class="body-bool">true</span> <span class="body-comment">// true nếu không có quest phù hợp</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/ai/generate-quest</div>
+        <div class="endpoint-desc">Sinh quest mới từ mục tiêu — chapters + tasks có type phù hợp. Quest được tạo dưới tên user, status DRAFT, user edit trước khi publish. Rate-limited: 3 req/day per user.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request</span>
+{ <span class="body-key">"goal"</span>: <span class="body-str">"Learn Docker and container deployment"</span>, <span class="body-key">"domainId"</span>: <span class="body-str">"uuid"</span> }
+
+<span class="body-comment">// Response 201 — quest is created as DRAFT</span>
+{ <span class="body-key">"questId"</span>: <span class="body-str">"uuid"</span>, <span class="body-key">"title"</span>: <span class="body-str">"Docker Fundamentals"</span>, <span class="body-key">"taskCount"</span>: <span class="body-num">8" }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/ai/grade</div>
+        <div class="endpoint-desc">Chấm bài task SUBMISSION/PRACTICE theo rubric trong task.config. Kết quả PASS → tự tạo TaskCompletion qua event <code>submission.graded</code>. Rate-limited: 20 req/day per user.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request</span>
+{ <span class="body-key">"personalTaskId"</span>: <span class="body-str">"uuid"</span>, <span class="body-key">"evidence"</span>: { <span class="body-key">"text"</span>: <span class="body-str">"..."</span>, <span class="body-key">"submissionUrl"</span>: <span class="body-str">"..."</span> } }
+
+<span class="body-comment">// Response 200</span>
+{ <span class="body-key">"gradeId"</span>: <span class="body-str">"uuid"</span>, <span class="body-key">"status"</span>: <span class="body-str">"PASS"</span>, <span class="body-key">"score"</span>: <span class="body-num">92</span>,
+  <span class="body-key">"feedback"</span>: <span class="body-str">"Đúng trọng tâm rubric..."</span>, <span class="body-key">"gradedAt"</span>: <span class="body-str">"..."</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/ai/coach/sessions</div>
+        <div class="endpoint-desc">Tạo phiên coach mới. Body tùy chọn <code>personalQuestId</code> để gắn context quest cụ thể. Rate-limited: 5 sessions/day.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request</span>
+{ <span class="body-key">"personalQuestId"</span>: <span class="body-str">"uuid"</span> }
+
+<span class="body-comment">// Response 201</span>
+{ <span class="body-key">"sessionId"</span>: <span class="body-str">"uuid"</span>, <span class="body-key">"status"</span>: <span class="body-str">"ACTIVE"</span>, <span class="body-key">"title"</span>: <span class="body-str">"Spring Boot Quest"</span> }</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/ai/coach/sessions</div>
+        <div class="endpoint-desc">Danh sách phiên coach của user (mới nhất trước). Hỗ trợ <code>?status=ACTIVE</code>.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/ai/coach/sessions/<span class="param">:id</span>/messages</div>
+        <div class="endpoint-desc">Gửi tin nhắn. AI dùng tool calling đọc progress thật (get_progress, get_streak, get_achievements, get_upcoming_tasks) rồi trả lời streaming qua SSE. Rate-limited: 60 messages/day.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+      <div></div>
+      <div class="endpoint-detail">
+        <div class="endpoint-body"><span class="body-comment">// Request</span>
+{ <span class="body-key">"content"</span>: <span class="body-str">"Tôi đang kẹt ở đâu trong quest này?"</span> }
+
+<span class="body-comment">// Response 200 — text/event-stream (SSE)</span>
+<span class="body-str">data: {"delta":"Bạn đang ở Chapter 2 · Task 3 (Docker volumes)..."}</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/ai/coach/sessions/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Lịch sử tin nhắn của session (role USER/ASSISTANT/TOOL). Dùng để hiển thị lại chat khi load lại trang.</div>
+        <div class="tags"><span class="tag tag-auth">Auth</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="service-section">
+  <div class="service-header">
+    <span class="service-title">Admin Module</span>
+    <span class="service-base">/api/v1/admin — requires role: ADMIN</span>
+  </div>
+  <div class="service-body">
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/admin/quests</div>
+        <div class="endpoint-desc">Tất cả quests với visibility filter. Hỗ trợ sort, search, filter theo visibility.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/admin/quests/<span class="param">:id</span>/hide</div>
+        <div class="endpoint-desc">Ẩn quest vi phạm → visibility = HIDDEN. Creator nhận notification. Quest không còn xuất hiện trong Marketplace.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/admin/quests/<span class="param">:id</span>/restore</div>
+        <div class="endpoint-desc">Khôi phục quest HIDDEN về PUBLIC.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/admin/skill-domains</div>
+        <div class="endpoint-desc">Tất cả skill domains (kể cả ẩn). Grouped listing cho admin panel.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-post">POST</span>
+      <div>
+        <div class="endpoint-path">/admin/skill-domains</div>
+        <div class="endpoint-desc">Tạo skill domain mới (name, slug, description, icon). Ảnh hưởng LearningPath lẫn District.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/admin/skill-domains/<span class="param">:id</span></div>
+        <div class="endpoint-desc">Update name, description, icon, is_active. Deactivate không xóa — chỉ ẩn khỏi Marketplace filter.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/admin/feature-flags</div>
+        <div class="endpoint-desc">Danh sách tất cả feature flags và trạng thái hiện tại.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-put">PUT</span>
+      <div>
+        <div class="endpoint-path">/admin/feature-flags/<span class="param">:key</span></div>
+        <div class="endpoint-desc">Toggle flag. Hiệu lực ngay — services read từ Redis cache (TTL 30s), không cần restart.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method method-get">GET</span>
+      <div>
+        <div class="endpoint-path">/admin/users</div>
+        <div class="endpoint-desc">Danh sách users. Filter theo email, username. Paginated.</div>
+        <div class="tags"><span class="tag tag-admin">Admin</span></div>
+      </div>
+    </div>
+  </div>
+</div>

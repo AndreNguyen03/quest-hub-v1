@@ -1,0 +1,718 @@
+<meta charset="utf-8">
+<script>document.documentElement.setAttribute('data-theme','light')</script>
+<title>QuestHub — Event Contracts</title>
+<style>
+  :root {
+    --bg:        #FAFAF8;
+    --surface:   #FFFFFF;
+    --surface-2: #FEF9EE;
+    --border:    #E7E3D8;
+    --border-acc:#F59E0B;
+    --text:      #1C1917;
+    --muted:     #78716C;
+    --accent:    #D97706;
+    --accent-bg: #FEF3C7;
+    --mono-bg:   #F5F5F4;
+    --green:     #059669; --green-bg:  #D1FAE5;
+    --blue:      #2563EB; --blue-bg:   #DBEAFE;
+    --purple:    #7C3AED; --purple-bg: #EDE9FE;
+    --red:       #DC2626; --red-bg:    #FEE2E2;
+    --slate:     #475569; --slate-bg:  #F1F5F9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#1C1917;--surface:#292524;--surface-2:#1F1D19;--border:#3B3530;--border-acc:#B45309;
+      --text:#F5F5F4;--muted:#A8A29E;--accent:#FBBF24;--accent-bg:#451A03;--mono-bg:#292524;
+      --green:#34D399;--green-bg:#064E3B;--blue:#93C5FD;--blue-bg:#1E3A5F;
+      --purple:#C4B5FD;--purple-bg:#2E1065;--red:#FCA5A5;--red-bg:#4C0519;
+      --slate:#94A3B8;--slate-bg:#1E293B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#1C1917;--surface:#292524;--surface-2:#1F1D19;--border:#3B3530;--border-acc:#B45309;
+    --text:#F5F5F4;--muted:#A8A29E;--accent:#FBBF24;--accent-bg:#451A03;--mono-bg:#292524;
+    --green:#34D399;--green-bg:#064E3B;--blue:#93C5FD;--blue-bg:#1E3A5F;
+    --purple:#C4B5FD;--purple-bg:#2E1065;--red:#FCA5A5;--red-bg:#4C0519;
+    --slate:#94A3B8;--slate-bg:#1E293B;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6;
+    padding: 2.5rem 2rem; max-width: 1000px; margin: 0 auto;
+  }
+  header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: .8125rem; margin-top: .35rem; }
+
+  .info-box {
+    background: var(--surface-2); border: 1px solid var(--border-acc);
+    border-radius: 8px; padding: .875rem 1.125rem;
+    font-size: .8125rem; color: var(--muted); margin-bottom: 2rem;
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--accent); }
+
+  /* Exchange summary */
+  .exchange-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; margin-bottom: 2.5rem; }
+  .exchange-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.125rem; }
+  .exchange-name { font-weight: 700; font-size: .875rem; color: var(--text); margin-bottom: .25rem; }
+  .exchange-meta { font-size: .75rem; color: var(--muted); }
+  .exchange-type { display: inline-block; font-size: .6875rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: .1em .5em; border-radius: 4px; margin-left: .35rem; }
+  .type-topic { background: var(--blue-bg); color: var(--blue); }
+  .type-fanout { background: var(--purple-bg); color: var(--purple); }
+
+  /* Event section */
+  .event-section { margin-bottom: 2.5rem; }
+  .event-header {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 8px 8px 0 0; padding: 1rem 1.25rem;
+  }
+  .event-name {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .875rem; font-weight: 700; color: var(--text);
+    margin-bottom: .25rem;
+  }
+  .event-desc { font-size: .8125rem; color: var(--muted); }
+  .event-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; }
+
+  .event-meta-row {
+    display: flex; flex-wrap: wrap; gap: 1.5rem;
+    padding: .75rem 1.25rem; border-bottom: 1px solid var(--border);
+    font-size: .8rem;
+  }
+  .event-meta-item label { font-weight: 600; color: var(--muted); margin-right: .35rem; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; }
+
+  .tag {
+    display: inline-flex; align-items: center;
+    font-size: .6875rem; font-weight: 600;
+    padding: .15em .55em; border-radius: 4px;
+    white-space: nowrap;
+  }
+  .tag-producer { background: var(--green-bg); color: var(--green); }
+  .tag-consumer { background: var(--blue-bg); color: var(--blue); }
+  .tag-exchange { background: var(--accent-bg); color: var(--accent); }
+  .tag-routing  { background: var(--mono-bg); color: var(--muted); font-family: monospace; }
+  .tag-durable  { background: var(--slate-bg); color: var(--slate); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+
+  .payload-section { padding: 1rem 1.25rem; }
+  .payload-label { font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+  .payload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  @media(max-width: 640px) { .payload-grid { grid-template-columns: 1fr; } }
+
+  .payload-code {
+    background: var(--mono-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: .75rem; line-height: 1.7;
+    overflow-x: auto; white-space: pre;
+    color: var(--text);
+  }
+  .k { color: var(--accent); }          /* key */
+  .s { color: var(--green); }           /* string */
+  .n { color: var(--blue); }            /* number/bool */
+  .c { color: var(--muted); font-style: italic; }  /* comment */
+
+  .field-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  .field-table th {
+    text-align: left; font-size: .7rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted);
+    padding: .4rem .75rem; background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .field-table td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .field-table tr:last-child td { border-bottom: none; }
+  .field-name { font-family: monospace; font-size: .8rem; color: var(--accent); font-weight: 600; }
+  .field-type { font-family: monospace; font-size: .75rem; color: var(--blue); }
+  .field-note { color: var(--muted); font-size: .775rem; }
+
+  .note-strip {
+    padding: .625rem 1.25rem;
+    background: var(--surface-2); border-top: 1px solid var(--border);
+    font-size: .775rem; color: var(--muted); border-radius: 0 0 8px 8px;
+    display: flex; flex-wrap: wrap; gap: .75rem;
+  }
+  .note-strip strong { color: var(--accent); }
+
+  .section-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .75rem; margin-top: 2rem;
+  }
+
+  @media(max-width: 640px) { body { padding: 1.25rem 1rem; } h1 { font-size: 1.25rem; } }
+</style>
+
+<header>
+  <div class="eyebrow">QuestHub</div>
+  <h1>Event Contracts</h1>
+  <p class="subtitle">Event payload schemas — producer và consumer phải đồng ý trước khi code</p>
+</header>
+
+<div class="info-box">
+  <strong>Phase 1 (Modular Monolith):</strong> Events được deliver qua <strong>Outbox Relay → Spring ApplicationEventPublisher</strong>. Không có RabbitMQ. Exchange/routing-key structure bên dưới là contract cho Phase 2. <br>
+  <strong>Phase 2 (Microservices):</strong> Outbox Relay thay <code>ApplicationEvent</code> bằng <code>RabbitTemplate.send(exchange, routingKey, payload)</code> — payload schema không thay đổi. <br>
+  <strong>Convention:</strong> Mọi event có <code>eventId</code> (UUID), <code>timestamp</code> (ISO 8601 UTC), <code>version</code> ("1.0"). Consumer phải idempotent — xử lý trùng <code>eventId</code> phải an toàn. Routing key format: <code>domain.action</code>.
+</div>
+
+<!-- Exchange overview -->
+<div class="section-label">Exchanges — 4 tổng</div>
+<div class="exchange-grid">
+  <div class="exchange-card">
+    <div class="exchange-name">quest.events <span class="exchange-type type-topic">topic</span></div>
+    <div class="exchange-meta">Producer: Quest Module, Marketplace Module<br>Events: quest.*, task.*</div>
+  </div>
+  <div class="exchange-card">
+    <div class="exchange-name">user.events <span class="exchange-type type-topic">topic</span></div>
+    <div class="exchange-meta">Producer: Identity Module, Social Module<br>Events: user.*</div>
+  </div>
+  <div class="exchange-card">
+    <div class="exchange-name">social.events <span class="exchange-type type-topic">topic</span></div>
+    <div class="exchange-meta">Producer: Social Module, World Module<br>Events: social.*, achievement.*</div>
+  </div>
+  <div class="exchange-card">
+    <div class="exchange-name">notification.fanout <span class="exchange-type type-fanout">fanout</span></div>
+    <div class="exchange-meta">Consumer duy nhất: Notification Module<br>Nhận event từ các exchange khác qua shovel</div>
+  </div>
+</div>
+
+<div class="section-label">Events — 11 contracts</div>
+
+<!-- EVENT 1: user.registered -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">user.registered</div>
+      <div class="event-desc">Trigger sau khi Identity Module tạo user thành công. World Module dùng để tạo World + District mặc định.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">user.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">user.registered</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Identity Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">World Module</span></div></div>
+      <div><label>Durable</label><span class="tag tag-durable">persistent</span></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:   <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>: <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:   <span class="s">"1.0"</span>,
+
+  <span class="k">"userId"</span>:    <span class="s">"uuid-v4"</span>,
+  <span class="k">"username"</span>:  <span class="s">"john_doe"</span>,
+  <span class="k">"email"</span>:     <span class="s">"john@example.com"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">eventId</td><td class="field-type">string (UUID)</td><td class="field-note">Idempotency key — skip nếu đã xử lý</td></tr>
+            <tr><td class="field-name">userId</td><td class="field-type">string (UUID)</td><td class="field-note">FK → users.id</td></tr>
+            <tr><td class="field-name">username</td><td class="field-type">string</td><td class="field-note">Dùng làm World name default</td></tr>
+            <tr><td class="field-name">email</td><td class="field-type">string</td><td class="field-note">Informational only</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>World Module:</strong> INSERT worlds (user_id) sau khi nhận event — bảng worlds chỉ có user_id + timestamps.</span>
+      <span><strong>Idempotent:</strong> CHECK EXISTS trước khi INSERT. Trùng userId thì skip.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 2: quest.published -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">quest.published</div>
+      <div class="event-desc">Quest chuyển từ DRAFT → PUBLIC. Kích hoạt ES indexing và activity feed.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">quest.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">quest.published</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Marketplace Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Marketplace Module</span><span class="tag tag-consumer">Social Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:      <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:        <span class="s">"1.0"</span>,
+
+  <span class="k">"questId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"learningPathId"</span>:<span class="s">"uuid-v4"</span>,
+  <span class="k">"title"</span>:          <span class="s">"Learn TypeScript"</span>,
+  <span class="k">"description"</span>:   <span class="s">"A complete guide..."</span>,
+  <span class="k">"skillDomainId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"difficulty"</span>:    <span class="s">"INTERMEDIATE"</span>,
+  <span class="k">"taskCount"</span>:      <span class="n">12</span>,
+  <span class="k">"creatorId"</span>:     <span class="s">"uuid-v4"</span>,
+  <span class="k">"creatorUsername"</span>:<span class="s">"john_doe"</span>,
+  <span class="k">"publishedAt"</span>:    <span class="s">"2026-08-16T10:00:00Z"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">questId</td><td class="field-type">string (UUID)</td><td class="field-note">PK của quest</td></tr>
+            <tr><td class="field-name">learningPathId</td><td class="field-type">string (UUID) | null</td><td class="field-note">ES filter + hiển thị path</td></tr>
+            <tr><td class="field-name">skillDomainId</td><td class="field-type">string (UUID)</td><td class="field-note">ES filter + World mapping</td></tr>
+            <tr><td class="field-name">difficulty</td><td class="field-type">string</td><td class="field-note">BEGINNER | INTERMEDIATE | ADVANCED</td></tr>
+            <tr><td class="field-name">taskCount</td><td class="field-type">int</td><td class="field-note">Tổng task — hiển thị trên card</td></tr>
+            <tr><td class="field-name">creatorUsername</td><td class="field-type">string</td><td class="field-note">Denorm cho activity display</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Marketplace Module:</strong> Index document vào Elasticsearch, invalidate cache:trending.</span>
+      <span><strong>Social Module:</strong> INSERT activities (type=QUEST_PUBLISHED, user_id=creatorId).</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 3: quest.forked -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">quest.forked</div>
+      <div class="event-desc">User fork một Quest thành PersonalQuest. Cập nhật fork_count và activity feed.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">quest.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">quest.forked</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Quest Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Quest Module</span><span class="tag tag-consumer">Social Module</span><span class="tag tag-consumer">Marketplace Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:      <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:        <span class="s">"1.0"</span>,
+
+  <span class="k">"questId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"questTitle"</span>:     <span class="s">"Learn TypeScript"</span>,
+  <span class="k">"learningPathId"</span>:<span class="s">"uuid-v4"</span>,
+  <span class="k">"personalQuestId"</span>:<span class="s">"uuid-v4"</span>,
+  <span class="k">"userId"</span>:         <span class="s">"uuid-v4"</span>,
+  <span class="k">"username"</span>:       <span class="s">"jane_doe"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">questId</td><td class="field-type">string (UUID)</td><td class="field-note">Quest gốc (template)</td></tr>
+            <tr><td class="field-name">questTitle</td><td class="field-type">string</td><td class="field-note">Denorm cho activity display</td></tr>
+            <tr><td class="field-name">learningPathId</td><td class="field-type">string (UUID) | null</td><td class="field-note">Path context khi fork từ trong path</td></tr>
+            <tr><td class="field-name">personalQuestId</td><td class="field-type">string (UUID)</td><td class="field-note">PersonalQuest mới tạo</td></tr>
+            <tr><td class="field-name">userId</td><td class="field-type">string (UUID)</td><td class="field-note">User đã fork</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Quest Module:</strong> UPDATE quests SET fork_count = fork_count + 1.</span>
+      <span><strong>Social Module:</strong> INSERT activities (type=QUEST_FORKED, user_id=userId, quest_id=questId).</span>
+      <span><strong>Marketplace Module:</strong> Invalidate Redis cache cho quest card.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 4: task.completed -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">task.completed</div>
+      <div class="event-desc">Event phức tạp nhất — 3 consumers chạy song song. Kèm flag <code>isQuestCompleted</code> để biết quest vừa chạm đích.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">quest.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">task.completed</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Quest Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">World Module</span><span class="tag tag-consumer">Social Module</span><span class="tag tag-consumer">Notification Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:         <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:       <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:         <span class="s">"1.0"</span>,
+
+  <span class="k">"userId"</span>:          <span class="s">"uuid-v4"</span>,
+  <span class="k">"username"</span>:        <span class="s">"jane_doe"</span>,
+  <span class="k">"personalQuestId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"questId"</span>:         <span class="s">"uuid-v4"</span>,
+  <span class="k">"questTitle"</span>:      <span class="s">"Learn TypeScript"</span>,
+  <span class="k">"chapterId"</span>:       <span class="s">"uuid-v4"</span>,
+  <span class="k">"chapterTitle"</span>:    <span class="s">"Type Basics"</span>,
+  <span class="k">"taskId"</span>:          <span class="s">"uuid-v4"</span>,
+  <span class="k">"taskTitle"</span>:       <span class="s">"Setup tsconfig"</span>,
+  <span class="k">"taskType"</span>:        <span class="s">"PRACTICE"</span>,
+  <span class="k">"skillDomainId"</span>:   <span class="s">"uuid-v4"</span>,
+  <span class="k">"districtId"</span>:      <span class="s">"uuid-v4"</span>,
+  <span class="k">"newProgress"</span>:     <span class="n">62</span>,
+  <span class="k">"isQuestCompleted"</span>:<span class="n">false</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">skillDomainId</td><td class="field-type">string (UUID)</td><td class="field-note">World Module cần để map task → district</td></tr>
+            <tr><td class="field-name">districtId</td><td class="field-type">string (UUID)</td><td class="field-note">Denorm — World Module dùng để UPDATE districts</td></tr>
+            <tr><td class="field-name">taskType</td><td class="field-type">string</td><td class="field-note">LEARN | QUIZ | PRACTICE | SUBMISSION | REFLECTION</td></tr>
+            <tr><td class="field-name">newProgress</td><td class="field-type">int (0-100)</td><td class="field-note">% hoàn thành sau task này</td></tr>
+            <tr><td class="field-name">isQuestCompleted</td><td class="field-type">boolean</td><td class="field-note">true nếu completion_rule vừa thỏa</td></tr>
+            <tr><td class="field-name">chapterTitle</td><td class="field-type">string</td><td class="field-note">Denorm cho Notification/Feed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>World Module:</strong> UPDATE districts SET completion_count += 1 WHERE id=districtId; kiểm tra mở khóa Building.</span>
+      <span><strong>Social Module:</strong> INSERT activities (TASK_COMPLETED), nếu isQuestCompleted=true thêm activities (QUEST_COMPLETED).</span>
+      <span><strong>Notification Module:</strong> Push "🎯 Completed: {taskTitle}". Nếu isQuestCompleted push "🏆 Quest {questTitle} completed!".</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 5: quest.completed -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">quest.completed</div>
+      <div class="event-desc">Quest hoàn thành theo completion_rule. Dùng để unlock achievement và cập nhật learning path progress.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">quest.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">quest.completed</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Quest Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">World Module</span><span class="tag tag-consumer">Notification Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:         <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:       <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:         <span class="s">"1.0"</span>,
+
+  <span class="k">"userId"</span>:          <span class="s">"uuid-v4"</span>,
+  <span class="k">"personalQuestId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"questId"</span>:         <span class="s">"uuid-v4"</span>,
+  <span class="k">"questTitle"</span>:      <span class="s">"Learn TypeScript"</span>,
+  <span class="k">"learningPathId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"skillDomainId"</span>:   <span class="s">"uuid-v4"</span>,
+  <span class="k">"completedAt"</span>:     <span class="s">"2026-08-16T10:00:00Z"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">learningPathId</td><td class="field-type">string (UUID) | null</td><td class="field-note">Cập nhật tiến độ path nếu có</td></tr>
+            <tr><td class="field-name">skillDomainId</td><td class="field-type">string (UUID)</td><td class="field-note">World Module kiểm tra achievement theo domain</td></tr>
+            <tr><td class="field-name">completedAt</td><td class="field-type">timestamp</td><td class="field-note">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>World Module:</strong> Kiểm tra và unlock Achievement (QUEST_COUNT, FIRST_QUEST, DOMAIN_TASK_COUNT...) → publish achievement.unlocked nếu có.</span>
+      <span><strong>Notification Module:</strong> "🏆 Quest {questTitle} completed!" nếu chưa được push bởi task.completed.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 6: quest.rated -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">quest.rated</div>
+      <div class="event-desc">User submit hoặc update review. Quest Module cập nhật denormalized avg_rating / rating_count.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">quest.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">quest.rated</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Marketplace Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Quest Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:       <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:     <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:       <span class="s">"1.0"</span>,
+
+  <span class="k">"questId"</span>:       <span class="s">"uuid-v4"</span>,
+  <span class="k">"userId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"newScore"</span>:      <span class="n">5</span>,
+  <span class="k">"previousScore"</span>: <span class="n">null</span>,
+  <span class="k">"action"</span>:        <span class="s">"CREATED"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">newScore</td><td class="field-type">int (1-5)</td><td class="field-note">Rating vừa được set</td></tr>
+            <tr><td class="field-name">previousScore</td><td class="field-type">int | null</td><td class="field-note">null nếu lần đầu rate</td></tr>
+            <tr><td class="field-name">action</td><td class="field-type">CREATED | UPDATED | DELETED</td><td class="field-note">Quest Module recalculate avg dựa vào action</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Quest Module:</strong> Recalculate avg_rating = (avg * rating_count - previousScore + newScore) / rating_count (UPDATED) hoặc (avg * count + newScore) / (count+1) (CREATED).</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 7: achievement.unlocked -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">achievement.unlocked</div>
+      <div class="event-desc">User mở khóa một achievement — feed + notification + profile.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">social.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">achievement.unlocked</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">World Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Social Module</span><span class="tag tag-consumer">Notification Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:       <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:     <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:       <span class="s">"1.0"</span>,
+
+  <span class="k">"userId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"achievementId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"code"</span>:          <span class="s">"FIRST_QUEST_COMPLETED"</span>,
+  <span class="k">"title"</span>:         <span class="s">"First Blood"</span>,
+  <span class="k">"unlockedAt"</span>:    <span class="s">"2026-08-16T10:00:00Z"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">code</td><td class="field-type">string</td><td class="field-note">Unique code từ achievements</td></tr>
+            <tr><td class="field-name">title</td><td class="field-type">string</td><td class="field-note">Denorm cho feed/notification</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Social Module:</strong> INSERT activities (ACHIEVEMENT_UNLOCKED, user_id=userId).</span>
+      <span><strong>Notification Module:</strong> Push "🏅 {title}" cho user.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 8: comment.created -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">comment.created</div>
+      <div class="event-desc">Comment mới trên Quest hoặc Discussion — thông báo người liên quan.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">social.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">social.comment</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Social Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Notification Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:      <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:    <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:      <span class="s">"1.0"</span>,
+
+  <span class="k">"commentId"</span>:    <span class="s">"uuid-v4"</span>,
+  <span class="k">"authorId"</span>:     <span class="s">"uuid-v4"</span>,
+  <span class="k">"authorUsername"</span>:<span class="s">"jane_doe"</span>,
+  <span class="k">"targetType"</span>:   <span class="s">"DISCUSSION"</span>,
+  <span class="k">"targetId"</span>:     <span class="s">"uuid-v4"</span>,
+  <span class="k">"questId"</span>:      <span class="s">"uuid-v4"</span>,
+  <span class="k">"parentId"</span>:     <span class="n">null</span>,
+  <span class="k">"body"</span>:         <span class="s">"Bạn ơi, chapter 3 nên làm trước..."</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">targetType</td><td class="field-type">DISCUSSION | QUEST</td><td class="field-note">—</td></tr>
+            <tr><td class="field-name">questId</td><td class="field-type">string (UUID) | null</td><td class="field-note">Thông báo creator quest</td></tr>
+            <tr><td class="field-name">parentId</td><td class="field-type">string (UUID) | null</td><td class="field-note">Thông báo author comment gốc khi reply</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Notification Module:</strong> Reply → thông báo author comment gốc. Comment trên quest → thông báo creator quest.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 9: discussion.created -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">discussion.created</div>
+      <div class="event-desc">Discussion mới trên Quest — thông báo creator + follower của author.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">social.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">social.discussion</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Social Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Notification Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:      <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:    <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:      <span class="s">"1.0"</span>,
+
+  <span class="k">"discussionId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"authorId"</span>:     <span class="s">"uuid-v4"</span>,
+  <span class="k">"authorUsername"</span>:<span class="s">"jane_doe"</span>,
+  <span class="k">"questId"</span>:      <span class="s">"uuid-v4"</span>,
+  <span class="k">"title"</span>:        <span class="s">"Mẹo học chapter 2 nhanh hơn"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">questId</td><td class="field-type">string (UUID) | null</td><td class="field-note">Thông báo creator quest</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Notification Module:</strong> Thông báo creator quest có discussion mới.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 10: user.followed -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">user.followed</div>
+      <div class="event-desc">User A follow User B. Notification Module gửi push cho User B.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">user.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">user.followed</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">Social Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Notification Module</span><span class="tag tag-consumer">Identity Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:          <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:        <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:          <span class="s">"1.0"</span>,
+
+  <span class="k">"followerId"</span>:       <span class="s">"uuid-v4"</span>,
+  <span class="k">"followerUsername"</span>: <span class="s">"jane_doe"</span>,
+  <span class="k">"followedUserId"</span>:  <span class="s">"uuid-v4"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">followerId</td><td class="field-type">string (UUID)</td><td class="field-note">User đã follow</td></tr>
+            <tr><td class="field-name">followerUsername</td><td class="field-type">string</td><td class="field-note">Dùng trong notification text</td></tr>
+            <tr><td class="field-name">followedUserId</td><td class="field-type">string (UUID)</td><td class="field-note">User nhận notification</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Notification Module:</strong> Push tới followedUserId: "{followerUsername} đã follow bạn 👋".</span>
+      <span><strong>Identity Module:</strong> UPDATE users SET follower_count += 1 WHERE id=followedUserId, following_count += 1 WHERE id=followerId.</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT 11: submission.graded -->
+<div class="event-section">
+  <div class="event-header">
+    <div>
+      <div class="event-name">submission.graded</div>
+      <div class="event-desc">AI chấm xong bài SUBMISSION/PRACTICE. Quest Module dùng để tạo TaskCompletion (nếu PASS) + evaluate completion_rule; Notification gửi kết quả.</div>
+    </div>
+  </div>
+  <div class="event-body">
+    <div class="event-meta-row">
+      <div><label>Exchange</label><span class="tag tag-exchange">quest.events</span></div>
+      <div><label>Routing Key</label><span class="tag tag-routing">submission.graded</span></div>
+      <div><label>Producer</label><span class="tag tag-producer">AI Module</span></div>
+      <div><label>Consumers</label><div class="tags"><span class="tag tag-consumer">Quest Module</span><span class="tag tag-consumer">Notification Module</span></div></div>
+    </div>
+    <div class="payload-section">
+      <div class="payload-label">Payload Schema</div>
+      <div class="payload-grid">
+        <pre class="payload-code">{
+  <span class="k">"eventId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"timestamp"</span>:      <span class="s">"2026-08-16T10:00:00Z"</span>,
+  <span class="k">"version"</span>:        <span class="s">"1.0"</span>,
+
+  <span class="k">"gradeId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"userId"</span>:         <span class="s">"uuid-v4"</span>,
+  <span class="k">"personalTaskId"</span>: <span class="s">"uuid-v4"</span>,
+  <span class="k">"questId"</span>:        <span class="s">"uuid-v4"</span>,
+  <span class="k">"status"</span>:         <span class="s">"PASS"</span>,
+  <span class="k">"score"</span>:          <span class="n">92</span>,
+  <span class="k">"feedback"</span>:       <span class="s">"Đúng trọng tâm rubric..."</span>,
+  <span class="k">"gradedAt"</span>:       <span class="s">"2026-08-16T10:00:00Z"</span>
+}</pre>
+        <table class="field-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">gradeId</td><td class="field-type">string (UUID)</td><td class="field-note">Idempotency key — skip nếu đã xử lý</td></tr>
+            <tr><td class="field-name">status</td><td class="field-type">PASS | FAIL | NEEDS_REVISION</td><td class="field-note">Chỉ PASS mới trigger TaskCompletion</td></tr>
+            <tr><td class="field-name">personalTaskId</td><td class="field-type">string (UUID)</td><td class="field-note">Task được chấm</td></tr>
+            <tr><td class="field-name">feedback</td><td class="field-type">string</td><td class="field-note">Hiển thị cho user + notification text</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-strip">
+      <span><strong>Quest Module:</strong> status=PASS → INSERT task_completions + UPDATE personal_tasks SET is_completed=true → evaluate completion_rule (có thể raise quest.completed). Idempotent — task_completions.personal_task_id UNIQUE chặn duplicate.</span>
+      <span><strong>Notification Module:</strong> Push "✅ {taskTitle} đạt yêu cầu — AI chấm {score} điểm" (PASS) hoặc "📝 {taskTitle} cần chỉnh sửa — xem feedback" (FAIL/NEEDS_REVISION).</span>
+    </div>
+  </div>
+</div>
