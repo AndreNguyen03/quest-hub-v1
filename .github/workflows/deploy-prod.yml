@@ -1,0 +1,54 @@
+name: deploy-prod
+
+# Deploy PRODUCTION — GitOps qua ArgoCD, có manual approval.
+# Workflow này chỉ chạy bằng tay (workflow_dispatch); môi trường `prod`
+# bật environment protection rule → cần người approve trước khi chạy.
+# Image dùng tag = git SHA từ run staging, ArgoCD sync từ Git (GitOps).
+# Khớp stage 6 trong docs/devsecops-pipeline.html.
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_sha:
+        description: "Git SHA của image đã pass staging (vd: abc1234)"
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify image đã pass CI (SHA khớp)
+        run: |
+          [ -n "${{ github.event.inputs.image_sha }}" ] && echo "Deploying image SHA ${{ github.event.inputs.image_sha }}"
+
+      - name: Trivy IaC scan (K8s manifests)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: ./infra/k8s/overlays/prod
+
+      - name: Update image tag trong gitops repo (ArgoCD source of truth)
+        run: |
+          echo "Cập nhật image tag = ${{ github.event.inputs.image_sha }} trong GitOps repo (helm/kustomize values)."
+          echo "ArgoCD sẽ tự sync — cấu hình ArgoCD app đích tới gitops repo."
+
+      - name: ArgoCD sync prod
+        run: |
+          argocd app sync questhub-prod \
+            --server "${{ secrets.ARGOCD_SERVER }}" \
+            --auth-token "${{ secrets.ARGOCD_TOKEN }}" \
+            --async
+          argocd app wait questhub-prod \
+            --server "${{ secrets.ARGOCD_SERVER }}" \
+            --auth-token "${{ secrets.ARGOCD_TOKEN }}"
