@@ -1,0 +1,12 @@
+# DEV — mặc định khi chạy ./mvnw spring-boot:run trên máy local.
+# Hạ tầng chạy bằng docker compose (make dev-up), giá trị khớp .env.dev.example.
+logging:
+  level:
+    com.questhub: DEBUG
+
+spring:
+  flyway:
+    clean-disabled: true
+  docker:
+    compose:
+      enabled: false

@@ -1,0 +1,15 @@
+# PROD — deploy qua manual approval + ArgoCD GitOps (namespace questhub-prod).
+# Không hardcode secret — mọi giá trị nhạy cảm qua env vars (CI secrets / Vault).
+logging:
+  level:
+    com.questhub: WARN
+
+spring:
+  flyway:
+    clean-disabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

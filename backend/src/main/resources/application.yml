@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: questhub-backend
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:questhub}
+    username: ${DB_USER:questhub}
+    password: ${DB_PASSWORD:questhub}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+server:
+  port: 9090
+
+app:
+  ai:
+    base-url: ${AI_BASE_URL:http://localhost:8090}
+  security:
+    jwt:
+      secret: ${JWT_SECRET:questhub-dev-secret-change-me-questhub-dev-secret-0123456789abcdef}
+      access-token-ttl: ${JWT_ACCESS_TTL:PT15M}
+      refresh-token-ttl: ${JWT_REFRESH_TTL:P7D}
+      issuer: questhub

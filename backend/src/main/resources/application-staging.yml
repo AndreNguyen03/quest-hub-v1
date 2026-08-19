@@ -1,0 +1,15 @@
+# STAGING — deploy tự động khi merge main (k3s, namespace questhub-staging).
+# Không hardcode secret — mọi giá trị nhạy cảm qua env vars (CI secrets / Vault).
+logging:
+  level:
+    com.questhub: INFO
+
+spring:
+  flyway:
+    clean-disabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
