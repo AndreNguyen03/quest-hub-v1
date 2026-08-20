@@ -25,6 +25,8 @@ server:
 app:
   ai:
     base-url: ${AI_BASE_URL:http://localhost:8090}
+  outbox:
+    relay-fixed-delay: ${OUTBOX_RELAY_DELAY:1000}
   security:
     jwt:
       secret: ${JWT_SECRET:questhub-dev-secret-change-me-questhub-dev-secret-0123456789abcdef}
