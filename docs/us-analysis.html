@@ -15,7 +15,8 @@
     --spec:      #1D4ED8; --spec-bg: #DBEAFE;
     --plan:      #92400E; --plan-bg: #FEF3C7;
     --impl:      #065F46; --impl-bg: #D1FAE5;
-    --ver:       #9F1239; --ver-bg:  #FFE4E6;
+--ver:       #9F1239; --ver-bg:  #FFE4E6;
+    --done:      #155E75; --done-bg: #CFFAFE;
   }
 
   *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,8 +99,9 @@
   .ac { color: var(--muted); }
 
   .status { display: inline-block; font-size: .65rem; font-weight: 800; letter-spacing: .05em; padding: .12rem .45rem; border-radius: 5px; }
-  .status-now   { background: var(--impl-bg); color: var(--impl); }
+.status-now   { background: var(--impl-bg); color: var(--impl); }
   .status-later { background: var(--plan-bg); color: var(--plan); }
+  .status-done  { background: var(--done-bg); color: var(--done); }
 
   .fe-id { font-size: 11px; font-weight: 700; color: #0E7490; background: #CFFAFE; padding: .15rem .5rem; border-radius: 5px; }
   .fe-tag { font-size: 11px; font-weight: 700; letter-spacing: .05em; background: #CFFAFE; color: #0E7490; padding: .2rem .6rem; border-radius: 5px; }
@@ -164,7 +166,7 @@
     <div class="us-head">
       <span class="us-id">US-20</span>
       <span class="us-title">Đăng ký</span>
-      <span class="us-meta">Identity · <span class="sprint">Sprint 1 / M1</span> · <span class="status status-now">IMPLEMENT</span></span>
+      <span class="us-meta">Identity · <span class="sprint">Sprint 1 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Guest</em>, I want to create an account, so that I can start tracking my progress.</div>
     <div class="phase">
@@ -218,7 +220,7 @@
     <div class="us-head">
       <span class="us-id">US-21</span>
       <span class="us-title">Cập nhật profile</span>
-      <span class="us-meta">Identity · <span class="sprint">Sprint 1 / M1</span> · <span class="status status-now">IMPLEMENT</span></span>
+      <span class="us-meta">Identity · <span class="sprint">Sprint 1 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to update my profile information, so that others can know who I am.</div>
     <div class="phase">
@@ -275,7 +277,7 @@
     <div class="us-head">
       <span class="us-id">US-01</span>
       <span class="us-title">Tạo learning path</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Creator</em>, I want to create a learning path with a title, description and difficulty, so that I can bundle multiple quests toward one goal.</div>
     <div class="phase">
@@ -328,7 +330,7 @@
     <div class="us-head">
       <span class="us-id">US-02</span>
       <span class="us-title">Tạo quest với chapters &amp; tasks</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Creator</em>, I want to create a quest with chapters and tasks, so that I can structure a roadmap for others to follow.</div>
     <div class="phase">
@@ -382,7 +384,7 @@
     <div class="us-head">
       <span class="us-id">US-03</span>
       <span class="us-title">Thêm chapter &amp; task, gắn resource</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Creator</em>, I want to add chapters, add tasks inside each chapter, and attach resources to LEARN tasks, so that the learning path is clear and logical.</div>
     <div class="phase">
@@ -436,7 +438,7 @@
     <div class="us-head">
       <span class="us-id">US-04</span>
       <span class="us-title">Cấu hình CompletionRule</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Creator</em>, I want to set a completion rule for my quest, so that a quest is considered done only when the real criteria are met.</div>
     <div class="phase">
@@ -488,7 +490,7 @@
     <div class="us-head">
       <span class="us-id">US-10</span>
       <span class="us-title">Publish quest</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-now">PLAN</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 2 / M1</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Creator</em>, I want to publish my quest so others can discover it, so that my work can help the community.</div>
     <div class="phase">
@@ -544,7 +546,7 @@
     <div class="us-head">
       <span class="us-id">US-05</span>
       <span class="us-title">Fork quest</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-later">LATER</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to fork a public quest into my own copy, so that I can track my personal progress without affecting the original.</div>
     <div class="phase">
@@ -597,7 +599,7 @@
     <div class="us-head">
       <span class="us-id">US-06</span>
       <span class="us-title">Hoàn thành task theo loại</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-later">LATER</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to complete tasks of different types, so that my progress reflects real work done.</div>
     <div class="phase">
@@ -651,7 +653,7 @@
     <div class="us-head">
       <span class="us-id">US-07</span>
       <span class="us-title">Làm quiz và xem kết quả</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-later">LATER</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 3 / M2</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to take a quiz and see my score immediately, so that I know if I've passed the task.</div>
     <div class="phase">
@@ -710,7 +712,7 @@
     <div class="us-head">
       <span class="us-id">US-08</span>
       <span class="us-title">Hoàn thành quest theo rule</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 4 / M2</span> · <span class="status status-later">LATER</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 4 / M2</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want my quest to be marked completed automatically when the rule is satisfied, so that I know I have achieved my goal.</div>
     <div class="phase">
@@ -763,7 +765,7 @@
     <div class="us-head">
       <span class="us-id">US-09</span>
       <span class="us-title">Chỉnh sửa PersonalQuest</span>
-      <span class="us-meta">Quest · <span class="sprint">Sprint 4 / M2</span> · <span class="status status-later">LATER</span></span>
+      <span class="us-meta">Quest · <span class="sprint">Sprint 4 / M2</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to add or modify chapters/tasks in my forked quest, so that I can customize the path to fit my needs.</div>
     <div class="phase">
@@ -818,8 +820,8 @@
   <div class="us-card">
     <div class="us-head">
       <span class="us-id">US-16</span>
-      <span class="us-title">Xem thế giới cá nhân</span>
-      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+<span class="us-title">Xem thế giới cá nhân</span>
+      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to see my Knowledge World, so that I can visualize my progress across different domains.</div>
     <div class="phase">
@@ -869,8 +871,8 @@
   <div class="us-card">
     <div class="us-head">
       <span class="us-id">US-17</span>
-      <span class="us-title">Xem district &amp; building</span>
-      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-later">LATER</span></span>
+<span class="us-title">Xem district &amp; building</span>
+      <span class="us-meta">World · <span class="sprint">Sprint 5 / M3</span> · <span class="status status-done">DONE</span></span>
     </div>
     <div class="us-statement">As a <em>Learner</em>, I want to see district details with buildings, so that I can feel my progress visually.</div>
     <div class="phase">
