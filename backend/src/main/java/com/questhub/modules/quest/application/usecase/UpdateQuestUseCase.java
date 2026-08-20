@@ -8,10 +8,12 @@ import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class UpdateQuestUseCase {
@@ -37,6 +39,8 @@ public class UpdateQuestUseCase {
         request.difficulty(),
         request.completionRule(),
         request.reward());
-    return questRepository.save(quest);
+    Quest saved = questRepository.save(quest);
+    log.info("Quest updated questId={} actorId={}", questId, actorId);
+    return saved;
   }
 }

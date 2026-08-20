@@ -8,7 +8,9 @@ import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class UpdateLearningPathUseCase {
@@ -25,6 +27,8 @@ public class UpdateLearningPathUseCase {
       throw BusinessException.forbidden(ErrorCodes.FORBIDDEN, "Chỉ author mới sửa được learning path");
     }
     path.update(request.title(), request.description(), request.difficulty(), request.isPublic());
-    return learningPathRepository.save(path);
+    LearningPath saved = learningPathRepository.save(path);
+    log.info("LearningPath updated pathId={} actorId={}", pathId, actorId);
+    return saved;
   }
 }

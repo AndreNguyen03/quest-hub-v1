@@ -8,9 +8,11 @@ import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class CreateLearningPathUseCase {
@@ -30,6 +32,9 @@ public class CreateLearningPathUseCase {
             request.description(),
             request.difficulty());
 
-    return learningPathRepository.save(createLearningPath);
+    LearningPath saved = learningPathRepository.save(createLearningPath);
+    log.info("LearningPath created authorId={} pathId={} title={}",
+        authorId, saved.getId(), request.title());
+    return saved;
   }
 }

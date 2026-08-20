@@ -7,7 +7,9 @@ import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class GetLearningPathUseCase {
@@ -21,8 +23,11 @@ public class GetLearningPathUseCase {
             .orElseThrow(
                 () -> BusinessException.notFound(ErrorCodes.NOT_FOUND, "Không tìm thấy learning path"));
     if (!path.isPublic() && !path.getAuthorId().equals(viewerId)) {
+      log.warn("Forbidden view learning path pathId={} viewerId={} ownerId={}",
+          pathId, viewerId, path.getAuthorId());
       throw BusinessException.forbidden(ErrorCodes.FORBIDDEN, "Không có quyền xem learning path này");
     }
+    log.info("LearningPath viewed pathId={} viewerId={}", pathId, viewerId);
     return path;
   }
 }

@@ -11,10 +11,12 @@ import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class CreateQuestUseCase {
@@ -60,6 +62,9 @@ public class CreateQuestUseCase {
       quest.setCompletionRule(request.completionRule());
     }
 
-    return questRepository.save(quest);
+    Quest saved = questRepository.save(quest);
+    log.info("Quest created creatorId={} questId={} title={} chapterCount={}",
+        creatorId, saved.getId(), request.title(), saved.getChapters().size());
+    return saved;
   }
 }
