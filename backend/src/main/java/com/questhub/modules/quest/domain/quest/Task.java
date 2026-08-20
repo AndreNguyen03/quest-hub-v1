@@ -68,6 +68,11 @@ public class Task {
     this.updatedAt = Instant.now();
   }
 
+  public void removeResource(UUID resourceId) {
+    resources.removeIf(resource -> resource.getId().equals(resourceId));
+    this.updatedAt = Instant.now();
+  }
+
   public void changeOrder(int order) {
     this.order = order;
     this.updatedAt = Instant.now();

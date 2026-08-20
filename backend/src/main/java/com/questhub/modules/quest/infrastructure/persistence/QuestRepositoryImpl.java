@@ -2,6 +2,7 @@ package com.questhub.modules.quest.infrastructure.persistence;
 
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
+import com.questhub.modules.quest.domain.quest.QuestVisibility;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -28,5 +29,25 @@ public class QuestRepositoryImpl implements QuestRepository {
   @Override
   public boolean existsById(UUID id) {
     return jpa.existsById(id);
+  }
+
+  @Override
+  public boolean existsByCreatorIdAndVisibility(UUID creatorId, QuestVisibility visibility) {
+    return jpa.existsByCreatorIdAndVisibility(creatorId, visibility);
+  }
+
+  @Override
+  public Optional<Quest> findQuestByTaskId(UUID taskId) {
+    return jpa.findByTaskId(taskId).map(QuestMapper::toDomain);
+  }
+
+  @Override
+  public Optional<Quest> findQuestByResourceId(UUID resourceId) {
+    return jpa.findByResourceId(resourceId).map(QuestMapper::toDomain);
+  }
+
+  @Override
+  public void incrementForkCount(UUID questId) {
+    jpa.incrementForkCount(questId);
   }
 }

@@ -1,5 +1,8 @@
 package com.questhub.modules.quest.domain.quest;
 
+import com.questhub.modules.quest.domain.personalquest.PersonalChapter;
+import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
+import com.questhub.modules.quest.domain.personalquest.PersonalTask;
 import com.questhub.shared.domain.DomainValidationException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -144,6 +147,14 @@ public class Quest {
     this.updatedAt = Instant.now();
   }
 
+  public void removeTask(UUID taskId) {
+    ensureDraft("remove task");
+    Chapter chapter = findChapterContainingTask(taskId);
+    chapter.removeTask(taskId);
+    recalcEstimatedDuration();
+    this.updatedAt = Instant.now();
+  }
+
   public void reorderChapters(List<UUID> chapterIds) {
     ensureDraft("reorder chapters");
     if (chapterIds.size() != chapters.size()) {
@@ -192,6 +203,33 @@ public class Quest {
     this.updatedAt = Instant.now();
   }
 
+  public PersonalQuest forkTo(UUID userId) {
+    if (visibility != QuestVisibility.PUBLIC) {
+      throw new DomainValidationException("Only public quests can be forked");
+    }
+    PersonalQuest personalQuest =
+        PersonalQuest.create(userId, id, learningPathId, title, completionRule);
+    int chapterIndex = 0;
+    for (Chapter chapter : chapters) {
+      PersonalChapter personalChapter =
+          PersonalChapter.create(
+              chapter.getId(), chapter.getTitle(), chapter.getDescription(), chapterIndex++);
+      int taskIndex = 0;
+      for (Task task : chapter.getTasks()) {
+        personalChapter.addTask(
+            PersonalTask.create(
+                task.getId(),
+                task.getType(),
+                task.getTitle(),
+                task.getDescription(),
+                taskIndex++,
+                task.getConfig()));
+      }
+      personalQuest.addChapter(personalChapter);
+    }
+    return personalQuest;
+  }
+
   public void updateMetadata(
       String title,
       String description,
@@ -205,6 +243,43 @@ public class Quest {
       this.completionRule = completionRule;
     }
     this.reward = reward == null ? Map.of() : reward;
+    this.updatedAt = Instant.now();
+  }
+
+  public void updateChapter(
+      UUID chapterId, String title, String description, Integer position) {
+    ensureDraft("update chapter");
+    Chapter chapter = findChapter(chapterId);
+    chapter.updateDetails(title, description);
+    if (position != null) {
+      chapter.changePosition(position);
+    }
+    this.updatedAt = Instant.now();
+  }
+
+  public void updateTask(
+      UUID taskId, String title, String description, Map<String, Object> config, Integer order) {
+    ensureDraft("update task");
+    Task task = findTask(taskId);
+    task.updateDetails(title, description, config);
+    if (order != null) {
+      task.changeOrder(order);
+    }
+    this.updatedAt = Instant.now();
+  }
+
+  public void addResource(UUID taskId, Resource resource) {
+    ensureDraft("add resource");
+    findTask(taskId).addResource(resource);
+    recalcEstimatedDuration();
+    this.updatedAt = Instant.now();
+  }
+
+  public void removeResource(UUID resourceId) {
+    ensureDraft("remove resource");
+    Task task = findTaskByResource(resourceId);
+    task.removeResource(resourceId);
+    recalcEstimatedDuration();
     this.updatedAt = Instant.now();
   }
 
@@ -224,6 +299,29 @@ public class Quest {
         .filter(c -> c.getId().equals(chapterId))
         .findFirst()
         .orElseThrow(() -> new DomainValidationException("Chapter not found: " + chapterId));
+  }
+
+  private Task findTask(UUID taskId) {
+    return chapters.stream()
+        .flatMap(c -> c.getTasks().stream())
+        .filter(t -> t.getId().equals(taskId))
+        .findFirst()
+        .orElseThrow(() -> new DomainValidationException("Task not found: " + taskId));
+  }
+
+  private Chapter findChapterContainingTask(UUID taskId) {
+    return chapters.stream()
+        .filter(c -> c.getTasks().stream().anyMatch(t -> t.getId().equals(taskId)))
+        .findFirst()
+        .orElseThrow(() -> new DomainValidationException("Task not found: " + taskId));
+  }
+
+  private Task findTaskByResource(UUID resourceId) {
+    return chapters.stream()
+        .flatMap(c -> c.getTasks().stream())
+        .filter(t -> t.getResources().stream().anyMatch(r -> r.getId().equals(resourceId)))
+        .findFirst()
+        .orElseThrow(() -> new DomainValidationException("Resource not found: " + resourceId));
   }
 
   private void renumberChapters() {
