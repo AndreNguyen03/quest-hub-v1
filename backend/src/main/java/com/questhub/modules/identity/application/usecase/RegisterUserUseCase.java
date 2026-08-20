@@ -35,8 +35,7 @@ public class RegisterUserUseCase {
       conflicts.add(new FieldErrorItem("username", "Username đã tồn tại"));
     }
     if (!conflicts.isEmpty()) {
-      throw BusinessException.conflict(
-          ErrorCodes.CONFLICT, "Đăng ký không thành công", conflicts);
+      throw BusinessException.conflict(ErrorCodes.CONFLICT, "Đăng ký không thành công", conflicts);
     }
 
     String passwordHash = passwordEncoder.encode(request.password());
