@@ -10,18 +10,30 @@ import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import com.questhub.shared.domain.FieldErrorItem;
+import com.questhub.shared.outbox.OutboxPublisher;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class RegisterUserUseCase {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final OutboxPublisher outboxPublisher;
 
+  @Transactional(
+      isolation = Isolation.DEFAULT,
+      rollbackFor = Exception.class,
+      propagation = Propagation.REQUIRED)
   public User register(RegisterUserRequest request) {
     Email email = new Email(request.email());
     Username username = new Username(request.username());
@@ -41,6 +53,17 @@ public class RegisterUserUseCase {
     String passwordHash = passwordEncoder.encode(request.password());
     User newUser = User.create(email, username, displayName, passwordHash);
 
-    return userRepository.save(newUser);
+    User saved = userRepository.save(newUser);
+    log.info("User registered userId={} username={} email={}", saved.getId(), username.value(), email.value());
+
+    outboxPublisher.publish(
+        "User",
+        saved.getId(),
+        "user.registered",
+        Map.of(
+            "userId", saved.getId().toString(),
+            "username", username.value(),
+            "email", email.value()));
+    return saved;
   }
 }

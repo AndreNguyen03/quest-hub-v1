@@ -3,6 +3,7 @@ package com.questhub.modules.identity.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import com.questhub.modules.identity.domain.user.Username;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import com.questhub.shared.domain.FieldErrorItem;
+import com.questhub.shared.outbox.OutboxPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +32,7 @@ class RegisterUserUseCaseTest {
 
   @Mock private UserRepository userRepository;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private OutboxPublisher outboxPublisher;
 
   @InjectMocks private RegisterUserUseCase useCase;
 
@@ -54,6 +57,8 @@ class RegisterUserUseCaseTest {
     verify(userRepository).save(saved.capture());
     assertThat(saved.getValue().getPasswordHash()).isEqualTo("$2a$10$encoded-hash");
     verify(passwordEncoder).encode("secret123");
+    verify(outboxPublisher)
+        .publish(eq("User"), eq(created.getId()), eq("user.registered"), any());
   }
 
   @Test

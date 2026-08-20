@@ -8,8 +8,10 @@ import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class LoginUseCase {
@@ -28,10 +30,12 @@ public class LoginUseCase {
 
     if (user.getPasswordHash() == null
         || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+      log.warn("Login failed email={} reason={}", request.email(), "invalid password");
       throw BusinessException.unauthorized(
           ErrorCodes.INVALID_CREDENTIALS, "Email hoặc mật khẩu không đúng");
     }
 
+    log.info("User logged in userId={} username={}", user.getId(), user.getUsername().value());
     return user;
   }
 }

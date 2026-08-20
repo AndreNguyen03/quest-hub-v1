@@ -9,7 +9,9 @@ import com.questhub.shared.domain.ErrorCodes;
 import com.questhub.shared.infrastructure.security.JwtService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class RefreshUseCase {
@@ -23,18 +25,22 @@ public class RefreshUseCase {
     try {
       claims = jwtService.parse(refreshToken);
     } catch (JwtException | IllegalArgumentException ex) {
+      log.warn("Refresh failed reason={}", "invalid token");
       throw invalid();
     }
     if (!JwtService.TYPE_REFRESH.equals(claims.type())) {
+      log.warn("Refresh failed reason={}", "wrong token type");
       throw invalid();
     }
     if (!refreshTokenStore.isValid(refreshToken)) {
+      log.warn("Refresh failed reason={} userId={}", "token revoked", claims.userId());
       throw invalid();
     }
 
     User user = userRepository.findById(claims.userId()).orElseThrow(RefreshUseCase::invalid);
 
     refreshTokenStore.delete(refreshToken);
+    log.info("Refresh token rotated userId={}", user.getId());
     return user;
   }
 

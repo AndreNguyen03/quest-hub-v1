@@ -9,7 +9,9 @@ import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @UseCase
 @RequiredArgsConstructor
 public class UpdateProfileUseCase {
@@ -29,6 +31,8 @@ public class UpdateProfileUseCase {
         new DisplayName(request.displayName()),
         request.isPublic());
 
-    return userRepository.save(user);
+    User saved = userRepository.save(user);
+    log.info("Profile updated userId={}", saved.getId());
+    return saved;
   }
 }
