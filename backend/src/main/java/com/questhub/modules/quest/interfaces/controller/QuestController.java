@@ -1,9 +1,13 @@
 package com.questhub.modules.quest.interfaces.controller;
 
 import com.questhub.modules.quest.application.request.CreateQuestRequest;
+import com.questhub.modules.quest.application.request.SetCompletionRuleRequest;
 import com.questhub.modules.quest.application.request.UpdateQuestRequest;
 import com.questhub.modules.quest.application.usecase.CreateQuestUseCase;
 import com.questhub.modules.quest.application.usecase.GetQuestUseCase;
+import com.questhub.modules.quest.application.usecase.PublishQuestUseCase;
+import com.questhub.modules.quest.application.usecase.SetCompletionRuleUseCase;
+import com.questhub.modules.quest.application.usecase.UnpublishQuestUseCase;
 import com.questhub.modules.quest.application.usecase.UpdateQuestUseCase;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.interfaces.dto.QuestResponse;
@@ -31,6 +35,9 @@ public class QuestController {
   private final CreateQuestUseCase createQuestUseCase;
   private final GetQuestUseCase getQuestUseCase;
   private final UpdateQuestUseCase updateQuestUseCase;
+  private final PublishQuestUseCase publishQuestUseCase;
+  private final UnpublishQuestUseCase unpublishQuestUseCase;
+  private final SetCompletionRuleUseCase setCompletionRuleUseCase;
 
   private UUID currentUserId() {
     AuthenticatedUser current =
@@ -56,6 +63,25 @@ public class QuestController {
   public ResponseEntity<ApiResponse<QuestResponse>> update(
       @PathVariable UUID id, @Valid @RequestBody UpdateQuestRequest request) {
     Quest quest = updateQuestUseCase.update(id, currentUserId(), request);
+    return ResponseEntity.ok(ApiResponse.ok(QuestResponse.from(quest)));
+  }
+
+  @PostMapping("/{id}/publish")
+  public ResponseEntity<ApiResponse<QuestResponse>> publish(@PathVariable UUID id) {
+    Quest quest = publishQuestUseCase.publish(id, currentUserId());
+    return ResponseEntity.ok(ApiResponse.ok(QuestResponse.from(quest)));
+  }
+
+  @PostMapping("/{id}/unpublish")
+  public ResponseEntity<ApiResponse<QuestResponse>> unpublish(@PathVariable UUID id) {
+    Quest quest = unpublishQuestUseCase.unpublish(id, currentUserId());
+    return ResponseEntity.ok(ApiResponse.ok(QuestResponse.from(quest)));
+  }
+
+  @PutMapping("/{id}/completion-rule")
+  public ResponseEntity<ApiResponse<QuestResponse>> setCompletionRule(
+      @PathVariable UUID id, @Valid @RequestBody SetCompletionRuleRequest request) {
+    Quest quest = setCompletionRuleUseCase.setRule(id, currentUserId(), request.completionRule());
     return ResponseEntity.ok(ApiResponse.ok(QuestResponse.from(quest)));
   }
 }

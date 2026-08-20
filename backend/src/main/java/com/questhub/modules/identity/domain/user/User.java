@@ -111,6 +111,13 @@ public class User {
     this.updatedAt = Instant.now();
   }
 
+  public void promoteToCreator() {
+    if (role == Role.USER) {
+      role = Role.CREATOR;
+      updatedAt = Instant.now();
+    }
+  }
+
   public UUID getId() {
     return id;
   }
