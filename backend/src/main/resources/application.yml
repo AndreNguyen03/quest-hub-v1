@@ -18,6 +18,8 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  elasticsearch:
+    uris: ${ES_URI:http://localhost:9200}
 
 server:
   port: 9090
@@ -32,4 +34,4 @@ app:
       secret: ${JWT_SECRET:questhub-dev-secret-change-me-questhub-dev-secret-0123456789abcdef}
       access-token-ttl: ${JWT_ACCESS_TTL:PT15M}
       refresh-token-ttl: ${JWT_REFRESH_TTL:P7D}
-      issuer: questhub
+      issuer: ${JWT_ISSUER:questhub}
