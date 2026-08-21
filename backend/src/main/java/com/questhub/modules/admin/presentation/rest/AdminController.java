@@ -1,4 +1,4 @@
-package com.questhub.modules.admin.interfaces.rest;
+package com.questhub.modules.admin.presentation.rest;
 
 import com.questhub.modules.admin.application.dto.FeatureFlagResponse;
 import com.questhub.modules.admin.application.dto.QuestAdminResponse;
