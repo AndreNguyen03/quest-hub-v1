@@ -1,11 +1,11 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.request.CreateQuestRequest;
+import com.questhub.modules.quest.application.command.CreateQuestCommand;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
-import com.questhub.modules.quest.domain.quest.Chapter;
+import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
-import com.questhub.modules.quest.domain.quest.Task;
+import com.questhub.modules.quest.domain.task.Task;
 import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -28,7 +28,7 @@ public class CreateQuestUseCase {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
-  public Quest create(UUID creatorId, CreateQuestRequest request) {
+  public Quest create(UUID creatorId, CreateQuestCommand request) {
     if (request.learningPathId() != null
         && !learningPathRepository.existsById(request.learningPathId())) {
       throw BusinessException.notFound(ErrorCodes.NOT_FOUND, "Không tìm thấy learning path");
@@ -43,10 +43,10 @@ public class CreateQuestUseCase {
             request.difficulty(),
             request.reward());
 
-    for (CreateQuestRequest.ChapterRequest chapterRequest : request.chapters()) {
+    for (CreateQuestCommand.ChapterRequest chapterRequest : request.chapters()) {
       Chapter chapter = Chapter.create(chapterRequest.title(), chapterRequest.description(), 0);
       quest.addChapter(chapter);
-      for (CreateQuestRequest.TaskRequest taskRequest : chapterRequest.tasks()) {
+      for (CreateQuestCommand.TaskRequest taskRequest : chapterRequest.tasks()) {
         Task task =
             Task.create(
                 taskRequest.type(),
@@ -59,7 +59,7 @@ public class CreateQuestUseCase {
     }
 
     if (request.completionRule() != null) {
-      quest.setCompletionRule(request.completionRule());
+      quest.applyCompletionRule(request.completionRule());
     }
 
     Quest saved = questRepository.save(quest);
@@ -68,3 +68,8 @@ public class CreateQuestUseCase {
     return saved;
   }
 }
+
+
+
+
+

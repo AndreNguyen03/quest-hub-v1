@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.questhub.modules.identity.domain.user.Email;
 import com.questhub.modules.identity.domain.user.Role;
 import com.questhub.modules.identity.domain.user.User;
+import com.questhub.modules.identity.application.query.GetUserProfileQuery;
 import com.questhub.modules.identity.domain.user.UserRepository;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -22,11 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
-class GetCurrentUserUseCaseTest {
+class GetUserProfileQueryTest {
 
   @Mock private UserRepository userRepository;
 
-  @InjectMocks private GetCurrentUserUseCase useCase;
+  @InjectMocks private GetUserProfileQuery useCase;
 
   @Test
   void getById_whenUserExists_shouldReturnUser() {

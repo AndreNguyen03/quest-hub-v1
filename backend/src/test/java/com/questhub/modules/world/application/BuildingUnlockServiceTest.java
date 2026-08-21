@@ -7,9 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.world.domain.Building;
-import com.questhub.modules.world.domain.BuildingRepository;
-import com.questhub.modules.world.domain.District;
+import com.questhub.modules.world.domain.building.Building;
+import com.questhub.modules.world.domain.building.BuildingRepository;
+import com.questhub.modules.world.domain.district.District;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,3 +84,4 @@ class BuildingUnlockServiceTest {
     verify(buildingRepository, never()).save(any());
   }
 }
+

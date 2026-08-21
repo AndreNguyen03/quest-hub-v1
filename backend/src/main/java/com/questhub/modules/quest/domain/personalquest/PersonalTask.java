@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.domain.personalquest;
 
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.DomainValidationException;
 import java.time.Instant;
 import java.util.Collections;
@@ -146,7 +146,7 @@ public class PersonalTask {
     return order;
   }
 
-  public void setOrder(int order) {
+  public void reorderTo(int order) {
     this.order = order;
     this.updatedAt = Instant.now();
   }
@@ -171,3 +171,5 @@ public class PersonalTask {
     return updatedAt;
   }
 }
+
+

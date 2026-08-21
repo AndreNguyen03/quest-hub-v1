@@ -1,8 +1,11 @@
 package com.questhub.modules.quest.domain.quest;
 
+import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.personalquest.PersonalChapter;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalTask;
+import com.questhub.modules.quest.domain.resource.Resource;
+import com.questhub.modules.quest.domain.task.Task;
 import com.questhub.shared.domain.DomainValidationException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,6 +27,9 @@ public class Quest {
   private Map<String, Object> reward;
   private QuestVisibility visibility;
   private Instant publishedAt;
+  private int forkCount;
+  private java.math.BigDecimal avgRating;
+  private int ratingCount;
   private final List<Chapter> chapters = new ArrayList<>();
   private final Instant createdAt;
   private Instant updatedAt;
@@ -40,6 +46,9 @@ public class Quest {
       Map<String, Object> reward,
       QuestVisibility visibility,
       Instant publishedAt,
+      int forkCount,
+      java.math.BigDecimal avgRating,
+      int ratingCount,
       Instant createdAt,
       Instant updatedAt) {
     this.id = id;
@@ -53,6 +62,9 @@ public class Quest {
     this.reward = reward == null ? Map.of() : reward;
     this.visibility = visibility;
     this.publishedAt = publishedAt;
+    this.forkCount = forkCount;
+    this.avgRating = avgRating;
+    this.ratingCount = ratingCount;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -77,6 +89,9 @@ public class Quest {
         reward,
         QuestVisibility.DRAFT,
         null,
+        0,
+        null,
+        0,
         now,
         now);
   }
@@ -93,6 +108,9 @@ public class Quest {
       Map<String, Object> reward,
       QuestVisibility visibility,
       Instant publishedAt,
+      int forkCount,
+      java.math.BigDecimal avgRating,
+      int ratingCount,
       List<Chapter> chapters,
       Instant createdAt,
       Instant updatedAt) {
@@ -109,6 +127,9 @@ public class Quest {
             reward,
             visibility,
             publishedAt,
+            forkCount,
+            avgRating,
+            ratingCount,
             createdAt,
             updatedAt);
     quest.chapters.addAll(chapters);
@@ -197,8 +218,8 @@ public class Quest {
     }
   }
 
-  public void setCompletionRule(CompletionRule rule) {
-    ensureDraft("set completion rule");
+  public void applyCompletionRule(CompletionRule rule) {
+    ensureDraft("apply completion rule");
     this.completionRule = rule;
     this.updatedAt = Instant.now();
   }
@@ -383,6 +404,18 @@ public class Quest {
     return publishedAt;
   }
 
+  public int getForkCount() {
+    return forkCount;
+  }
+
+  public java.math.BigDecimal getAvgRating() {
+    return avgRating;
+  }
+
+  public int getRatingCount() {
+    return ratingCount;
+  }
+
   public List<Chapter> getChapters() {
     return Collections.unmodifiableList(chapters);
   }
@@ -395,3 +428,4 @@ public class Quest {
     return updatedAt;
   }
 }
+

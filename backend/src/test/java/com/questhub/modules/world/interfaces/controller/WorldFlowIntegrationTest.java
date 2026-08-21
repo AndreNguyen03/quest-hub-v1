@@ -1,4 +1,4 @@
-package com.questhub.modules.world.interfaces.controller;
+package com.questhub.modules.world.presentation.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -422,3 +422,4 @@ class WorldFlowIntegrationTest {
     return headers;
   }
 }
+

@@ -1,10 +1,10 @@
 package com.questhub.modules.quest.application.usecase;
 
 import com.questhub.modules.quest.application.helper.QuestAcess;
-import com.questhub.modules.quest.application.request.AddResourceRequest;
+import com.questhub.modules.quest.application.command.AddResourceCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
-import com.questhub.modules.quest.domain.quest.Resource;
+import com.questhub.modules.quest.domain.resource.Resource;
 import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -27,7 +27,7 @@ public class AddResourceUseCase {
       isolation = Isolation.DEFAULT,
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
-  public Quest add(UUID taskId, UUID actorId, AddResourceRequest request) {
+  public Quest add(UUID taskId, UUID actorId, AddResourceCommand request) {
     Quest quest =
         questRepository
             .findQuestByTaskId(taskId)
@@ -44,3 +44,7 @@ public class AddResourceUseCase {
     return saved;
   }
 }
+
+
+
+

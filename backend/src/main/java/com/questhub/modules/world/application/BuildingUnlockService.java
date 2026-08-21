@@ -1,10 +1,12 @@
 package com.questhub.modules.world.application;
 
-import com.questhub.modules.world.domain.Building;
-import com.questhub.modules.world.domain.BuildingRepository;
-import com.questhub.modules.world.domain.District;
+import com.questhub.modules.world.domain.building.Building;
+import com.questhub.modules.world.domain.building.BuildingRepository;
+import com.questhub.modules.world.domain.district.District;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -20,7 +22,10 @@ public class BuildingUnlockService {
     this.buildingRepository = buildingRepository;
   }
 
-  @Transactional
+  @Transactional(
+      isolation = Isolation.DEFAULT,
+      rollbackFor = Exception.class,
+      propagation = Propagation.REQUIRED)
   public void unlockFor(District district) {
     for (int i = 0; i < THRESHOLDS.length; i++) {
       if (THRESHOLDS[i] <= district.getCompletionCount()

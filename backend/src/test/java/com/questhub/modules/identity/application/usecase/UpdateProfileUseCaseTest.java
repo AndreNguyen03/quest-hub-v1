@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.identity.application.request.UpdateProfileRequest;
+import com.questhub.modules.identity.application.command.UpdateProfileCommand;
 import com.questhub.modules.identity.domain.user.Email;
 import com.questhub.modules.identity.domain.user.Role;
 import com.questhub.modules.identity.domain.user.User;
@@ -42,7 +42,7 @@ class UpdateProfileUseCaseTest {
     User updated =
         useCase.update(
             id,
-            new UpdateProfileRequest("http://x.com/a.png", "Dev", "Alice B", false));
+            new UpdateProfileCommand("http://x.com/a.png", "Dev", "Alice B", false));
 
     assertThat(updated.getAvatarUrl()).isEqualTo("http://x.com/a.png");
     assertThat(updated.getBio()).isEqualTo("Dev");
@@ -58,7 +58,7 @@ class UpdateProfileUseCaseTest {
 
     BusinessException ex =
         catchThrowableOfType(
-            () -> useCase.update(id, new UpdateProfileRequest(null, null, "Alice", true)),
+            () -> useCase.update(id, new UpdateProfileCommand(null, null, "Alice", true)),
             BusinessException.class);
 
     assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -84,3 +84,4 @@ class UpdateProfileUseCaseTest {
         Instant.now());
   }
 }
+

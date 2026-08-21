@@ -8,21 +8,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.identity.domain.user.DisplayName;
-import com.questhub.modules.identity.domain.user.Email;
-import com.questhub.modules.identity.domain.user.Role;
-import com.questhub.modules.identity.domain.user.User;
-import com.questhub.modules.identity.domain.user.UserRepository;
-import com.questhub.modules.identity.domain.user.Username;
+import com.questhub.modules.identity.application.query.GetUsernameQuery;
+import com.questhub.modules.identity.application.usecase.PromoteToCreatorUseCase;
 import com.questhub.modules.quest.application.helper.QuestAcess;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
-import com.questhub.modules.quest.domain.quest.Chapter;
+import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.Difficulty;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.modules.quest.domain.quest.QuestVisibility;
-import com.questhub.modules.quest.domain.quest.Task;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.Task;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.DomainValidationException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -44,7 +40,8 @@ class PublishQuestUseCaseTest {
   @Mock private QuestAcess questAcess;
   @Mock private QuestRepository questRepository;
   @Mock private LearningPathRepository learningPathRepository;
-  @Mock private UserRepository userRepository;
+  @Mock private GetUsernameQuery getUsernameQuery;
+  @Mock private PromoteToCreatorUseCase promoteToCreatorUseCase;
   @Mock private OutboxPublisher outboxPublisher;
 
   @InjectMocks private PublishQuestUseCase useCase;
@@ -57,8 +54,7 @@ class PublishQuestUseCaseTest {
     when(questRepository.existsByCreatorIdAndVisibility(creatorId, QuestVisibility.PUBLIC))
         .thenReturn(false);
     when(questRepository.save(any(Quest.class))).thenAnswer(inv -> inv.getArgument(0));
-    when(userRepository.findById(creatorId)).thenReturn(Optional.of(user(Role.USER)));
-    when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(getUsernameQuery.byUserId(creatorId)).thenReturn(Optional.of("binh_nguyen"));
 
     Quest published = useCase.publish(quest.getId(), creatorId);
 
@@ -72,7 +68,7 @@ class PublishQuestUseCaseTest {
     assertThat(payload.getValue()).containsEntry("taskCount", 1);
     assertThat(payload.getValue()).containsEntry("creatorUsername", "binh_nguyen");
 
-    verify(userRepository).save(any(User.class));
+    verify(promoteToCreatorUseCase).promote(creatorId);
   }
 
   @Test
@@ -87,7 +83,7 @@ class PublishQuestUseCaseTest {
     Quest published = useCase.publish(quest.getId(), creatorId);
 
     assertThat(published.getVisibility()).isEqualTo(QuestVisibility.PUBLIC);
-    verify(userRepository, never()).save(any());
+    verify(promoteToCreatorUseCase, never()).promote(any());
   }
 
   @Test
@@ -143,22 +139,6 @@ class PublishQuestUseCaseTest {
     quest.addChapter(chapter);
     return quest;
   }
-
-  private User user(Role role) {
-    return User.restore(
-        UUID.randomUUID(),
-        new Email("binh@example.com"),
-        new Username("binh_nguyen"),
-        new DisplayName("Binh"),
-        "$2a$10$hash",
-        role,
-        null,
-        null,
-        true,
-        0,
-        0,
-        Map.of(),
-        java.time.Instant.now(),
-        java.time.Instant.now());
-  }
 }
+
+

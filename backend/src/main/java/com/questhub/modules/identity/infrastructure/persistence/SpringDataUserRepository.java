@@ -4,9 +4,11 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SpringDataUserRepository extends JpaRepository<UserEntity, UUID> {
+public interface SpringDataUserRepository extends JpaRepository<UserJpaEntity, UUID> {
 
-  Optional<UserEntity> findByEmail(String email);
+  Optional<UserJpaEntity> findByEmail(String email);
+
+  Optional<UserJpaEntity> findByUsername(String username);
 
   boolean existsByEmail(String email);
 

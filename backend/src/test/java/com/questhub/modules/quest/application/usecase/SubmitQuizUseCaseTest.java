@@ -19,7 +19,7 @@ import com.questhub.modules.quest.domain.personalquest.QuizAttemptRepository;
 import com.questhub.modules.quest.domain.personalquest.QuizGrader;
 import com.questhub.modules.quest.domain.personalquest.TaskCompletionRepository;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.DomainValidationException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -210,3 +210,5 @@ class SubmitQuizUseCaseTest {
     return quest.getChapters().get(0).getTasks().get(0);
   }
 }
+
+

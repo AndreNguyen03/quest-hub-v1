@@ -11,9 +11,9 @@ public final class PersonalQuestMapper {
 
   private PersonalQuestMapper() {}
 
-  public static PersonalQuestEntity toEntity(PersonalQuest quest) {
-    PersonalQuestEntity entity =
-        new PersonalQuestEntity(
+  public static PersonalQuestJpaEntity toEntity(PersonalQuest quest) {
+    PersonalQuestJpaEntity entity =
+        new PersonalQuestJpaEntity(
             quest.getId(),
             quest.getUserId(),
             quest.getQuestId(),
@@ -27,16 +27,16 @@ public final class PersonalQuestMapper {
             quest.getCompletedAt(),
             new ArrayList<>());
     for (PersonalChapter chapter : quest.getChapters()) {
-      PersonalChapterEntity chapterEntity = toEntity(chapter);
-      chapterEntity.setPersonalQuest(entity);
-      entity.getChapters().add(chapterEntity);
+      PersonalChapterJpaEntity ChapterJpaEntity = toEntity(chapter);
+      ChapterJpaEntity.setPersonalQuest(entity);
+      entity.getChapters().add(ChapterJpaEntity);
     }
     return entity;
   }
 
-  private static PersonalChapterEntity toEntity(PersonalChapter chapter) {
-    PersonalChapterEntity entity =
-        new PersonalChapterEntity(
+  private static PersonalChapterJpaEntity toEntity(PersonalChapter chapter) {
+    PersonalChapterJpaEntity entity =
+        new PersonalChapterJpaEntity(
             chapter.getId(),
             chapter.getSourceChapterId(),
             chapter.getTitle(),
@@ -46,15 +46,15 @@ public final class PersonalQuestMapper {
             chapter.getUpdatedAt(),
             new ArrayList<>());
     for (PersonalTask task : chapter.getTasks()) {
-      PersonalTaskEntity taskEntity = toEntity(task);
-      taskEntity.setPersonalChapter(entity);
-      entity.getTasks().add(taskEntity);
+      PersonalTaskJpaEntity TaskJpaEntity = toEntity(task);
+      TaskJpaEntity.setPersonalChapter(entity);
+      entity.getTasks().add(TaskJpaEntity);
     }
     return entity;
   }
 
-  private static PersonalTaskEntity toEntity(PersonalTask task) {
-    return new PersonalTaskEntity(
+  private static PersonalTaskJpaEntity toEntity(PersonalTask task) {
+    return new PersonalTaskJpaEntity(
         task.getId(),
         task.getSourceTaskId(),
         task.getType(),
@@ -68,7 +68,7 @@ public final class PersonalQuestMapper {
         task.getUpdatedAt());
   }
 
-  public static PersonalQuest toDomain(PersonalQuestEntity entity) {
+  public static PersonalQuest toDomain(PersonalQuestJpaEntity entity) {
     List<PersonalChapter> chapters =
         entity.getChapters().stream().map(PersonalQuestMapper::toDomain).collect(Collectors.toList());
     return PersonalQuest.restore(
@@ -86,7 +86,7 @@ public final class PersonalQuestMapper {
         entity.getCompletedAt());
   }
 
-  private static PersonalChapter toDomain(PersonalChapterEntity entity) {
+  private static PersonalChapter toDomain(PersonalChapterJpaEntity entity) {
     List<PersonalTask> tasks =
         entity.getTasks().stream().map(PersonalQuestMapper::toDomain).collect(Collectors.toList());
     return PersonalChapter.restore(
@@ -100,7 +100,7 @@ public final class PersonalQuestMapper {
         entity.getUpdatedAt());
   }
 
-  private static PersonalTask toDomain(PersonalTaskEntity entity) {
+  private static PersonalTask toDomain(PersonalTaskJpaEntity entity) {
     return PersonalTask.restore(
         entity.getId(),
         entity.getSourceTaskId(),
@@ -115,3 +115,7 @@ public final class PersonalQuestMapper {
         entity.getUpdatedAt());
   }
 }
+
+
+
+

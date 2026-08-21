@@ -1,6 +1,6 @@
 package com.questhub.modules.identity.application.usecase;
 
-import com.questhub.modules.identity.application.request.LoginRequest;
+import com.questhub.modules.identity.application.command.LoginCommand;
 import com.questhub.modules.identity.domain.user.Email;
 import com.questhub.modules.identity.domain.user.User;
 import com.questhub.modules.identity.domain.user.UserRepository;
@@ -19,7 +19,7 @@ public class LoginUseCase {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
 
-  public User login(LoginRequest request) {
+  public User login(LoginCommand request) {
     User user =
         userRepository
             .findByEmail(new Email(request.email()))
@@ -39,3 +39,4 @@ public class LoginUseCase {
     return user;
   }
 }
+

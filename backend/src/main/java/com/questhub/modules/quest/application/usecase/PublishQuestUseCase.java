@@ -1,7 +1,7 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.identity.domain.user.Role;
-import com.questhub.modules.identity.domain.user.UserRepository;
+import com.questhub.modules.identity.application.query.GetUsernameQuery;
+import com.questhub.modules.identity.application.usecase.PromoteToCreatorUseCase;
 import com.questhub.modules.quest.application.helper.QuestAcess;
 import com.questhub.modules.quest.domain.learningpath.LearningPath;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
@@ -27,7 +27,8 @@ public class PublishQuestUseCase {
   private final QuestAcess questAcess;
   private final QuestRepository questRepository;
   private final LearningPathRepository learningPathRepository;
-  private final UserRepository userRepository;
+  private final GetUsernameQuery getUsernameQuery;
+  private final PromoteToCreatorUseCase promoteToCreatorUseCase;
   private final OutboxPublisher outboxPublisher;
 
   @Transactional(
@@ -66,11 +67,7 @@ public class PublishQuestUseCase {
               .orElse(null);
     }
 
-    String creatorUsername =
-        userRepository
-            .findById(creatorId)
-            .map(user -> user.getUsername().value())
-            .orElse(null);
+    String creatorUsername = getUsernameQuery.byUserId(creatorId).orElse(null);
 
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("questId", quest.getId().toString());
@@ -92,12 +89,7 @@ public class PublishQuestUseCase {
   }
 
   private void promoteToCreator(UUID creatorId) {
-    userRepository.findById(creatorId).ifPresent(user -> {
-      if (user.getRole() == Role.USER) {
-        user.promoteToCreator();
-        userRepository.save(user);
-        log.info("User promoted to CREATOR userId={}", creatorId);
-      }
-    });
+    promoteToCreatorUseCase.promote(creatorId);
   }
 }
+

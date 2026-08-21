@@ -938,7 +938,7 @@
       <div class="phase-head phase-plan"><span class="phase-dot"></span><span class="phase-label">PLAN</span></div>
       <div class="phase-body">
         <ul>
-          <li>API: <code>GET /api/v1/users/:username/world</code></li>
+          <li>API: <code>GET /api/v1/world/users/:username</code> — world là resource chính (<code>/world</code>), lookup by username</li>
           <li>Guard: kiểm tra <code>users.is_public</code>; private + chưa follow → 404 (ẩn danh tính như US profile)</li>
           <li>Read-only — không có mutation endpoint</li>
         </ul>

@@ -8,13 +8,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.questhub.modules.quest.application.helper.QuestAcess;
-import com.questhub.modules.quest.domain.quest.Chapter;
+import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.Difficulty;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.modules.quest.domain.quest.QuestVisibility;
-import com.questhub.modules.quest.domain.quest.Task;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.Task;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.Map;
@@ -87,3 +87,5 @@ class UnpublishQuestUseCaseTest {
     return quest;
   }
 }
+
+

@@ -8,27 +8,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.identity.domain.user.DisplayName;
-import com.questhub.modules.identity.domain.user.Email;
-import com.questhub.modules.identity.domain.user.Role;
-import com.questhub.modules.identity.domain.user.User;
-import com.questhub.modules.identity.domain.user.UserRepository;
-import com.questhub.modules.identity.domain.user.Username;
+import com.questhub.modules.identity.application.query.GetUsernameQuery;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
-import com.questhub.modules.quest.domain.quest.Chapter;
+import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
 import com.questhub.modules.quest.domain.quest.Difficulty;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.modules.quest.domain.quest.QuestVisibility;
-import com.questhub.modules.quest.domain.quest.Task;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.Task;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import com.questhub.shared.outbox.OutboxPublisher;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +39,7 @@ class ForkQuestUseCaseTest {
 
   @Mock private QuestRepository questRepository;
   @Mock private PersonalQuestRepository personalQuestRepository;
-  @Mock private UserRepository userRepository;
+  @Mock private GetUsernameQuery getUsernameQuery;
   @Mock private OutboxPublisher outboxPublisher;
 
   @InjectMocks private ForkQuestUseCase useCase;
@@ -58,8 +52,7 @@ class ForkQuestUseCaseTest {
     when(personalQuestRepository.existsByUserIdAndQuestId(userId, quest.getId())).thenReturn(false);
     when(personalQuestRepository.save(any(PersonalQuest.class)))
         .thenAnswer(inv -> inv.getArgument(0));
-    when(userRepository.findById(userId))
-        .thenReturn(Optional.of(user(userId, "jane_doe")));
+    when(getUsernameQuery.byUserId(userId)).thenReturn(Optional.of("jane_doe"));
 
     PersonalQuest forked = useCase.fork(quest.getId(), userId);
 
@@ -137,7 +130,7 @@ class ForkQuestUseCaseTest {
     when(personalQuestRepository.existsByUserIdAndQuestId(userId, quest.getId())).thenReturn(false);
     when(personalQuestRepository.save(any(PersonalQuest.class)))
         .thenAnswer(inv -> inv.getArgument(0));
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user(userId, "jane_doe")));
+    when(getUsernameQuery.byUserId(userId)).thenReturn(Optional.of("jane_doe"));
 
     PersonalQuest forked = useCase.fork(quest.getId(), userId);
 
@@ -157,7 +150,7 @@ class ForkQuestUseCaseTest {
             "Học Spring Security",
             Difficulty.INTERMEDIATE,
             Map.of("icon", "x"));
-    quest.setCompletionRule(CompletionRule.quizScore(new BigDecimal("70")));
+    quest.applyCompletionRule(CompletionRule.quizScore(new BigDecimal("70")));
     Chapter c1 = Chapter.create("Authentication", "Phần 1", 0);
     c1.addTask(Task.create(TaskType.LEARN, "Xem video", "video", 0, Map.of()));
     c1.addTask(Task.create(TaskType.QUIZ, "Quiz 1", "quiz", 1, Map.of("minScore", 70)));
@@ -168,22 +161,6 @@ class ForkQuestUseCaseTest {
     quest.publish();
     return quest;
   }
-
-  private User user(UUID id, String username) {
-    return User.restore(
-        id,
-        new Email("jane@example.com"),
-        new Username(username),
-        new DisplayName("Jane"),
-        "$2a$10$hash",
-        Role.USER,
-        null,
-        null,
-        true,
-        0,
-        0,
-        Map.of(),
-        Instant.now(),
-        Instant.now());
-  }
 }
+
+

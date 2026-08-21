@@ -3,6 +3,7 @@ package com.questhub.modules.quest.domain.quest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.DomainValidationException;
 import java.math.BigDecimal;
 import java.util.List;

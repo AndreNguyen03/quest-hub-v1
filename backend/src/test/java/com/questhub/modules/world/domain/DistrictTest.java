@@ -1,7 +1,8 @@
-package com.questhub.modules.world.domain;
+package com.questhub.modules.world.domain.district;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.questhub.modules.world.domain.district.District;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 

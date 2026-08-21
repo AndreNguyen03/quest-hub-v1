@@ -17,4 +17,8 @@ public interface PersonalQuestRepository {
 
   List<PersonalQuest> findByUserIdAndDomainIdAndStatusIn(
       UUID userId, UUID domainId, Collection<PersonalQuestStatus> statuses);
+
+  long countByUserIdAndStatus(UUID userId, PersonalQuestStatus status);
+
+  List<LeaderboardStat> topByCompletionStats(int limit);
 }

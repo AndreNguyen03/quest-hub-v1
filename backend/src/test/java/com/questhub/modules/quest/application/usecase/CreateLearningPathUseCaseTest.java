@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.quest.application.request.CreateLearningPathRequest;
+import com.questhub.modules.quest.application.command.CreateLearningPathCommand;
 import com.questhub.modules.quest.domain.learningpath.LearningPath;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.modules.quest.domain.quest.Difficulty;
@@ -67,8 +67,11 @@ class CreateLearningPathUseCaseTest {
     verify(learningPathRepository, never()).save(any());
   }
 
-  private CreateLearningPathRequest request(UUID domainId) {
-    return new CreateLearningPathRequest(
+  private CreateLearningPathCommand request(UUID domainId) {
+    return new CreateLearningPathCommand(
         "Java Backend Engineer", "Roadmap Java", domainId, Difficulty.INTERMEDIATE);
   }
 }
+
+
+

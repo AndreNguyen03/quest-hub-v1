@@ -1,7 +1,7 @@
 package com.questhub.modules.quest.domain.quest;
 
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.DomainValidationException;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -57,3 +57,5 @@ public record CompletionRule(
     return new CompletionRule(Type.ANY_OF, null, null, rules);
   }
 }
+
+

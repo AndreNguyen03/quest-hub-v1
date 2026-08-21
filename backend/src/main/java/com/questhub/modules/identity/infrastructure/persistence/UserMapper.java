@@ -9,8 +9,8 @@ public final class UserMapper {
 
   private UserMapper() {}
 
-  public static UserEntity toEntity(User user) {
-    return new UserEntity(
+  public static UserJpaEntity toEntity(User user) {
+    return new UserJpaEntity(
         user.getId(),
         user.getEmail().value(),
         user.getUsername().value(),
@@ -27,7 +27,7 @@ public final class UserMapper {
         user.getUpdatedAt());
   }
 
-  public static User toDomain(UserEntity entity) {
+  public static User toDomain(UserJpaEntity entity) {
     return User.restore(
         entity.getId(),
         new Email(entity.getEmail()),

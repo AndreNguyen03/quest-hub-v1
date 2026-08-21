@@ -17,7 +17,7 @@ import com.questhub.modules.quest.domain.personalquest.PersonalTask;
 import com.questhub.modules.quest.domain.personalquest.TaskCompletion;
 import com.questhub.modules.quest.domain.personalquest.TaskCompletionRepository;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.DomainValidationException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -263,3 +263,5 @@ class CompleteTaskUseCaseTest {
     return quest;
   }
 }
+
+

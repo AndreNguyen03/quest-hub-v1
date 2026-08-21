@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.request.CreateLearningPathRequest;
+import com.questhub.modules.quest.application.command.CreateLearningPathCommand;
 import com.questhub.modules.quest.domain.learningpath.LearningPath;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.modules.quest.domain.skilldomain.SkillDomainRepository;
@@ -19,7 +19,7 @@ public class CreateLearningPathUseCase {
   private final SkillDomainRepository skillDomainRepository;
   private final LearningPathRepository learningPathRepository;
 
-  public LearningPath create(UUID authorId, CreateLearningPathRequest request) {
+  public LearningPath create(UUID authorId, CreateLearningPathCommand request) {
     if (!skillDomainRepository.existsById(request.domainId())) {
       throw BusinessException.notFound(ErrorCodes.NOT_FOUND, "skill domain didn't exists");
     }
@@ -38,3 +38,5 @@ public class CreateLearningPathUseCase {
     return saved;
   }
 }
+
+

@@ -42,3 +42,4 @@ class QuestForkedEventHandlerTest {
     verify(questRepository, never()).incrementForkCount(questId);
   }
 }
+

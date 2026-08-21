@@ -17,26 +17,32 @@ public class QuestEventPublisher {
   private final OutboxPublisher outboxPublisher;
 
   public void publishCompleted(PersonalQuest personalQuest, UUID userId) {
+    String questId = null;
+    if (personalQuest.getQuestId() != null) {
+      questId = personalQuest.getQuestId().toString();
+    }
+
+    String learningPathId = null;
+    if (personalQuest.getLearningPathId() != null) {
+      learningPathId = personalQuest.getLearningPathId().toString();
+    }
+
+    String skillDomainId = null;
+    if (personalQuest.getLearningPathId() != null) {
+      skillDomainId =
+          learningPathRepository
+              .findById(personalQuest.getLearningPathId())
+              .map(lp -> lp.getDomainId().toString())
+              .orElse(null);
+    }
+
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("userId", userId.toString());
     payload.put("personalQuestId", personalQuest.getId().toString());
-    payload.put(
-        "questId",
-        personalQuest.getQuestId() != null ? personalQuest.getQuestId().toString() : null);
+    payload.put("questId", questId);
     payload.put("questTitle", personalQuest.getTitle());
-    payload.put(
-        "learningPathId",
-        personalQuest.getLearningPathId() != null
-            ? personalQuest.getLearningPathId().toString()
-            : null);
-    payload.put(
-        "skillDomainId",
-        personalQuest.getLearningPathId() != null
-            ? learningPathRepository
-                .findById(personalQuest.getLearningPathId())
-                .map(lp -> lp.getDomainId().toString())
-                .orElse(null)
-            : null);
+    payload.put("learningPathId", learningPathId);
+    payload.put("skillDomainId", skillDomainId);
     payload.put("completedAt", personalQuest.getCompletedAt().toString());
 
     outboxPublisher.publish("Quest", personalQuest.getId(), "quest.completed", payload);

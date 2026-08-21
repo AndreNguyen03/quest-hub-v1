@@ -3,7 +3,7 @@ package com.questhub.modules.quest.domain.personalquest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.questhub.modules.quest.domain.quest.CompletionRule;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -133,3 +133,5 @@ class CompletionEvaluatorTest {
     return quest.getChapters().get(0).getTasks().get(0).getId();
   }
 }
+
+

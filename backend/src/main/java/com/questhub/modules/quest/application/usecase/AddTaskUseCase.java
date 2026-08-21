@@ -1,10 +1,10 @@
 package com.questhub.modules.quest.application.usecase;
 
 import com.questhub.modules.quest.application.helper.QuestAcess;
-import com.questhub.modules.quest.application.request.AddTaskRequest;
+import com.questhub.modules.quest.application.command.AddTaskCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
-import com.questhub.modules.quest.domain.quest.Task;
+import com.questhub.modules.quest.domain.task.Task;
 import com.questhub.shared.annotation.UseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class AddTaskUseCase {
       isolation = Isolation.DEFAULT,
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
-  public Quest add(UUID questId, UUID chapterId, UUID actorId, AddTaskRequest request) {
+  public Quest add(UUID questId, UUID chapterId, UUID actorId, AddTaskCommand request) {
     Quest quest = questAcess.loadForWrite(questId, actorId);
     Task task = Task.create(request.type(), request.title(), request.description(), 0, request.config());
     quest.addTask(chapterId, task);
@@ -36,3 +36,7 @@ public class AddTaskUseCase {
     return saved;
   }
 }
+
+
+
+

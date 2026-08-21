@@ -1,6 +1,6 @@
 package com.questhub.modules.identity.application.usecase;
 
-import com.questhub.modules.identity.application.request.UpdateProfileRequest;
+import com.questhub.modules.identity.application.command.UpdateProfileCommand;
 import com.questhub.modules.identity.domain.user.DisplayName;
 import com.questhub.modules.identity.domain.user.User;
 import com.questhub.modules.identity.domain.user.UserRepository;
@@ -18,7 +18,7 @@ public class UpdateProfileUseCase {
 
   private final UserRepository userRepository;
 
-  public User update(UUID userId, UpdateProfileRequest request) {
+  public User update(UUID userId, UpdateProfileCommand request) {
     User user =
         userRepository
             .findById(userId)
@@ -36,3 +36,4 @@ public class UpdateProfileUseCase {
     return saved;
   }
 }
+

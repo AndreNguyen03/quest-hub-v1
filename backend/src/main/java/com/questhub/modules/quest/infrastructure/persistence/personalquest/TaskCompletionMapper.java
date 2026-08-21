@@ -6,8 +6,8 @@ public final class TaskCompletionMapper {
 
   private TaskCompletionMapper() {}
 
-  public static TaskCompletionEntity toEntity(TaskCompletion completion) {
-    return new TaskCompletionEntity(
+  public static TaskCompletionJpaEntity toEntity(TaskCompletion completion) {
+    return new TaskCompletionJpaEntity(
         completion.getId(),
         completion.getPersonalTaskId(),
         completion.getUserId(),
@@ -16,7 +16,7 @@ public final class TaskCompletionMapper {
         completion.getCreatedAt());
   }
 
-  public static TaskCompletion toDomain(TaskCompletionEntity entity) {
+  public static TaskCompletion toDomain(TaskCompletionJpaEntity entity) {
     return TaskCompletion.restore(
         entity.getId(),
         entity.getPersonalTaskId(),
@@ -26,3 +26,7 @@ public final class TaskCompletionMapper {
         entity.getCreatedAt());
   }
 }
+
+
+
+

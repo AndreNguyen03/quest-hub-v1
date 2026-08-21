@@ -1,7 +1,7 @@
 package com.questhub.modules.quest.domain.personalquest;
 
 import com.questhub.modules.quest.domain.quest.CompletionRule;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
@@ -60,3 +60,5 @@ public class CompletionEvaluator {
         .allMatch(task -> !required.contains(task.getType()) || task.isCompleted());
   }
 }
+
+

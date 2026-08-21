@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.identity.application.request.LoginRequest;
+import com.questhub.modules.identity.application.command.LoginCommand;
 import com.questhub.modules.identity.domain.user.Email;
 import com.questhub.modules.identity.domain.user.User;
 import com.questhub.modules.identity.domain.user.UserRepository;
@@ -39,7 +39,7 @@ class LoginUseCaseTest {
         .thenReturn(Optional.of(user));
     when(passwordEncoder.matches("secret123", "$2a$10$hash")).thenReturn(true);
 
-    User loggedIn = useCase.login(new LoginRequest("alice@example.com", "secret123"));
+    User loggedIn = useCase.login(new LoginCommand("alice@example.com", "secret123"));
 
     assertThat(loggedIn).isSameAs(user);
     verify(passwordEncoder).matches("secret123", "$2a$10$hash");
@@ -51,7 +51,7 @@ class LoginUseCaseTest {
 
     BusinessException ex =
         catchThrowableOfType(
-            () -> useCase.login(new LoginRequest("ghost@example.com", "x")),
+            () -> useCase.login(new LoginCommand("ghost@example.com", "x")),
             BusinessException.class);
 
     assertThat(ex.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -67,7 +67,7 @@ class LoginUseCaseTest {
 
     BusinessException ex =
         catchThrowableOfType(
-            () -> useCase.login(new LoginRequest("alice@example.com", "sai")),
+            () -> useCase.login(new LoginCommand("alice@example.com", "sai")),
             BusinessException.class);
 
     assertThat(ex.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -86,7 +86,7 @@ class LoginUseCaseTest {
 
     BusinessException ex =
         catchThrowableOfType(
-            () -> useCase.login(new LoginRequest("alice@example.com", "secret123")),
+            () -> useCase.login(new LoginCommand("alice@example.com", "secret123")),
             BusinessException.class);
 
     assertThat(ex.getCode()).isEqualTo(ErrorCodes.INVALID_CREDENTIALS);
@@ -111,3 +111,4 @@ class LoginUseCaseTest {
         Instant.now());
   }
 }
+

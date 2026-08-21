@@ -34,10 +34,11 @@ public class SetCompletionRuleUseCase {
           ErrorCodes.CONFLICT, "Chỉ có thể cấu hình completion rule khi quest ở trạng thái DRAFT");
     }
 
-    quest.setCompletionRule(rule);
+    quest.applyCompletionRule(rule);
     Quest saved = questRepository.save(quest);
     log.info("Completion rule set questId={} type={} creatorId={}",
         saved.getId(), saved.getCompletionRule().type(), creatorId);
     return saved;
   }
 }
+

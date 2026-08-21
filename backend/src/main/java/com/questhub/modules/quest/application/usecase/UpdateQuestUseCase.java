@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.request.UpdateQuestRequest;
+import com.questhub.modules.quest.application.command.UpdateQuestCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -24,7 +24,7 @@ public class UpdateQuestUseCase {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
-  public Quest update(UUID questId, UUID actorId, UpdateQuestRequest request) {
+  public Quest update(UUID questId, UUID actorId, UpdateQuestCommand request) {
     Quest quest =
         questRepository
             .findById(questId)
@@ -44,3 +44,6 @@ public class UpdateQuestUseCase {
     return saved;
   }
 }
+
+
+

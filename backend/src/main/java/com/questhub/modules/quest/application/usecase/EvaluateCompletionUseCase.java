@@ -5,7 +5,7 @@ import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalTask;
 import com.questhub.modules.quest.domain.personalquest.QuizAttempt;
 import com.questhub.modules.quest.domain.personalquest.QuizAttemptRepository;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
@@ -71,3 +71,5 @@ public class EvaluateCompletionUseCase {
     return best;
   }
 }
+
+

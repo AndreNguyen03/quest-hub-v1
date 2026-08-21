@@ -1,7 +1,7 @@
 package com.questhub.modules.quest.application.usecase;
 
 import com.questhub.modules.quest.application.helper.QuestAcess;
-import com.questhub.modules.quest.application.request.UpdateTaskRequest;
+import com.questhub.modules.quest.application.command.UpdateTaskCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -24,7 +24,7 @@ public class UpdateTaskUseCase {
       isolation = Isolation.DEFAULT,
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
-  public Quest update(UUID questId, UUID taskId, UUID actorId, UpdateTaskRequest request) {
+  public Quest update(UUID questId, UUID taskId, UUID actorId, UpdateTaskCommand request) {
     Quest quest = questAcess.loadForWrite(questId, actorId);
     quest.updateTask(taskId, request.title(), request.description(), request.config(), request.order());
     Quest saved = questRepository.save(quest);
@@ -32,3 +32,6 @@ public class UpdateTaskUseCase {
     return saved;
   }
 }
+
+
+

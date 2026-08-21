@@ -2,7 +2,7 @@ package com.questhub.modules.identity.application.service;
 
 import com.questhub.modules.identity.application.port.RefreshTokenStore;
 import com.questhub.modules.identity.domain.user.User;
-import com.questhub.modules.identity.interfaces.dto.TokenPair;
+import com.questhub.modules.identity.application.dto.TokenPair;
 import com.questhub.shared.domain.AuthenticatedUser;
 import com.questhub.shared.infrastructure.security.JwtProperties;
 import com.questhub.shared.infrastructure.security.JwtService;
@@ -33,3 +33,4 @@ public class TokenIssuer {
     return new TokenPair(accessToken, refreshToken);
   }
 }
+

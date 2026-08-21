@@ -1,5 +1,6 @@
 package com.questhub.shared.outbox;
 
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class OutboxDispatcher {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRES_NEW)
-  public void dispatch(UUID id, String eventType, java.util.Map<String, Object> payload) {
+  public void dispatch(UUID id, String eventType, Map<String, Object> payload) {
     outboxEventRepository.markProcessing(id);
     applicationEventPublisher.publishEvent(new OutboxEventDispatched(id, eventType, payload));
     outboxEventRepository.markProcessed(id);

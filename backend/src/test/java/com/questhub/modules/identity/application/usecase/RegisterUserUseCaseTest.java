@@ -8,7 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.identity.application.request.RegisterUserRequest;
+import com.questhub.modules.identity.application.command.RegisterUserCommand;
 import com.questhub.modules.identity.domain.user.Email;
 import com.questhub.modules.identity.domain.user.Role;
 import com.questhub.modules.identity.domain.user.User;
@@ -110,7 +110,8 @@ class RegisterUserUseCaseTest {
     verify(userRepository, never()).save(any());
   }
 
-  private RegisterUserRequest request(String email, String username) {
-    return new RegisterUserRequest(email, username, "Display Name", "secret123");
+  private RegisterUserCommand request(String email, String username) {
+    return new RegisterUserCommand(email, username, "Display Name", "secret123");
   }
 }
+

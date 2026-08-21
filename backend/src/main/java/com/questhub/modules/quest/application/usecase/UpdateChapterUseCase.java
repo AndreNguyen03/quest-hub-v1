@@ -1,7 +1,7 @@
 package com.questhub.modules.quest.application.usecase;
 
 import com.questhub.modules.quest.application.helper.QuestAcess;
-import com.questhub.modules.quest.application.request.UpdateChapterRequest;
+import com.questhub.modules.quest.application.command.UpdateChapterCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -24,7 +24,7 @@ public class UpdateChapterUseCase {
       isolation = Isolation.DEFAULT,
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
-  public Quest update(UUID questId, UUID chapterId, UUID actorId, UpdateChapterRequest request) {
+  public Quest update(UUID questId, UUID chapterId, UUID actorId, UpdateChapterCommand request) {
     Quest quest = questAcess.loadForWrite(questId, actorId);
     quest.updateChapter(chapterId, request.title(), request.description(), request.position());
     Quest saved = questRepository.save(quest);
@@ -32,3 +32,6 @@ public class UpdateChapterUseCase {
     return saved;
   }
 }
+
+
+

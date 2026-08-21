@@ -37,3 +37,4 @@ public class QuestForkedEventHandler {
     log.info("Fork count incremented questId={}", questId);
   }
 }
+

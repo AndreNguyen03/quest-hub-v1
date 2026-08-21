@@ -110,3 +110,4 @@ public class LearningPath {
     return updatedAt;
   }
 }
+

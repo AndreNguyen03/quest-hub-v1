@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SpringDataQuizAttemptRepository extends JpaRepository<QuizAttemptEntity, UUID> {
+public interface SpringDataQuizAttemptRepository extends JpaRepository<QuizAttemptJpaEntity, UUID> {
 
-  List<QuizAttemptEntity> findByPersonalTaskIdOrderByCreatedAtDesc(UUID personalTaskId);
+  List<QuizAttemptJpaEntity> findByPersonalTaskIdOrderByCreatedAtDesc(UUID personalTaskId);
 }
+
+
+
+

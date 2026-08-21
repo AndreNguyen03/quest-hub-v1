@@ -1,8 +1,8 @@
 package com.questhub.modules.quest.application.usecase;
 
 import com.questhub.modules.quest.application.helper.QuestAcess;
-import com.questhub.modules.quest.application.request.AddChapterRequest;
-import com.questhub.modules.quest.domain.quest.Chapter;
+import com.questhub.modules.quest.application.command.AddChapterCommand;
+import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -25,7 +25,7 @@ public class AddChapterUseCase {
       isolation = Isolation.DEFAULT,
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
-  public Quest add(UUID questId, UUID actorId, AddChapterRequest request) {
+  public Quest add(UUID questId, UUID actorId, AddChapterCommand request) {
     Quest quest = questAcess.loadForWrite(questId, actorId);
     Chapter chapter = Chapter.create(request.title(), request.description(), 0);
     quest.addChapter(chapter);
@@ -34,3 +34,8 @@ public class AddChapterUseCase {
     return saved;
   }
 }
+
+
+
+
+

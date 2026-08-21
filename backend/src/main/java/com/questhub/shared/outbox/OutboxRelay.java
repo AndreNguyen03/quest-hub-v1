@@ -1,13 +1,15 @@
 package com.questhub.shared.outbox;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 public class OutboxRelay {
+
+  private static final Logger log = LoggerFactory.getLogger(OutboxRelay.class);
 
   private static final int MAX_RETRY = 5;
   private static final int BATCH_SIZE = 100;

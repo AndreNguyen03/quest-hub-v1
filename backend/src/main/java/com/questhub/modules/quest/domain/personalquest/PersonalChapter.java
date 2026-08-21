@@ -3,6 +3,7 @@ package com.questhub.modules.quest.domain.personalquest;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,7 +70,7 @@ public class PersonalChapter {
   }
 
   public void sortTasks() {
-    tasks.sort(java.util.Comparator.comparingInt(PersonalTask::getOrder));
+    tasks.sort(Comparator.comparingInt(PersonalTask::getOrder));
     this.updatedAt = Instant.now();
   }
 
@@ -93,7 +94,7 @@ public class PersonalChapter {
     return position;
   }
 
-  public void setPosition(int position) {
+  public void reorderTo(int position) {
     this.position = position;
     this.updatedAt = Instant.now();
   }

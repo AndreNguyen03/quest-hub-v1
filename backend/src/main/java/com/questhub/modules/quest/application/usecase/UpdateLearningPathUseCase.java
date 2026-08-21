@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.request.UpdateLearningPathRequest;
+import com.questhub.modules.quest.application.command.UpdateLearningPathCommand;
 import com.questhub.modules.quest.domain.learningpath.LearningPath;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -17,7 +17,7 @@ public class UpdateLearningPathUseCase {
 
   private final LearningPathRepository learningPathRepository;
 
-  public LearningPath update(UUID pathId, UUID actorId, UpdateLearningPathRequest request) {
+  public LearningPath update(UUID pathId, UUID actorId, UpdateLearningPathCommand request) {
     LearningPath path =
         learningPathRepository
             .findById(pathId)
@@ -32,3 +32,4 @@ public class UpdateLearningPathUseCase {
     return saved;
   }
 }
+

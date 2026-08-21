@@ -6,8 +6,8 @@ public final class QuizAttemptMapper {
 
   private QuizAttemptMapper() {}
 
-  public static QuizAttemptEntity toEntity(QuizAttempt attempt) {
-    return new QuizAttemptEntity(
+  public static QuizAttemptJpaEntity toEntity(QuizAttempt attempt) {
+    return new QuizAttemptJpaEntity(
         attempt.getId(),
         attempt.getPersonalTaskId(),
         attempt.getUserId(),
@@ -18,7 +18,7 @@ public final class QuizAttemptMapper {
         attempt.getCreatedAt());
   }
 
-  public static QuizAttempt toDomain(QuizAttemptEntity entity) {
+  public static QuizAttempt toDomain(QuizAttemptJpaEntity entity) {
     return QuizAttempt.restore(
         entity.getId(),
         entity.getPersonalTaskId(),
@@ -30,3 +30,7 @@ public final class QuizAttemptMapper {
         entity.getCreatedAt());
   }
 }
+
+
+
+

@@ -4,7 +4,7 @@ import com.questhub.modules.quest.domain.personalquest.PersonalChapter;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
 import com.questhub.modules.quest.domain.personalquest.PersonalTask;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -136,3 +136,5 @@ public class EditPersonalQuestUseCase {
     return quest;
   }
 }
+
+

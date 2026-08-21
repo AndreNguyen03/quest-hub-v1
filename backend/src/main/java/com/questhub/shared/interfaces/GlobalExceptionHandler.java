@@ -11,6 +11,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.validation.FieldError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -98,7 +99,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ApiError.of(ErrorCodes.INTERNAL_ERROR, "Internal server error")));
     }
 
-    private ResponseEntity<ApiResponse<Void>> validationError(List<org.springframework.validation.FieldError> fieldErrors) {
+    private ResponseEntity<ApiResponse<Void>> validationError(List<FieldError> fieldErrors) {
         List<FieldErrorItem> details = fieldErrors.stream()
                 .map(fe -> new FieldErrorItem(fe.getField(), fe.getDefaultMessage()))
                 .toList();

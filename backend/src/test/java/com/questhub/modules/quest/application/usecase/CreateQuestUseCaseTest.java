@@ -7,14 +7,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.quest.application.request.CreateQuestRequest;
+import com.questhub.modules.quest.application.command.CreateQuestCommand;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
 import com.questhub.modules.quest.domain.quest.Difficulty;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.modules.quest.domain.quest.QuestVisibility;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.math.BigDecimal;
@@ -73,9 +73,9 @@ class CreateQuestUseCaseTest {
   void create_whenLearningPathMissing_shouldThrowNotFoundAndNotSave() {
     UUID pathId = UUID.randomUUID();
     when(learningPathRepository.existsById(pathId)).thenReturn(false);
-    CreateQuestRequest request = requestWithTree(CompletionRule.defaultAllTasks());
-    CreateQuestRequest withPath =
-        new CreateQuestRequest(
+    CreateQuestCommand request = requestWithTree(CompletionRule.defaultAllTasks());
+    CreateQuestCommand withPath =
+        new CreateQuestCommand(
             request.title(),
             request.description(),
             pathId,
@@ -91,8 +91,8 @@ class CreateQuestUseCaseTest {
     verify(questRepository, never()).save(any());
   }
 
-  private CreateQuestRequest requestWithTree(CompletionRule rule) {
-    return new CreateQuestRequest(
+  private CreateQuestCommand requestWithTree(CompletionRule rule) {
+    return new CreateQuestCommand(
         "Spring Security Fundamentals",
         "Học Spring Security",
         null,
@@ -100,19 +100,23 @@ class CreateQuestUseCaseTest {
         rule,
         Map.of("icon", "🎖️"),
         List.of(
-            new CreateQuestRequest.ChapterRequest(
+            new CreateQuestCommand.ChapterRequest(
                 "Authentication",
                 "Phần 1",
                 List.of(
-                    new CreateQuestRequest.TaskRequest(
+                    new CreateQuestCommand.TaskRequest(
                         TaskType.LEARN, "Xem video", "video về JWT", null),
-                    new CreateQuestRequest.TaskRequest(
+                    new CreateQuestCommand.TaskRequest(
                         TaskType.PRACTICE, "Code login", "viết controller", Map.of("passThreshold", 80)))),
-            new CreateQuestRequest.ChapterRequest(
+            new CreateQuestCommand.ChapterRequest(
                 "Authorization",
                 "Phần 2",
                 List.of(
-                    new CreateQuestRequest.TaskRequest(
+                    new CreateQuestCommand.TaskRequest(
                         TaskType.QUIZ, "Quiz role", "trắc nghiệm", Map.of("passThreshold", 80))))));
   }
 }
+
+
+
+

@@ -1,6 +1,6 @@
 package com.questhub.modules.identity.application.usecase;
 
-import com.questhub.modules.identity.application.request.RegisterUserRequest;
+import com.questhub.modules.identity.application.command.RegisterUserCommand;
 import com.questhub.modules.identity.domain.user.DisplayName;
 import com.questhub.modules.identity.domain.user.Email;
 import com.questhub.modules.identity.domain.user.User;
@@ -34,7 +34,7 @@ public class RegisterUserUseCase {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
-  public User register(RegisterUserRequest request) {
+  public User register(RegisterUserCommand request) {
     Email email = new Email(request.email());
     Username username = new Username(request.username());
     DisplayName displayName = new DisplayName(request.displayName());
@@ -67,3 +67,5 @@ public class RegisterUserUseCase {
     return saved;
   }
 }
+
+

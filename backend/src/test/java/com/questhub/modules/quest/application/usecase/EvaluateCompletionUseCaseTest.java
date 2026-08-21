@@ -11,7 +11,7 @@ import com.questhub.modules.quest.domain.personalquest.PersonalTask;
 import com.questhub.modules.quest.domain.personalquest.QuizAttempt;
 import com.questhub.modules.quest.domain.personalquest.QuizAttemptRepository;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -140,3 +140,5 @@ class EvaluateCompletionUseCaseTest {
     return quest;
   }
 }
+
+

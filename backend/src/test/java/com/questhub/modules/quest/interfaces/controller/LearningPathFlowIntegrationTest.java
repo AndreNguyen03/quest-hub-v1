@@ -1,4 +1,4 @@
-package com.questhub.modules.quest.interfaces.controller;
+package com.questhub.modules.quest.presentation.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

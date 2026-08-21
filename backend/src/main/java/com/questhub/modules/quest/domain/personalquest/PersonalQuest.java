@@ -1,17 +1,19 @@
 package com.questhub.modules.quest.domain.personalquest;
 
 import com.questhub.modules.quest.domain.quest.CompletionRule;
-import com.questhub.modules.quest.domain.quest.TaskType;
+import com.questhub.modules.quest.domain.task.TaskType;
 import com.questhub.shared.domain.DomainValidationException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PersonalQuest {
 
@@ -195,7 +197,7 @@ public class PersonalQuest {
 
   public void reorderChapters(List<UUID> orderedIds) {
     Set<UUID> currentIds =
-        chapters.stream().map(PersonalChapter::getId).collect(java.util.stream.Collectors.toSet());
+        chapters.stream().map(PersonalChapter::getId).collect(Collectors.toSet());
     if (orderedIds.size() != chapters.size() || !currentIds.equals(new HashSet<>(orderedIds))) {
       throw new DomainValidationException("Danh sách chapter không khớp với personal quest");
     }
@@ -205,9 +207,9 @@ public class PersonalQuest {
           .filter(c -> c.getId().equals(id))
           .findFirst()
           .orElseThrow()
-          .setPosition(i);
+          .reorderTo(i);
     }
-    chapters.sort(java.util.Comparator.comparingInt(PersonalChapter::getPosition));
+    chapters.sort(Comparator.comparingInt(PersonalChapter::getPosition));
     this.updatedAt = Instant.now();
   }
 
@@ -218,7 +220,7 @@ public class PersonalQuest {
             .findFirst()
             .orElseThrow(() -> new DomainValidationException("Không tìm thấy chapter"));
     Set<UUID> currentIds =
-        chapter.getTasks().stream().map(PersonalTask::getId).collect(java.util.stream.Collectors.toSet());
+        chapter.getTasks().stream().map(PersonalTask::getId).collect(Collectors.toSet());
     if (orderedIds.size() != chapter.getTasks().size() || !currentIds.equals(new HashSet<>(orderedIds))) {
       throw new DomainValidationException("Danh sách task không khớp với chapter");
     }
@@ -228,7 +230,7 @@ public class PersonalQuest {
           .filter(t -> t.getId().equals(id))
           .findFirst()
           .orElseThrow()
-          .setOrder(i);
+          .reorderTo(i);
     }
     chapter.sortTasks();
     this.updatedAt = Instant.now();
@@ -323,3 +325,5 @@ public class PersonalQuest {
     return completedAt;
   }
 }
+
+
