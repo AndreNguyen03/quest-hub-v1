@@ -47,4 +47,30 @@ public class QuestEventPublisher {
 
     outboxPublisher.publish("Quest", personalQuest.getId(), "quest.completed", payload);
   }
+
+  public void publishReopened(PersonalQuest personalQuest, UUID userId) {
+    String learningPathId = null;
+    if (personalQuest.getLearningPathId() != null) {
+      learningPathId = personalQuest.getLearningPathId().toString();
+    }
+
+    String skillDomainId = null;
+    if (personalQuest.getLearningPathId() != null) {
+      skillDomainId =
+          learningPathRepository
+              .findById(personalQuest.getLearningPathId())
+              .map(lp -> lp.getDomainId().toString())
+              .orElse(null);
+    }
+
+    Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put("userId", userId.toString());
+    payload.put("personalQuestId", personalQuest.getId().toString());
+    payload.put("questId", personalQuest.getQuestId() != null ? personalQuest.getQuestId().toString() : null);
+    payload.put("questTitle", personalQuest.getTitle());
+    payload.put("learningPathId", learningPathId);
+    payload.put("skillDomainId", skillDomainId);
+
+    outboxPublisher.publish("Quest", personalQuest.getId(), "quest.reopened", payload);
+  }
 }

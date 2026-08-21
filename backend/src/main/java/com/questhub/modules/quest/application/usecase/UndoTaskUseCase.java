@@ -1,5 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
+import com.questhub.modules.quest.application.event.QuestEventPublisher;
 import com.questhub.modules.quest.application.event.TaskEventPublisher;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
@@ -24,6 +25,7 @@ public class UndoTaskUseCase {
   private final TaskCompletionRepository taskCompletionRepository;
   private final EvaluateCompletionUseCase evaluateCompletion;
   private final TaskEventPublisher taskEventPublisher;
+  private final QuestEventPublisher questEventPublisher;
 
   @Transactional(
       isolation = Isolation.DEFAULT,
@@ -49,12 +51,20 @@ public class UndoTaskUseCase {
       return personalQuest;
     }
 
+    boolean wasCompleted = personalQuest.isCompleted();
+
     personalQuest.undoTask(personalTaskId);
     evaluateCompletion.evaluate(personalQuest, userId);
     personalQuestRepository.save(personalQuest);
     taskCompletionRepository.deleteByPersonalTaskId(personalTaskId);
 
     taskEventPublisher.publishUndone(personalQuest, task, userId);
+    if (wasCompleted && personalQuest.isActive()) {
+      log.info(
+          "Quest reopened after undo personalQuestId={} userId={}",
+          personalQuestId, userId);
+      questEventPublisher.publishReopened(personalQuest, userId);
+    }
     return personalQuest;
   }
 }

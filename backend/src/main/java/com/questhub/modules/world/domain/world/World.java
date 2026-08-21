@@ -31,6 +31,12 @@ public class World {
     this.questCompletedCount++;
   }
 
+  public void decrementQuestCount() {
+    if (this.questCompletedCount > 0) {
+      this.questCompletedCount--;
+    }
+  }
+
   public UUID getId() { return id; }
   public UUID getUserId() { return userId; }
   public String getUsername() { return username; }
