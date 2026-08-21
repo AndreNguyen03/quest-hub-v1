@@ -7,11 +7,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.world.domain.District;
-import com.questhub.modules.world.domain.DistrictEventRepository;
-import com.questhub.modules.world.domain.DistrictRepository;
-import com.questhub.modules.world.domain.World;
-import com.questhub.modules.world.domain.WorldRepository;
+import com.questhub.modules.world.domain.district.District;
+import com.questhub.modules.world.domain.district.DistrictEventRepository;
+import com.questhub.modules.world.domain.district.DistrictRepository;
+import com.questhub.modules.world.domain.world.World;
+import com.questhub.modules.world.domain.world.WorldRepository;
 import com.questhub.shared.outbox.OutboxEventDispatched;
 import java.util.Map;
 import java.util.Optional;
@@ -41,13 +41,12 @@ class TaskCompletionEventHandlerTest {
   }
 
   @Test
-  void taskCompleted_shouldCreateWorldAndDistrictAndIncrement() {
+  void taskCompleted_whenWorldExists_shouldCreateDistrictAndIncrement() {
     UUID userId = UUID.randomUUID();
     UUID domainId = UUID.randomUUID();
-    World world = World.create(userId);
+    World world = World.restore(UUID.randomUUID(), userId, "alice", java.time.Instant.now(), 0);
     District district = District.create(world.getId(), domainId);
-    when(worldRepository.findByUserId(userId)).thenReturn(Optional.empty());
-    when(worldRepository.save(any(World.class))).thenReturn(world);
+    when(worldRepository.findByUserId(userId)).thenReturn(Optional.of(world));
     when(districtRepository.findByWorldIdAndDomainId(world.getId(), domainId))
         .thenReturn(Optional.empty());
     when(districtRepository.save(any(District.class))).thenReturn(district);
@@ -62,10 +61,23 @@ class TaskCompletionEventHandlerTest {
   }
 
   @Test
+  void taskCompleted_whenWorldNotFound_shouldSkip() {
+    UUID userId = UUID.randomUUID();
+    UUID domainId = UUID.randomUUID();
+    when(worldRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+    handler.handle(event("task.completed", userId, domainId));
+
+    verify(worldRepository, never()).save(any());
+    verify(districtRepository, never()).save(any());
+    verify(districtEventRepository, never()).record(any(), any(), org.mockito.ArgumentMatchers.anyInt());
+  }
+
+  @Test
   void taskUndone_shouldDecrement() {
     UUID userId = UUID.randomUUID();
     UUID domainId = UUID.randomUUID();
-    World world = World.create(userId);
+    World world = World.create(userId, null);
     District district = District.create(world.getId(), domainId);
     district.incrementCompletion();
     district.incrementCompletion();

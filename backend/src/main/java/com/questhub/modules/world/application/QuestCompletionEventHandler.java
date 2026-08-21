@@ -13,16 +13,19 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class UserRegisteredEventHandler {
+public class QuestCompletionEventHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(UserRegisteredEventHandler.class);
-
-  private static final String EVENT_TYPE = "user.registered";
+  private static final Logger log = LoggerFactory.getLogger(QuestCompletionEventHandler.class);
+  private static final String QUEST_COMPLETED = "quest.completed";
 
   private final WorldRepository worldRepository;
+  private final AchievementUnlockService achievementUnlockService;
 
-  public UserRegisteredEventHandler(WorldRepository worldRepository) {
+  public QuestCompletionEventHandler(
+      WorldRepository worldRepository,
+      AchievementUnlockService achievementUnlockService) {
     this.worldRepository = worldRepository;
+    this.achievementUnlockService = achievementUnlockService;
   }
 
   @EventListener
@@ -31,18 +34,24 @@ public class UserRegisteredEventHandler {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public void handle(OutboxEventDispatched event) {
-    if (!EVENT_TYPE.equals(event.eventType())) {
+    if (!QUEST_COMPLETED.equals(event.eventType())) {
       return;
     }
 
     UUID userId = UUID.fromString((String) event.payload().get("userId"));
-    if (worldRepository.existsByUserId(userId)) {
-      log.info("World already exists for userId={}, skip", userId);
+
+    World world = worldRepository.findByUserId(userId).orElse(null);
+    if (world == null) {
+      log.warn("World not found for userId={}, quest.completed skipped — user.registered event may not have been processed yet", userId);
       return;
     }
 
-    String username = (String) event.payload().get("username");
-    World world = worldRepository.save(World.create(userId, username));
-    log.info("World created worldId={} userId={}", world.getId(), userId);
+    world.incrementQuestCount();
+    worldRepository.save(world);
+
+    log.info("Quest completion recorded userId={} questCompletedCount={}",
+        userId, world.getQuestCompletedCount());
+
+    achievementUnlockService.evaluate(userId);
   }
 }

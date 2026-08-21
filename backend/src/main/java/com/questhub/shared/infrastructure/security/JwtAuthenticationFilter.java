@@ -7,10 +7,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,9 +20,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER_PREFIX = "Bearer ";
 
   private final JwtService jwtService;
+  private final UserPrincipalLookup userPrincipalLookup;
 
-  public JwtAuthenticationFilter(JwtService jwtService) {
+  public JwtAuthenticationFilter(JwtService jwtService, UserPrincipalLookup userPrincipalLookup) {
     this.jwtService = jwtService;
+    this.userPrincipalLookup = userPrincipalLookup;
   }
 
   @Override
@@ -34,16 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       try {
         JwtService.TokenClaims claims = jwtService.parse(header.substring(BEARER_PREFIX.length()));
         if (JwtService.TYPE_ACCESS.equals(claims.type())) {
-          AuthenticatedUser principal = new AuthenticatedUser(claims.userId(), claims.username());
-          List<SimpleGrantedAuthority> authorities =
-              claims.roles().stream()
-                  .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                  .toList();
+          UserDetails userDetails = userPrincipalLookup.loadById(claims.userId());
+          AuthenticatedUser principal =
+              new AuthenticatedUser(claims.userId(), userDetails.getUsername());
           SecurityContextHolder.getContext()
               .setAuthentication(
-                  new UsernamePasswordAuthenticationToken(principal, null, authorities));
+                  new UsernamePasswordAuthenticationToken(
+                      principal, null, userDetails.getAuthorities()));
         }
-      } catch (JwtException | IllegalArgumentException ex) {
+      } catch (JwtException | IllegalArgumentException | UsernameNotFoundException ex) {
         SecurityContextHolder.clearContext();
       }
     }

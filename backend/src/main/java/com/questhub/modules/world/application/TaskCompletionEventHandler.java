@@ -1,22 +1,24 @@
 package com.questhub.modules.world.application;
 
-import com.questhub.modules.world.domain.District;
-import com.questhub.modules.world.domain.DistrictEventRepository;
-import com.questhub.modules.world.domain.DistrictRepository;
-import com.questhub.modules.world.domain.World;
-import com.questhub.modules.world.domain.WorldRepository;
+import com.questhub.modules.world.domain.district.District;
+import com.questhub.modules.world.domain.district.DistrictEventRepository;
+import com.questhub.modules.world.domain.district.DistrictRepository;
+import com.questhub.modules.world.domain.world.World;
+import com.questhub.modules.world.domain.world.WorldRepository;
 import com.questhub.shared.outbox.OutboxEventDispatched;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Component
 public class TaskCompletionEventHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(TaskCompletionEventHandler.class);
 
   private static final String TASK_COMPLETED = "task.completed";
   private static final String TASK_UNDONE = "task.undone";
@@ -61,10 +63,11 @@ public class TaskCompletionEventHandler {
     UUID domainId = UUID.fromString(domainIdValue);
     UUID userId = UUID.fromString((String) event.payload().get("userId"));
 
-    World world =
-        worldRepository
-            .findByUserId(userId)
-            .orElseGet(() -> worldRepository.save(World.create(userId)));
+    World world = worldRepository.findByUserId(userId).orElse(null);
+    if (world == null) {
+      log.warn("World not found for userId={}, task.completed skipped — user.registered event may not have been processed yet", userId);
+      return;
+    }
 
     District district =
         districtRepository

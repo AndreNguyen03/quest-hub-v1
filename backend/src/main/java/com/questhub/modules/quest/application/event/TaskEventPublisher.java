@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.event;
 
-import com.questhub.modules.identity.domain.user.UserRepository;
+import com.questhub.modules.identity.application.query.GetUsernameQuery;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.modules.quest.domain.personalquest.PersonalChapter;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TaskEventPublisher {
 
-  private final UserRepository userRepository;
+  private final GetUsernameQuery getUsernameQuery;
   private final LearningPathRepository learningPathRepository;
   private final OutboxPublisher outboxPublisher;
 
@@ -38,41 +38,54 @@ public class TaskEventPublisher {
 
   private Map<String, Object> basePayload(
       PersonalQuest personalQuest, PersonalTask task, UUID userId) {
-    String username =
-        userRepository
-            .findById(userId)
-            .map(user -> user.getUsername().value())
-            .orElse(null);
+    String username = getUsernameQuery.byUserId(userId).orElse(null);
     PersonalChapter chapter =
         personalQuest.findChapterOf(task.getId()).orElse(null);
+
+    String questId = null;
+    if (personalQuest.getQuestId() != null) {
+      questId = personalQuest.getQuestId().toString();
+    }
+
+    String chapterId = null;
+    String chapterTitle = null;
+    if (chapter != null) {
+      chapterTitle = chapter.getTitle();
+      if (chapter.getSourceChapterId() != null) {
+        chapterId = chapter.getSourceChapterId().toString();
+      } else {
+        chapterId = chapter.getId().toString();
+      }
+    }
+
+    String taskId;
+    if (task.getSourceTaskId() != null) {
+      taskId = task.getSourceTaskId().toString();
+    } else {
+      taskId = task.getId().toString();
+    }
+
+    String skillDomainId = null;
+    if (personalQuest.getLearningPathId() != null) {
+      skillDomainId =
+          learningPathRepository
+              .findById(personalQuest.getLearningPathId())
+              .map(lp -> lp.getDomainId().toString())
+              .orElse(null);
+    }
 
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("userId", userId.toString());
     payload.put("username", username);
     payload.put("personalQuestId", personalQuest.getId().toString());
-    payload.put("questId", personalQuest.getQuestId() != null ? personalQuest.getQuestId().toString() : null);
+    payload.put("questId", questId);
     payload.put("questTitle", personalQuest.getTitle());
-    payload.put(
-        "chapterId",
-        chapter != null
-            ? (chapter.getSourceChapterId() != null
-                ? chapter.getSourceChapterId().toString()
-                : chapter.getId().toString())
-            : null);
-    payload.put("chapterTitle", chapter != null ? chapter.getTitle() : null);
-    payload.put(
-        "taskId",
-        task.getSourceTaskId() != null ? task.getSourceTaskId().toString() : task.getId().toString());
+    payload.put("chapterId", chapterId);
+    payload.put("chapterTitle", chapterTitle);
+    payload.put("taskId", taskId);
     payload.put("taskTitle", task.getTitle());
     payload.put("taskType", task.getType().name());
-    payload.put(
-        "skillDomainId",
-        personalQuest.getLearningPathId() != null
-            ? learningPathRepository
-                .findById(personalQuest.getLearningPathId())
-                .map(lp -> lp.getDomainId().toString())
-                .orElse(null)
-            : null);
+    payload.put("skillDomainId", skillDomainId);
     return payload;
   }
 }

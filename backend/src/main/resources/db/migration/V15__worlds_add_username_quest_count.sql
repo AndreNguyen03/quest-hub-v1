@@ -1,0 +1,2 @@
+ALTER TABLE worlds ADD COLUMN username VARCHAR(50);
+ALTER TABLE worlds ADD COLUMN quest_completed_count INT NOT NULL DEFAULT 0;
