@@ -6,6 +6,7 @@ import com.questhub.modules.quest.application.command.CompleteTaskCommand;
 import com.questhub.modules.quest.application.command.ReorderChaptersCommand;
 import com.questhub.modules.quest.application.command.ReorderTasksCommand;
 import com.questhub.modules.quest.application.command.SubmitQuizCommand;
+import com.questhub.modules.quest.application.usecase.AbandonQuestUseCase;
 import com.questhub.modules.quest.application.usecase.CompleteTaskUseCase;
 import com.questhub.modules.quest.application.usecase.EditPersonalQuestUseCase;
 import com.questhub.modules.quest.application.usecase.ForkQuestUseCase;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PersonalQuestController {
 
+  private final AbandonQuestUseCase abandonQuestUseCase;
   private final ForkQuestUseCase forkQuestUseCase;
   private final GetPersonalQuestsQuery GetPersonalQuestsQuery;
   private final GetPersonalQuestQuery GetPersonalQuestQuery;
@@ -117,6 +119,12 @@ public class PersonalQuestController {
             .map(QuizAttemptResponse::from)
             .toList();
     return ResponseEntity.ok(ApiResponse.ok(responses));
+  }
+
+  @DeleteMapping("/personal-quests/{id}")
+  public ResponseEntity<Void> abandon(@PathVariable UUID id) {
+    abandonQuestUseCase.abandon(id, currentUserId());
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/personal-quests/{pqId}/chapters")
