@@ -1,8 +1,8 @@
 package com.questhub.modules.world.presentation.rest;
 
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.PersonalQuestSummaryDto;
 import com.questhub.modules.quest.application.dto.SkillDomainDto;
-import com.questhub.modules.quest.application.query.GetSkillDomainQuery;
 import com.questhub.modules.world.application.query.GetDistrictDetailQuery;
 import com.questhub.modules.world.application.query.GetWorldQuery;
 import com.questhub.modules.world.domain.building.Building;
@@ -13,7 +13,7 @@ import com.questhub.modules.world.application.dto.DistrictDetailResponse.QuestRe
 import com.questhub.modules.world.application.dto.WorldResponse;
 import com.questhub.modules.world.application.dto.WorldResponse.DistrictResponse;
 import com.questhub.shared.domain.AuthenticatedUser;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +32,7 @@ public class WorldController {
 
   private final GetWorldQuery getWorldQuery;
   private final GetDistrictDetailQuery getDistrictDetailQuery;
-  private final GetSkillDomainQuery getSkillDomainQuery;
+  private final QuestPublicApi questPublicApi;
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<WorldResponse>> myWorld() {
@@ -51,7 +51,7 @@ public class WorldController {
     District district = result.district();
     String domainName = null;
     String domainSlug = null;
-    Optional<SkillDomainDto> domain = getSkillDomainQuery.byId(district.getDomainId());
+    Optional<SkillDomainDto> domain = questPublicApi.findSkillDomain(district.getDomainId());
     if (domain.isPresent()) {
       domainName = domain.get().name();
       domainSlug = domain.get().slug();
@@ -82,7 +82,7 @@ public class WorldController {
   private DistrictResponse toDistrictResponse(District district) {
     String domainName = null;
     String domainSlug = null;
-    Optional<SkillDomainDto> domain = getSkillDomainQuery.byId(district.getDomainId());
+    Optional<SkillDomainDto> domain = questPublicApi.findSkillDomain(district.getDomainId());
     if (domain.isPresent()) {
       domainName = domain.get().name();
       domainSlug = domain.get().slug();

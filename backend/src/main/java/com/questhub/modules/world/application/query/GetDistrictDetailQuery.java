@@ -1,12 +1,12 @@
 package com.questhub.modules.world.application.query;
 
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.PersonalQuestSummaryDto;
-import com.questhub.modules.quest.application.query.ListPersonalQuestsByDomainQuery;
 import com.questhub.modules.world.domain.building.Building;
 import com.questhub.modules.world.domain.building.BuildingRepository;
 import com.questhub.modules.world.domain.district.District;
 import com.questhub.modules.world.domain.district.DistrictRepository;
-import com.questhub.modules.world.application.BuildingUnlockService;
+import com.questhub.modules.world.application.usecase.BuildingUnlockService;
 import com.questhub.modules.world.domain.world.World;
 import com.questhub.modules.world.domain.world.WorldRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -31,7 +31,7 @@ public class GetDistrictDetailQuery {
   private final WorldRepository worldRepository;
   private final BuildingRepository buildingRepository;
   private final BuildingUnlockService buildingUnlockService;
-  private final ListPersonalQuestsByDomainQuery listPersonalQuestsByDomainQuery;
+  private final QuestPublicApi questPublicApi;
 
   public record Result(
       District district, List<Building> buildings, List<PersonalQuestSummaryDto> quests) {}
@@ -61,7 +61,7 @@ public class GetDistrictDetailQuery {
     buildingUnlockService.unlockFor(district);
     List<Building> buildings = buildingRepository.findByDistrictId(district.getId());
     List<PersonalQuestSummaryDto> quests =
-        listPersonalQuestsByDomainQuery.byUserAndDomain(userId, district.getDomainId());
+        questPublicApi.personalQuestsByUserAndDomain(userId, district.getDomainId());
     log.info(
         "District detail viewed districtId={} userId={} buildings={} quests={}",
         districtId, userId, buildings.size(), quests.size());

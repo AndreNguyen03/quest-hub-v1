@@ -2,6 +2,7 @@ package com.questhub.modules.marketplace.application.query;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.QuestDto;
 import com.questhub.modules.marketplace.infrastructure.redis.MarketplaceCacheService;
 import com.questhub.shared.annotation.UseCase;
@@ -20,7 +21,7 @@ public class PopularQuestsQuery {
 
   private static final String CACHE_KEY_PREFIX = "marketplace:popular:quests:";
 
-  private final com.questhub.modules.quest.application.query.GetPopularQuestsQuery delegate;
+  private final QuestPublicApi questPublicApi;
   private final MarketplaceCacheService cacheService;
   private final ObjectMapper objectMapper;
 
@@ -40,7 +41,7 @@ public class PopularQuestsQuery {
       }
     }
 
-    List<QuestDto> quests = delegate.get(limit);
+    List<QuestDto> quests = questPublicApi.popularQuests(limit);
     try {
       cacheService.cachePopular(key, objectMapper.writeValueAsString(quests));
     } catch (Exception e) {

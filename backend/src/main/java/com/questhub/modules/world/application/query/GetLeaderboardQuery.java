@@ -1,8 +1,8 @@
 package com.questhub.modules.world.application.query;
 
-import com.questhub.modules.identity.application.query.GetUsernameQuery;
+import com.questhub.modules.identity.application.api.IdentityPublicApi;
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.LeaderboardStatDto;
-import com.questhub.modules.quest.application.query.GetLeaderboardStatsQuery;
 import com.questhub.shared.annotation.UseCase;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +20,8 @@ public class GetLeaderboardQuery {
 
   private static final Logger log = LoggerFactory.getLogger(GetLeaderboardQuery.class);
 
-  private final GetLeaderboardStatsQuery getLeaderboardStatsQuery;
-  private final GetUsernameQuery getUsernameQuery;
+  private final QuestPublicApi questPublicApi;
+  private final IdentityPublicApi identityPublicApi;
 
   public record LeaderboardEntry(UUID userId, String username, long questCount, long taskCount) {}
 
@@ -32,9 +32,9 @@ public class GetLeaderboardQuery {
       propagation = Propagation.REQUIRED)
   public List<LeaderboardEntry> get(int limit) {
     log.info("Get leaderboard limit={}", limit);
-    List<LeaderboardStatDto> stats = getLeaderboardStatsQuery.top(limit);
+    List<LeaderboardStatDto> stats = questPublicApi.topCompletionStats(limit);
     Map<UUID, String> usernames =
-        getUsernameQuery.byIds(stats.stream().map(LeaderboardStatDto::userId).toList());
+        identityPublicApi.usernamesByIds(stats.stream().map(LeaderboardStatDto::userId).toList());
     return stats.stream()
         .map(
             s ->

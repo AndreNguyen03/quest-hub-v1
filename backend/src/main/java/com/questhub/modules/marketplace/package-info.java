@@ -1,6 +1,6 @@
 @org.springframework.modulith.ApplicationModule(
     id = "marketplace",
     displayName = "marketplace",
-    allowedDependencies = {"shared", "quest::dto", "quest::query", "identity::query"}
+    allowedDependencies = {"shared", "quest::dto", "quest::api"}
 )
 package com.questhub.modules.marketplace;

@@ -1,12 +1,12 @@
 package com.questhub.modules.world.presentation.rest;
 
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.SkillDomainDto;
-import com.questhub.modules.quest.application.query.GetSkillDomainQuery;
 import com.questhub.modules.world.application.query.GetUserWorldQuery;
 import com.questhub.modules.world.domain.district.District;
 import com.questhub.modules.world.application.dto.WorldResponse;
 import com.questhub.modules.world.application.dto.WorldResponse.DistrictResponse;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PublicWorldController {
 
   private final GetUserWorldQuery getUserWorldQuery;
-  private final GetSkillDomainQuery getSkillDomainQuery;
+  private final QuestPublicApi questPublicApi;
 
   @GetMapping("/users/{username}")
   public ResponseEntity<ApiResponse<WorldResponse>> getUserWorld(@PathVariable String username) {
@@ -35,7 +35,7 @@ public class PublicWorldController {
   private DistrictResponse toDistrictResponse(District district) {
     String domainName = null;
     String domainSlug = null;
-    Optional<SkillDomainDto> domain = getSkillDomainQuery.byId(district.getDomainId());
+    Optional<SkillDomainDto> domain = questPublicApi.findSkillDomain(district.getDomainId());
     if (domain.isPresent()) {
       domainName = domain.get().name();
       domainSlug = domain.get().slug();

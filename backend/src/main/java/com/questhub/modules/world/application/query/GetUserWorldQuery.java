@@ -1,6 +1,6 @@
 package com.questhub.modules.world.application.query;
 
-import com.questhub.modules.identity.application.query.GetPublicUserIdQuery;
+import com.questhub.modules.identity.application.api.IdentityPublicApi;
 import com.questhub.modules.world.domain.district.District;
 import com.questhub.modules.world.domain.district.DistrictRepository;
 import com.questhub.modules.world.domain.world.World;
@@ -23,7 +23,7 @@ public class GetUserWorldQuery {
 
   private static final Logger log = LoggerFactory.getLogger(GetUserWorldQuery.class);
 
-  private final GetPublicUserIdQuery getPublicUserIdQuery;
+  private final IdentityPublicApi identityPublicApi;
   private final WorldRepository worldRepository;
   private final DistrictRepository districtRepository;
 
@@ -36,8 +36,8 @@ public class GetUserWorldQuery {
       propagation = Propagation.REQUIRED)
   public Result getByUsername(String usernameValue) {
     UUID userId =
-        getPublicUserIdQuery
-            .byUsername(usernameValue)
+        identityPublicApi
+            .findPublicUserIdByUsername(usernameValue)
             .orElseThrow(
                 () ->
                     BusinessException.notFound(ErrorCodes.NOT_FOUND, "User not found: " + usernameValue));

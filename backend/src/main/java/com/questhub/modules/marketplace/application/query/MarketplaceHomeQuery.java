@@ -1,12 +1,9 @@
 package com.questhub.modules.marketplace.application.query;
 
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.LearningPathDto;
 import com.questhub.modules.quest.application.dto.QuestDto;
 import com.questhub.modules.quest.application.dto.SkillDomainDto;
-import com.questhub.modules.quest.application.query.GetPopularQuestsQuery;
-import com.questhub.modules.quest.application.query.GetTrendingQuestsQuery;
-import com.questhub.modules.quest.application.query.ListPublicLearningPathsQuery;
-import com.questhub.modules.quest.application.query.ListSkillDomainsQuery;
 import com.questhub.shared.annotation.UseCase;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -23,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MarketplaceHomeQuery {
 
-  private final ListSkillDomainsQuery listSkillDomainsQuery;
-  private final ListPublicLearningPathsQuery listPublicLearningPathsQuery;
-  private final GetPopularQuestsQuery getPopularQuestsQuery;
-  private final GetTrendingQuestsQuery getTrendingQuestsQuery;
+  private final QuestPublicApi questPublicApi;
 
   public record QuestCard(UUID id, String title, String description, String difficulty, UUID domainId, int forkCount, Double avgRating) {}
   public record PathCard(UUID id, String title, String description, String difficulty, UUID domainId) {}
@@ -39,8 +33,8 @@ public class MarketplaceHomeQuery {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public HomeResult get() {
-    List<SkillDomainDto> domains = listSkillDomainsQuery.list();
-    List<LearningPathDto> publicPaths = listPublicLearningPathsQuery.list();
+    List<SkillDomainDto> domains = questPublicApi.listSkillDomains();
+    List<LearningPathDto> publicPaths = questPublicApi.publicLearningPaths();
 
     Map<UUID, List<LearningPathDto>> pathsByDomainId =
         publicPaths.stream().collect(Collectors.groupingBy(LearningPathDto::domainId));
@@ -61,14 +55,14 @@ public class MarketplaceHomeQuery {
             .filter(g -> !g.paths().isEmpty())
             .toList();
 
-    List<QuestDto> popularEntities = getPopularQuestsQuery.get(20);
+    List<QuestDto> popularEntities = questPublicApi.popularQuests(20);
     List<QuestCard> popular =
         popularEntities.stream()
             .map(q -> toQuestCard(q, learningPathIdToDomainId))
             .toList();
 
     Instant since = Instant.now().minus(7, ChronoUnit.DAYS);
-    List<QuestDto> trendingEntities = getTrendingQuestsQuery.get(since, 20);
+    List<QuestDto> trendingEntities = questPublicApi.trendingQuests(since, 20);
     List<QuestCard> trending =
         trendingEntities.stream()
             .map(q -> toQuestCard(q, learningPathIdToDomainId))

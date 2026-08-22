@@ -1,8 +1,7 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.identity.application.query.GetUsernameQuery;
-import com.questhub.modules.identity.application.usecase.PromoteToCreatorUseCase;
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.identity.application.api.IdentityPublicApi;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.domain.learningpath.LearningPath;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.modules.quest.domain.quest.Quest;
@@ -24,11 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PublishQuestUseCase {
 
-  private final QuestAcess questAcess;
+  private final QuestCreatorGuard questCreatorGuard;
   private final QuestRepository questRepository;
   private final LearningPathRepository learningPathRepository;
-  private final GetUsernameQuery getUsernameQuery;
-  private final PromoteToCreatorUseCase promoteToCreatorUseCase;
+  private final IdentityPublicApi identityPublicApi;
   private final OutboxPublisher outboxPublisher;
 
   @Transactional(
@@ -36,7 +34,7 @@ public class PublishQuestUseCase {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public Quest publish(UUID questId, UUID creatorId) {
-    Quest quest = questAcess.loadForWrite(questId, creatorId);
+    Quest quest = questCreatorGuard.loadForWrite(questId, creatorId);
     if (quest.getVisibility() == QuestVisibility.PUBLIC) {
       log.info("Quest already public questId={} creatorId={}", questId, creatorId);
       return quest;
@@ -67,7 +65,7 @@ public class PublishQuestUseCase {
               .orElse(null);
     }
 
-    String creatorUsername = getUsernameQuery.byUserId(creatorId).orElse(null);
+    String creatorUsername = identityPublicApi.findUsername(creatorId).orElse(null);
 
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("questId", quest.getId().toString());
@@ -89,7 +87,7 @@ public class PublishQuestUseCase {
   }
 
   private void promoteToCreator(UUID creatorId) {
-    promoteToCreatorUseCase.promote(creatorId);
+    identityPublicApi.promoteToCreator(creatorId);
   }
 }
 

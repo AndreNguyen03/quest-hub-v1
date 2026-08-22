@@ -1,9 +1,8 @@
 package com.questhub.modules.marketplace.application.query;
 
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.modules.quest.application.dto.LearningPathDto;
 import com.questhub.modules.quest.application.dto.SkillDomainDto;
-import com.questhub.modules.quest.application.query.ListPublicLearningPathsQuery;
-import com.questhub.modules.quest.application.query.ListSkillDomainsQuery;
 import com.questhub.shared.annotation.UseCase;
 import java.util.List;
 import java.util.UUID;
@@ -16,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetMarketplaceLearningPathsQuery {
 
-  private final ListSkillDomainsQuery listSkillDomainsQuery;
-  private final ListPublicLearningPathsQuery listPublicLearningPathsQuery;
+  private final QuestPublicApi questPublicApi;
 
   public record DomainPaths(UUID domainId, String domainName, String slug, List<PathDto> paths) {}
 
@@ -29,8 +27,8 @@ public class GetMarketplaceLearningPathsQuery {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public List<DomainPaths> get() {
-    List<SkillDomainDto> domains = listSkillDomainsQuery.list();
-    List<LearningPathDto> paths = listPublicLearningPathsQuery.list();
+    List<SkillDomainDto> domains = questPublicApi.listSkillDomains();
+    List<LearningPathDto> paths = questPublicApi.publicLearningPaths();
 
     return domains.stream()
         .map(

@@ -12,10 +12,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.questhub.modules.marketplace.application.command.CreateReviewCommand;
-import com.questhub.modules.marketplace.domain.event.QuestRatedEventPublisher;
+import com.questhub.modules.marketplace.application.event.QuestRatedEventPublisher;
 import com.questhub.modules.marketplace.domain.review.Review;
 import com.questhub.modules.marketplace.domain.review.ReviewRepository;
-import com.questhub.modules.quest.application.query.ExistsPersonalQuestQuery;
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
 import java.util.UUID;
@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CreateReviewUseCaseTest {
 
   @Mock private ReviewRepository reviewRepository;
-  @Mock private ExistsPersonalQuestQuery existsPersonalQuestQuery;
+  @Mock private QuestPublicApi questPublicApi;
   @Mock private QuestRatedEventPublisher questRatedEventPublisher;
 
   @InjectMocks private CreateReviewUseCase useCase;
@@ -40,7 +40,7 @@ class CreateReviewUseCaseTest {
     UUID questId = UUID.randomUUID();
     CreateReviewCommand cmd = new CreateReviewCommand(5, "Excellent quest!");
 
-    when(existsPersonalQuestQuery.exists(userId, questId)).thenReturn(true);
+    when(questPublicApi.existsPersonalQuest(userId, questId)).thenReturn(true);
     when(reviewRepository.existsByQuestIdAndUserId(questId, userId)).thenReturn(false);
     when(reviewRepository.save(any(Review.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -57,7 +57,7 @@ class CreateReviewUseCaseTest {
     UUID userId = UUID.randomUUID();
     UUID questId = UUID.randomUUID();
 
-    when(existsPersonalQuestQuery.exists(userId, questId)).thenReturn(false);
+    when(questPublicApi.existsPersonalQuest(userId, questId)).thenReturn(false);
 
     BusinessException ex = catchThrowableOfType(
         () -> useCase.create(questId, userId, new CreateReviewCommand(4, "Great")),
@@ -73,7 +73,7 @@ class CreateReviewUseCaseTest {
     UUID userId = UUID.randomUUID();
     UUID questId = UUID.randomUUID();
 
-    when(existsPersonalQuestQuery.exists(userId, questId)).thenReturn(true);
+    when(questPublicApi.existsPersonalQuest(userId, questId)).thenReturn(true);
     when(reviewRepository.existsByQuestIdAndUserId(questId, userId)).thenReturn(true);
 
     BusinessException ex = catchThrowableOfType(

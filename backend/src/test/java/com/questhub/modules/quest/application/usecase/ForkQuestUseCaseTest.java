@@ -8,7 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.identity.application.query.GetUsernameQuery;
+import com.questhub.modules.identity.application.api.IdentityPublicApi;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
 import com.questhub.modules.quest.domain.chapter.Chapter;
@@ -39,7 +39,7 @@ class ForkQuestUseCaseTest {
 
   @Mock private QuestRepository questRepository;
   @Mock private PersonalQuestRepository personalQuestRepository;
-  @Mock private GetUsernameQuery getUsernameQuery;
+  @Mock private IdentityPublicApi identityPublicApi;
   @Mock private OutboxPublisher outboxPublisher;
 
   @InjectMocks private ForkQuestUseCase useCase;
@@ -52,7 +52,7 @@ class ForkQuestUseCaseTest {
     when(personalQuestRepository.existsByUserIdAndQuestId(userId, quest.getId())).thenReturn(false);
     when(personalQuestRepository.save(any(PersonalQuest.class)))
         .thenAnswer(inv -> inv.getArgument(0));
-    when(getUsernameQuery.byUserId(userId)).thenReturn(Optional.of("jane_doe"));
+    when(identityPublicApi.findUsername(userId)).thenReturn(Optional.of("jane_doe"));
 
     PersonalQuest forked = useCase.fork(quest.getId(), userId);
 
@@ -130,7 +130,7 @@ class ForkQuestUseCaseTest {
     when(personalQuestRepository.existsByUserIdAndQuestId(userId, quest.getId())).thenReturn(false);
     when(personalQuestRepository.save(any(PersonalQuest.class)))
         .thenAnswer(inv -> inv.getArgument(0));
-    when(getUsernameQuery.byUserId(userId)).thenReturn(Optional.of("jane_doe"));
+    when(identityPublicApi.findUsername(userId)).thenReturn(Optional.of("jane_doe"));
 
     PersonalQuest forked = useCase.fork(quest.getId(), userId);
 

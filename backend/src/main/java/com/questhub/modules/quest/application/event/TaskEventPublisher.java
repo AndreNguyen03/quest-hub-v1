@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.event;
 
-import com.questhub.modules.identity.application.query.GetUsernameQuery;
+import com.questhub.modules.identity.application.api.IdentityPublicApi;
 import com.questhub.modules.quest.domain.learningpath.LearningPathRepository;
 import com.questhub.modules.quest.domain.personalquest.PersonalChapter;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TaskEventPublisher {
 
-  private final GetUsernameQuery getUsernameQuery;
+  private final IdentityPublicApi identityPublicApi;
   private final LearningPathRepository learningPathRepository;
   private final OutboxPublisher outboxPublisher;
 
@@ -38,7 +38,7 @@ public class TaskEventPublisher {
 
   private Map<String, Object> basePayload(
       PersonalQuest personalQuest, PersonalTask task, UUID userId) {
-    String username = getUsernameQuery.byUserId(userId).orElse(null);
+    String username = identityPublicApi.findUsername(userId).orElse(null);
     PersonalChapter chapter =
         personalQuest.findChapterOf(task.getId()).orElse(null);
 

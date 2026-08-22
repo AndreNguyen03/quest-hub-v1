@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.identity.application.query.GetUsernameQuery;
+import com.questhub.modules.identity.application.api.IdentityPublicApi;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
 import com.questhub.modules.quest.domain.quest.Quest;
@@ -26,7 +26,7 @@ public class ForkQuestUseCase {
 
   private final QuestRepository questRepository;
   private final PersonalQuestRepository personalQuestRepository;
-  private final GetUsernameQuery getUsernameQuery;
+  private final IdentityPublicApi identityPublicApi;
   private final OutboxPublisher outboxPublisher;
 
   @Transactional(
@@ -59,7 +59,7 @@ public class ForkQuestUseCase {
   }
 
   private void publishEvent(Quest quest, PersonalQuest personalQuest, UUID userId) {
-    String username = getUsernameQuery.byUserId(userId).orElse(null);
+    String username = identityPublicApi.findUsername(userId).orElse(null);
 
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("questId", quest.getId().toString());
