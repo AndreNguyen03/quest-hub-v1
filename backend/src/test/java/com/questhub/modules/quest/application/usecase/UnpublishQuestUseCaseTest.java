@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.Difficulty;
 import com.questhub.modules.quest.domain.quest.Quest;
@@ -28,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UnpublishQuestUseCaseTest {
 
-  @Mock private QuestAcess questAcess;
+  @Mock private QuestCreatorGuard questAccess;
   @Mock private QuestRepository questRepository;
 
   @InjectMocks private UnpublishQuestUseCase useCase;
@@ -37,7 +37,7 @@ class UnpublishQuestUseCaseTest {
   void unpublish_publicQuest_shouldRevertToDraft() {
     UUID creatorId = UUID.randomUUID();
     Quest quest = publicQuest(creatorId);
-    when(questAcess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
+    when(questAccess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
     when(questRepository.save(any(Quest.class))).thenAnswer(inv -> inv.getArgument(0));
 
     Quest result = useCase.unpublish(quest.getId(), creatorId);
@@ -51,7 +51,7 @@ class UnpublishQuestUseCaseTest {
   void unpublish_alreadyDraft_shouldBeIdempotentWithoutSave() {
     UUID creatorId = UUID.randomUUID();
     Quest quest = Quest.create(creatorId, null, "title", "desc", Difficulty.BEGINNER, Map.of());
-    when(questAcess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
+    when(questAccess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
 
     Quest result = useCase.unpublish(quest.getId(), creatorId);
 
@@ -63,7 +63,7 @@ class UnpublishQuestUseCaseTest {
   void unpublish_nonCreator_shouldThrowForbidden() {
     UUID questId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    when(questAcess.loadForWrite(questId, actorId))
+    when(questAccess.loadForWrite(questId, actorId))
         .thenThrow(BusinessException.forbidden(ErrorCodes.FORBIDDEN, "Chỉ creator mới sửa được quest"));
 
     BusinessException ex =

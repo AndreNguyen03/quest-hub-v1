@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.application.command.AddTaskCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @UseCase
 @RequiredArgsConstructor
 public class AddTaskUseCase {
-  private final QuestAcess questAcess;
+  private final QuestCreatorGuard questCreatorGuard;
   private final QuestRepository questRepository;
 
   @Transactional(
@@ -26,7 +26,7 @@ public class AddTaskUseCase {
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
   public Quest add(UUID questId, UUID chapterId, UUID actorId, AddTaskCommand request) {
-    Quest quest = questAcess.loadForWrite(questId, actorId);
+    Quest quest = questCreatorGuard.loadForWrite(questId, actorId);
     Task task = Task.create(request.type(), request.title(), request.description(), 0, request.config());
     quest.addTask(chapterId, task);
     Quest saved = questRepository.save(quest);

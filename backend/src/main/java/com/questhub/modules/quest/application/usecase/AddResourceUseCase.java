@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.application.command.AddResourceCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @UseCase
 @RequiredArgsConstructor
 public class AddResourceUseCase {
-  private final QuestAcess questAcess;
+  private final QuestCreatorGuard questCreatorGuard;
   private final QuestRepository questRepository;
 
   @Transactional(
@@ -33,7 +33,7 @@ public class AddResourceUseCase {
             .findQuestByTaskId(taskId)
             .orElseThrow(
                 () -> BusinessException.notFound(ErrorCodes.NOT_FOUND, "Không tìm thấy task"));
-    questAcess.verifyCreator(quest, actorId);
+    questCreatorGuard.verifyCreator(quest, actorId);
     quest.addResource(
         taskId,
         Resource.create(request.type(), request.title(), request.url(), request.estimatedMinutes()));

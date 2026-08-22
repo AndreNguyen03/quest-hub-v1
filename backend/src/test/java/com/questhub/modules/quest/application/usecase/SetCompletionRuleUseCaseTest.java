@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.domain.chapter.Chapter;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
 import com.questhub.modules.quest.domain.quest.Difficulty;
@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SetCompletionRuleUseCaseTest {
 
-  @Mock private QuestAcess questAcess;
+  @Mock private QuestCreatorGuard questAccess;
   @Mock private QuestRepository questRepository;
 
   @InjectMocks private SetCompletionRuleUseCase useCase;
@@ -38,7 +38,7 @@ class SetCompletionRuleUseCaseTest {
   void setRule_onDraftQuest_shouldPersistAndReturnRule() {
     UUID creatorId = UUID.randomUUID();
     Quest quest = draftQuest(creatorId);
-    when(questAcess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
+    when(questAccess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
     when(questRepository.save(any(Quest.class))).thenAnswer(inv -> inv.getArgument(0));
 
     CompletionRule rule = CompletionRule.quizScore(new BigDecimal("80"));
@@ -53,7 +53,7 @@ class SetCompletionRuleUseCaseTest {
   void setRule_nonCreator_shouldThrowForbidden() {
     UUID questId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    when(questAcess.loadForWrite(questId, actorId))
+    when(questAccess.loadForWrite(questId, actorId))
         .thenThrow(BusinessException.forbidden(ErrorCodes.FORBIDDEN, "Chỉ creator mới sửa được quest"));
 
     BusinessException ex =
@@ -70,7 +70,7 @@ class SetCompletionRuleUseCaseTest {
     UUID creatorId = UUID.randomUUID();
     Quest quest = draftQuest(creatorId);
     quest.publish();
-    when(questAcess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
+    when(questAccess.loadForWrite(quest.getId(), creatorId)).thenReturn(quest);
 
     BusinessException ex =
         catchThrowableOfType(

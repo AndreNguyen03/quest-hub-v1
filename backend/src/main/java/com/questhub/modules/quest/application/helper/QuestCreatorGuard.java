@@ -13,7 +13,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class QuestAcess {
+public class QuestCreatorGuard {
   private final QuestRepository questRepository;
 
   public Quest loadForWrite(UUID questId, UUID actorId) {

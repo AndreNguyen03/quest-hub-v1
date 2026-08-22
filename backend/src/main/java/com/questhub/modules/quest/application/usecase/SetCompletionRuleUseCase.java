@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SetCompletionRuleUseCase {
 
-  private final QuestAcess questAcess;
+  private final QuestCreatorGuard questCreatorGuard;
   private final QuestRepository questRepository;
 
   @Transactional(
@@ -27,7 +27,7 @@ public class SetCompletionRuleUseCase {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public Quest setRule(UUID questId, UUID creatorId, CompletionRule rule) {
-    Quest quest = questAcess.loadForWrite(questId, creatorId);
+    Quest quest = questCreatorGuard.loadForWrite(questId, creatorId);
     if (!quest.isDraft()) {
       log.warn("Cannot set completion rule on non-draft quest questId={}", questId);
       throw BusinessException.conflict(

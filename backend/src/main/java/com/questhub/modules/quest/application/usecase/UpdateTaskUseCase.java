@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.application.command.UpdateTaskCommand;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @UseCase
 @RequiredArgsConstructor
 public class UpdateTaskUseCase {
-  private final QuestAcess questAcess;
+  private final QuestCreatorGuard questCreatorGuard;
   private final QuestRepository questRepository;
 
   @Transactional(
@@ -25,7 +25,7 @@ public class UpdateTaskUseCase {
       propagation = Propagation.REQUIRED,
       rollbackFor = Exception.class)
   public Quest update(UUID questId, UUID taskId, UUID actorId, UpdateTaskCommand request) {
-    Quest quest = questAcess.loadForWrite(questId, actorId);
+    Quest quest = questCreatorGuard.loadForWrite(questId, actorId);
     quest.updateTask(taskId, request.title(), request.description(), request.config(), request.order());
     Quest saved = questRepository.save(quest);
     log.info("Task updated questId={} taskId={} actorId={}", questId, taskId, actorId);

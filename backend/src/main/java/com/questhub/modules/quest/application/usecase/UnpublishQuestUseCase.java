@@ -1,6 +1,6 @@
 package com.questhub.modules.quest.application.usecase;
 
-import com.questhub.modules.quest.application.helper.QuestAcess;
+import com.questhub.modules.quest.application.helper.QuestCreatorGuard;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.domain.quest.QuestRepository;
 import com.questhub.modules.quest.domain.quest.QuestVisibility;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UnpublishQuestUseCase {
 
-  private final QuestAcess questAcess;
+  private final QuestCreatorGuard questCreatorGuard;
   private final QuestRepository questRepository;
 
   @Transactional(
@@ -25,7 +25,7 @@ public class UnpublishQuestUseCase {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public Quest unpublish(UUID questId, UUID creatorId) {
-    Quest quest = questAcess.loadForWrite(questId, creatorId);
+    Quest quest = questCreatorGuard.loadForWrite(questId, creatorId);
     if (quest.getVisibility() == QuestVisibility.DRAFT) {
       log.info("Quest already draft questId={} creatorId={}", questId, creatorId);
       return quest;
