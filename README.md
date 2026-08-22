@@ -48,12 +48,4 @@ Toàn bộ design nằm trong [`docs/`](docs/):
 `high-level-design.md` · `database-schema.md` · `api-design.md` · `event-contracts.md` ·
 `ddd-convention.md` · `modules-user-stories.md` · `sequence-diagrams.md` · `devsecops-pipeline.md` ...
 
-Skill AI dùng khi implement: `GO_SKILL.md`, `JAVA_SKILL.md`, `SKILL_*_ENTERPRISE.md`.
-Cheatsheet Go cho Java dev + quy trình implement US: [`notification/CHEATSHEET.md`](notification/CHEATSHEET.md).
 
-## Nguyên tắc (tóm tắt từ docs)
-
-- Outbox pattern cho mọi domain event; consumer idempotent theo `eventId`.
-- AI Coach **chỉ đọc** progress (tool calling read-only) — không tool nào write quest.
-- AI Grader không tự PASS — chỉ publish `submission.graded`, Quest Module quyết định.
-- Không XP/Level — Reward intrinsic, Achievement gắn mốc thật.
