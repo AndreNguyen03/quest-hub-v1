@@ -1,0 +1,201 @@
+basePath: /
+definitions:
+  helper.ErrorResponse:
+    properties:
+      error:
+        example: true
+        type: boolean
+      message:
+        example: Lỗi hệ thống, vui lòng thử lại sau
+        type: string
+    type: object
+  jsonb.JSONB:
+    additionalProperties: {}
+    type: object
+  schemas.ListNotificationsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/schemas.Notification'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+    type: object
+  schemas.Notification:
+    properties:
+      body:
+        description: nullable
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      isRead:
+        type: boolean
+      payload:
+        $ref: '#/definitions/jsonb.JSONB'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/schemas.NotificationType'
+      userId:
+        type: string
+    type: object
+  schemas.NotificationType:
+    enum:
+    - TASK_COMPLETED
+    - QUEST_COMPLETED
+    - ACHIEVEMENT
+    - FOLLOWED
+    - COMMENT
+    - REVIEW
+    - ADMIN
+    type: string
+    x-enum-varnames:
+    - TypeTaskCompleted
+    - TypeQuestCompleted
+    - TypeAchievement
+    - TypeFollowed
+    - TypeComment
+    - TypeReview
+    - TypeAdmin
+  schemas.UnreadCountResponse:
+    properties:
+      count:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: Inbox API + transactional-outbox consumer của QuestHub notification
+    side-app.
+  title: Notification Service API
+  version: "1.0"
+paths:
+  /api/v1/notifications:
+    get:
+      consumes:
+      - application/json
+      description: Trả về danh sách thông báo của user, mới nhất trước (page >= 1,
+        limit <= 100)
+      parameters:
+      - description: User ID (UUID)
+        in: query
+        name: userId
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        maximum: 100
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ListNotificationsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Get notification inbox
+      tags:
+      - notifications
+  /api/v1/notifications/{id}/read:
+    patch:
+      consumes:
+      - application/json
+      description: Đánh dấu một thông báo là đã đọc
+      parameters:
+      - description: Notification ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Mark one notification as read
+      tags:
+      - notifications
+  /api/v1/notifications/read-all:
+    patch:
+      consumes:
+      - application/json
+      description: Đánh dấu tất cả thông báo chưa đọc của user là đã đọc
+      parameters:
+      - description: User ID (UUID)
+        in: query
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Mark all notifications as read
+      tags:
+      - notifications
+  /api/v1/notifications/unread-count:
+    get:
+      consumes:
+      - application/json
+      description: Số thông báo chưa đọc của user (badge count)
+      parameters:
+      - description: User ID (UUID)
+        in: query
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.UnreadCountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Count unread notifications
+      tags:
+      - notifications
+swagger: "2.0"
