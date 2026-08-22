@@ -305,8 +305,8 @@ public class PersonalQuest {
   }
 
   public void abandon() {
-    if (status == PersonalQuestStatus.COMPLETED) {
-      throw new DomainValidationException("Không thể abandon quest đã hoàn thành");
+    if (status == PersonalQuestStatus.COMPLETED || status == PersonalQuestStatus.ABANDONED) {
+      throw new DomainValidationException("Không thể abandon quest ở trạng thái " + status);
     }
     this.status = PersonalQuestStatus.ABANDONED;
     this.updatedAt = Instant.now();
