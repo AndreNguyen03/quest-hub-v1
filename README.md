@@ -9,7 +9,7 @@ Goal-achievement platform: Domain → LearningPath → Quest → Chapter → Tas
 | `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ chạy được | Modular Monolith — Identity, Quest, Marketplace, World, Admin |
 | `notification/` | Go + Gin + GORM | 8082 | ✅ chạy được | In-app inbox API + consumer `outbox_events` từ backend (push/email ở Phase 2) |
 | `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ scaffold | MOD-06 — recommend, generate, grade (AI Grader), coach (read-only agent) |
-| `social/` | Go + Fiber | 8081 | ⏳ planned | MOD-05 — feed, follow, comment, discussion |
+| `social/` | Go + Gin | 8081 | ⏳ planned | MOD-05 — feed, follow, comment, discussion |
 | `web/` | Next.js | 3000 | ⏳ planned | Web app (SSR marketplace/quest detail) |
 | `admin-web/` | Next.js | 3001 | ⏳ planned | Admin panel |
 | `mobile/` | React Native | — | ⏳ planned | App tracking-first |
