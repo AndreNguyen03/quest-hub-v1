@@ -21,7 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import com.questhub.shared.domain.ResponseStatus;
 
 @ExtendWith(MockitoExtension.class)
 class CreateLearningPathUseCaseTest {
@@ -63,7 +63,7 @@ class CreateLearningPathUseCaseTest {
             () -> useCase.create(UUID.randomUUID(), request(domainId)), BusinessException.class);
 
     assertThat(ex.getCode()).isEqualTo(ErrorCodes.NOT_FOUND);
-    assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThat(ex.getStatus()).isEqualTo(ResponseStatus.NOT_FOUND);
     verify(learningPathRepository, never()).save(any());
   }
 

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import com.questhub.shared.domain.ResponseStatus;
 
 @ExtendWith(MockitoExtension.class)
 class GetUserProfileQueryTest {
@@ -47,7 +47,7 @@ class GetUserProfileQueryTest {
 
     BusinessException ex = catchThrowableOfType(() -> useCase.getById(id), BusinessException.class);
 
-    assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThat(ex.getStatus()).isEqualTo(ResponseStatus.NOT_FOUND);
     assertThat(ex.getCode()).isEqualTo(ErrorCodes.NOT_FOUND);
   }
 

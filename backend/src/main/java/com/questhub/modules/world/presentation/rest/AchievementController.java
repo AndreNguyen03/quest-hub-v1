@@ -4,7 +4,7 @@ import com.questhub.modules.world.application.dto.AchievementResponse;
 import com.questhub.modules.world.application.dto.AchievementResponseMapper;
 import com.questhub.modules.world.application.query.GetAchievementsQuery;
 import com.questhub.shared.domain.AuthenticatedUser;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

@@ -21,7 +21,7 @@ import com.questhub.modules.marketplace.application.usecase.DeleteReviewUseCase;
 import com.questhub.modules.marketplace.application.usecase.RemoveFavoriteUseCase;
 import com.questhub.modules.marketplace.application.usecase.UpdateReviewUseCase;
 import com.questhub.shared.domain.AuthenticatedUser;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;

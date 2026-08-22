@@ -1,19 +1,18 @@
 package com.questhub.shared.domain;
 
 import java.util.List;
-import org.springframework.http.HttpStatus;
 
 public class BusinessException extends RuntimeException {
 
     private final String code;
-    private final HttpStatus status;
+    private final ResponseStatus status;
     private final List<FieldErrorItem> details;
 
-    public BusinessException(String code, String message, HttpStatus status) {
+    public BusinessException(String code, String message, ResponseStatus status) {
         this(code, message, status, null);
     }
 
-    public BusinessException(String code, String message, HttpStatus status, List<FieldErrorItem> details) {
+    public BusinessException(String code, String message, ResponseStatus status, List<FieldErrorItem> details) {
         super(message);
         this.code = code;
         this.status = status;
@@ -21,34 +20,34 @@ public class BusinessException extends RuntimeException {
     }
 
     public static BusinessException badRequest(String code, String message) {
-        return new BusinessException(code, message, HttpStatus.BAD_REQUEST);
+        return new BusinessException(code, message, ResponseStatus.BAD_REQUEST);
     }
 
     public static BusinessException unauthorized(String code, String message) {
-        return new BusinessException(code, message, HttpStatus.UNAUTHORIZED);
+        return new BusinessException(code, message, ResponseStatus.UNAUTHORIZED);
     }
 
     public static BusinessException notFound(String code, String message) {
-        return new BusinessException(code, message, HttpStatus.NOT_FOUND);
+        return new BusinessException(code, message, ResponseStatus.NOT_FOUND);
     }
 
     public static BusinessException conflict(String code, String message) {
-        return new BusinessException(code, message, HttpStatus.CONFLICT);
+        return new BusinessException(code, message, ResponseStatus.CONFLICT);
     }
 
     public static BusinessException conflict(String code, String message, List<FieldErrorItem> details) {
-        return new BusinessException(code, message, HttpStatus.CONFLICT, details);
+        return new BusinessException(code, message, ResponseStatus.CONFLICT, details);
     }
 
     public static BusinessException forbidden(String code, String message) {
-        return new BusinessException(code, message, HttpStatus.FORBIDDEN);
+        return new BusinessException(code, message, ResponseStatus.FORBIDDEN);
     }
 
     public String getCode() {
         return code;
     }
 
-    public HttpStatus getStatus() {
+    public ResponseStatus getStatus() {
         return status;
     }
 

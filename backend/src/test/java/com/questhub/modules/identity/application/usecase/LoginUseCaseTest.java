@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import com.questhub.shared.domain.ResponseStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +54,7 @@ class LoginUseCaseTest {
             () -> useCase.login(new LoginCommand("ghost@example.com", "x")),
             BusinessException.class);
 
-    assertThat(ex.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThat(ex.getStatus()).isEqualTo(ResponseStatus.UNAUTHORIZED);
     assertThat(ex.getCode()).isEqualTo(ErrorCodes.INVALID_CREDENTIALS);
     verify(passwordEncoder, never()).matches(any(), any());
   }
@@ -70,7 +70,7 @@ class LoginUseCaseTest {
             () -> useCase.login(new LoginCommand("alice@example.com", "sai")),
             BusinessException.class);
 
-    assertThat(ex.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThat(ex.getStatus()).isEqualTo(ResponseStatus.UNAUTHORIZED);
     assertThat(ex.getCode()).isEqualTo(ErrorCodes.INVALID_CREDENTIALS);
   }
 

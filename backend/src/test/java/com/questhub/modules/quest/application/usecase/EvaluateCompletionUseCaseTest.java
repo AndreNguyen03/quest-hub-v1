@@ -32,7 +32,7 @@ class EvaluateCompletionUseCaseTest {
 
   @BeforeEach
   void setUp() {
-    useCase = new EvaluateCompletionUseCase(new com.questhub.modules.quest.domain.personalquest.CompletionEvaluator(), quizAttemptRepository);
+    useCase = new EvaluateCompletionUseCase(quizAttemptRepository);
   }
 
   @Test

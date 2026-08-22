@@ -24,7 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import com.questhub.shared.domain.ResponseStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,7 +71,7 @@ class RegisterUserUseCaseTest {
             BusinessException.class);
 
     assertThat(ex.getCode()).isEqualTo(ErrorCodes.CONFLICT);
-    assertThat(ex.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+    assertThat(ex.getStatus()).isEqualTo(ResponseStatus.CONFLICT);
     assertThat(ex.getDetails()).extracting(FieldErrorItem::field).containsExactly("email");
     verify(userRepository, never()).save(any());
   }

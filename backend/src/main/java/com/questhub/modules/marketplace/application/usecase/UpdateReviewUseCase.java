@@ -1,7 +1,7 @@
 package com.questhub.modules.marketplace.application.usecase;
 
 import com.questhub.modules.marketplace.application.command.UpdateReviewCommand;
-import com.questhub.modules.marketplace.domain.event.QuestRatedEventPublisher;
+import com.questhub.modules.marketplace.application.event.QuestRatedEventPublisher;
 import com.questhub.modules.marketplace.domain.review.Review;
 import com.questhub.modules.marketplace.domain.review.ReviewRepository;
 import com.questhub.shared.annotation.UseCase;

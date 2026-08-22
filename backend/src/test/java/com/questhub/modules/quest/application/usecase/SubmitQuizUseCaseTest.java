@@ -16,7 +16,6 @@ import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
 import com.questhub.modules.quest.domain.personalquest.PersonalTask;
 import com.questhub.modules.quest.domain.personalquest.QuizAttempt;
 import com.questhub.modules.quest.domain.personalquest.QuizAttemptRepository;
-import com.questhub.modules.quest.domain.personalquest.QuizGrader;
 import com.questhub.modules.quest.domain.personalquest.TaskCompletionRepository;
 import com.questhub.modules.quest.domain.quest.CompletionRule;
 import com.questhub.modules.quest.domain.task.TaskType;
@@ -40,7 +39,6 @@ class SubmitQuizUseCaseTest {
   @Mock private PersonalQuestRepository personalQuestRepository;
   @Mock private QuizAttemptRepository quizAttemptRepository;
   @Mock private TaskCompletionRepository taskCompletionRepository;
-  @Mock private QuizGrader quizGrader;
   @Mock private EvaluateCompletionUseCase evaluateCompletion;
   @Mock private TaskEventPublisher taskEventPublisher;
   @Mock private QuestEventPublisher questEventPublisher;
@@ -54,8 +52,6 @@ class SubmitQuizUseCaseTest {
     UUID taskId = quizTaskId(quest);
     when(personalQuestRepository.findByIdAndUserId(quest.getId(), userId))
         .thenReturn(Optional.of(quest));
-    when(quizGrader.grade(any(), any()))
-        .thenReturn(new QuizGrader.QuizScore(new BigDecimal("8"), new BigDecimal("10"), true));
     when(quizAttemptRepository.save(any(QuizAttempt.class)))
         .thenAnswer(inv -> inv.getArgument(0));
     when(personalQuestRepository.save(any(PersonalQuest.class)))
@@ -65,7 +61,8 @@ class SubmitQuizUseCaseTest {
         useCase.submit(quest.getId(), taskId, userId, Map.of("q1", "a"));
 
     assertThat(result.attempt().isPassed()).isTrue();
-    assertThat(result.attempt().getScore()).isEqualByComparingTo(new BigDecimal("8"));
+    // Real QuizGrader: 1/1 câu đúng = 100% >= threshold 80
+    assertThat(result.attempt().getScore()).isEqualByComparingTo(new BigDecimal("1"));
     assertThat(result.taskCompleted()).isTrue();
     assertThat(quizTask(quest).isCompleted()).isTrue();
     assertThat(quest.getProgress()).isEqualTo(50);
@@ -87,8 +84,6 @@ class SubmitQuizUseCaseTest {
     UUID taskId = quizTaskId(quest);
     when(personalQuestRepository.findByIdAndUserId(quest.getId(), userId))
         .thenReturn(Optional.of(quest));
-    when(quizGrader.grade(any(), any()))
-        .thenReturn(new QuizGrader.QuizScore(new BigDecimal("8"), new BigDecimal("10"), true));
     when(quizAttemptRepository.save(any(QuizAttempt.class)))
         .thenAnswer(inv -> inv.getArgument(0));
     when(evaluateCompletion.evaluate(quest, userId)).thenReturn(true);
@@ -110,13 +105,13 @@ class SubmitQuizUseCaseTest {
     UUID taskId = quizTaskId(quest);
     when(personalQuestRepository.findByIdAndUserId(quest.getId(), userId))
         .thenReturn(Optional.of(quest));
-    when(quizGrader.grade(any(), any()))
-        .thenReturn(new QuizGrader.QuizScore(new BigDecimal("6"), new BigDecimal("10"), false));
     when(quizAttemptRepository.save(any(QuizAttempt.class)))
         .thenAnswer(inv -> inv.getArgument(0));
 
     SubmitQuizUseCase.Result result =
         useCase.submit(quest.getId(), taskId, userId, Map.of("q1", "b"));
+
+    // Real QuizGrader: sai câu duy nhất → 0/1, fail threshold 80
 
     assertThat(result.attempt().isPassed()).isFalse();
     assertThat(result.taskCompleted()).isFalse();

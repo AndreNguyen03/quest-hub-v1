@@ -21,7 +21,7 @@ import com.questhub.modules.quest.application.dto.PersonalQuestResponse;
 import com.questhub.modules.quest.application.dto.QuizAttemptResponse;
 import com.questhub.modules.quest.application.dto.SubmitQuizResponse;
 import com.questhub.shared.domain.AuthenticatedUser;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

@@ -1,6 +1,5 @@
-package com.questhub.modules.marketplace.domain.event;
+package com.questhub.modules.marketplace.application.event;
 
-import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.shared.outbox.OutboxPublisher;
 import java.util.LinkedHashMap;
 import java.util.Map;

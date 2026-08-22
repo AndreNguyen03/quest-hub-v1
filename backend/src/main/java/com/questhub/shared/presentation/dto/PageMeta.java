@@ -1,4 +1,4 @@
-package com.questhub.shared.interfaces.dto;
+package com.questhub.shared.presentation.dto;
 
 public record PageMeta(long total, int page, int limit, int totalPages) {
 

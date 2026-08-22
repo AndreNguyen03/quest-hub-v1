@@ -1,8 +1,8 @@
 package com.questhub.shared.infrastructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.questhub.shared.interfaces.dto.ApiError;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiError;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;

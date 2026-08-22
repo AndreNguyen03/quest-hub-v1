@@ -24,7 +24,8 @@ public class EvaluateCompletionUseCase {
 
   private static final BigDecimal HUNDRED = new BigDecimal("100");
 
-  private final CompletionEvaluator evaluator;
+  // Pure domain service — stateless, không cần Spring DI.
+  private final CompletionEvaluator evaluator = new CompletionEvaluator();
   private final QuizAttemptRepository quizAttemptRepository;
 
   @Transactional(

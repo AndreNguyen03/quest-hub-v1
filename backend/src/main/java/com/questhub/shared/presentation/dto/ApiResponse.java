@@ -1,4 +1,4 @@
-package com.questhub.shared.interfaces.dto;
+package com.questhub.shared.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

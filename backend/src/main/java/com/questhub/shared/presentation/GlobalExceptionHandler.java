@@ -1,11 +1,12 @@
-package com.questhub.shared.interfaces;
+package com.questhub.shared.presentation;
 
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.DomainValidationException;
 import com.questhub.shared.domain.ErrorCodes;
 import com.questhub.shared.domain.FieldErrorItem;
-import com.questhub.shared.interfaces.dto.ApiError;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.domain.ResponseStatus;
+import com.questhub.shared.presentation.dto.ApiError;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -31,8 +32,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException ex) {
-        return ResponseEntity.status(ex.getStatus())
+        return ResponseEntity.status(toHttpStatus(ex.getStatus()))
                 .body(ApiResponse.error(ApiError.of(ex.getCode(), ex.getMessage(), ex.getDetails())));
+    }
+
+    private HttpStatus toHttpStatus(ResponseStatus status) {
+        return switch (status) {
+            case BAD_REQUEST -> HttpStatus.BAD_REQUEST;
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case CONFLICT -> HttpStatus.CONFLICT;
+        };
     }
 
     @ExceptionHandler(DomainValidationException.class)

@@ -6,7 +6,7 @@ import com.questhub.modules.identity.application.usecase.UpdateProfileUseCase;
 import com.questhub.modules.identity.domain.user.User;
 import com.questhub.modules.identity.application.dto.UserResponse;
 import com.questhub.shared.domain.AuthenticatedUser;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

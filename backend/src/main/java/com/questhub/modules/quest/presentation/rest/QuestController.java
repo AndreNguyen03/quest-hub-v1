@@ -14,7 +14,7 @@ import com.questhub.modules.quest.application.usecase.UpdateQuestUseCase;
 import com.questhub.modules.quest.domain.quest.Quest;
 import com.questhub.modules.quest.application.dto.QuestResponse;
 import com.questhub.shared.domain.AuthenticatedUser;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

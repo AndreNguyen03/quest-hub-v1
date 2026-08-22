@@ -31,7 +31,8 @@ public class SubmitQuizUseCase {
   private final PersonalQuestRepository personalQuestRepository;
   private final QuizAttemptRepository quizAttemptRepository;
   private final TaskCompletionRepository taskCompletionRepository;
-  private final QuizGrader quizGrader;
+  // Pure domain service — stateless, không cần Spring DI.
+  private final QuizGrader quizGrader = new QuizGrader();
   private final EvaluateCompletionUseCase evaluateCompletion;
   private final TaskEventPublisher taskEventPublisher;
   private final QuestEventPublisher questEventPublisher;

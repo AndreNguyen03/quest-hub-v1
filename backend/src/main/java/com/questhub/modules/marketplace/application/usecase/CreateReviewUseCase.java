@@ -1,10 +1,10 @@
 package com.questhub.modules.marketplace.application.usecase;
 
 import com.questhub.modules.marketplace.application.command.CreateReviewCommand;
-import com.questhub.modules.marketplace.domain.event.QuestRatedEventPublisher;
+import com.questhub.modules.marketplace.application.event.QuestRatedEventPublisher;
 import com.questhub.modules.marketplace.domain.review.Review;
 import com.questhub.modules.marketplace.domain.review.ReviewRepository;
-import com.questhub.modules.quest.application.query.ExistsPersonalQuestQuery;
+import com.questhub.modules.quest.application.api.QuestPublicApi;
 import com.questhub.shared.annotation.UseCase;
 import com.questhub.shared.domain.BusinessException;
 import com.questhub.shared.domain.ErrorCodes;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateReviewUseCase {
 
   private final ReviewRepository reviewRepository;
-  private final ExistsPersonalQuestQuery existsPersonalQuestQuery;
+  private final QuestPublicApi questPublicApi;
   private final QuestRatedEventPublisher questRatedEventPublisher;
 
   @Transactional(
@@ -27,7 +27,7 @@ public class CreateReviewUseCase {
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
   public Review create(UUID questId, UUID userId, CreateReviewCommand command) {
-    if (!existsPersonalQuestQuery.exists(userId, questId)) {
+    if (!questPublicApi.existsPersonalQuest(userId, questId)) {
       throw BusinessException.forbidden(ErrorCodes.FORBIDDEN, "Bạn cần fork quest trước khi đánh giá");
     }
     if (reviewRepository.existsByQuestIdAndUserId(questId, userId)) {
