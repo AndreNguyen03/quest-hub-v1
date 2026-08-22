@@ -21,4 +21,8 @@ public interface PersonalQuestRepository {
   long countByUserIdAndStatus(UUID userId, PersonalQuestStatus status);
 
   List<LeaderboardStat> topByCompletionStats(int limit);
+
+  double completionRateByQuestId(UUID questId);
+
+  List<TaskDropOffStat> taskDropOffByQuestId(UUID questId);
 }

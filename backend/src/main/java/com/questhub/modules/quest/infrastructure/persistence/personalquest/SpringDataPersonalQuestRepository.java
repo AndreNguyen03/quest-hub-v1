@@ -45,6 +45,32 @@ public interface SpringDataPersonalQuestRepository extends JpaRepository<Persona
     long getQuestCount();
     long getTaskCount();
   }
+
+  @Query(
+      value =
+          "SELECT COALESCE(COUNT(*) FILTER (WHERE status = 'COMPLETED') * 100.0 / NULLIF(COUNT(*), 0), 0.0) "
+              + "FROM personal_quests WHERE quest_id = :questId",
+      nativeQuery = true)
+  double findCompletionRateByQuestId(@Param("questId") UUID questId);
+
+  @Query(
+      value =
+          "SELECT pt.source_task_id as sourceTaskId, "
+              + "COUNT(*) FILTER (WHERE pt.is_completed = true) as completedCount, "
+              + "COUNT(*) as totalCount "
+              + "FROM personal_tasks pt "
+              + "JOIN personal_quests pq ON pq.id = pt.personal_quest_id "
+              + "WHERE pq.quest_id = :questId AND pt.source_task_id IS NOT NULL "
+              + "GROUP BY pt.source_task_id "
+              + "ORDER BY completedCount ASC",
+      nativeQuery = true)
+  List<TaskDropOffRow> findTaskDropOffByQuestId(@Param("questId") UUID questId);
+
+  interface TaskDropOffRow {
+    UUID getSourceTaskId();
+    long getCompletedCount();
+    long getTotalCount();
+  }
 }
 
 

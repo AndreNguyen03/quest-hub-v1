@@ -3,6 +3,8 @@ package com.questhub.modules.quest.presentation.rest;
 import com.questhub.modules.quest.application.command.CreateQuestCommand;
 import com.questhub.modules.quest.application.command.SetCompletionRuleCommand;
 import com.questhub.modules.quest.application.command.UpdateQuestCommand;
+import com.questhub.modules.quest.application.dto.QuestAnalyticsDto;
+import com.questhub.modules.quest.application.query.GetQuestAnalyticsQuery;
 import com.questhub.modules.quest.application.usecase.CreateQuestUseCase;
 import com.questhub.modules.quest.application.query.GetQuestQuery;
 import com.questhub.modules.quest.application.usecase.PublishQuestUseCase;
@@ -38,6 +40,7 @@ public class QuestController {
   private final PublishQuestUseCase publishQuestUseCase;
   private final UnpublishQuestUseCase unpublishQuestUseCase;
   private final SetCompletionRuleUseCase setCompletionRuleUseCase;
+  private final GetQuestAnalyticsQuery getQuestAnalyticsQuery;
 
   private UUID currentUserId() {
     AuthenticatedUser current =
@@ -76,6 +79,12 @@ public class QuestController {
   public ResponseEntity<ApiResponse<QuestResponse>> unpublish(@PathVariable UUID id) {
     Quest quest = unpublishQuestUseCase.unpublish(id, currentUserId());
     return ResponseEntity.ok(ApiResponse.ok(QuestResponse.from(quest)));
+  }
+
+  @GetMapping("/{id}/analytics")
+  public ResponseEntity<ApiResponse<QuestAnalyticsDto>> analytics(@PathVariable UUID id) {
+    QuestAnalyticsDto analytics = getQuestAnalyticsQuery.get(id, currentUserId());
+    return ResponseEntity.ok(ApiResponse.ok(analytics));
   }
 
   @PutMapping("/{id}/completion-rule")

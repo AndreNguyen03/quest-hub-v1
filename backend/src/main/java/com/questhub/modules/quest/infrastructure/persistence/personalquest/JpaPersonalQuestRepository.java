@@ -1,6 +1,7 @@
 package com.questhub.modules.quest.infrastructure.persistence.personalquest;
 
 import com.questhub.modules.quest.domain.personalquest.LeaderboardStat;
+import com.questhub.modules.quest.domain.personalquest.TaskDropOffStat;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuest;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestRepository;
 import com.questhub.modules.quest.domain.personalquest.PersonalQuestStatus;
@@ -58,6 +59,18 @@ public class JpaPersonalQuestRepository implements PersonalQuestRepository {
   public List<LeaderboardStat> topByCompletionStats(int limit) {
     return jpa.findTopCompletionStats(limit).stream()
         .map(row -> new LeaderboardStat(row.getUserId(), row.getQuestCount(), row.getTaskCount()))
+        .toList();
+  }
+
+  @Override
+  public double completionRateByQuestId(UUID questId) {
+    return jpa.findCompletionRateByQuestId(questId);
+  }
+
+  @Override
+  public List<TaskDropOffStat> taskDropOffByQuestId(UUID questId) {
+    return jpa.findTaskDropOffByQuestId(questId).stream()
+        .map(row -> new TaskDropOffStat(row.getSourceTaskId(), row.getCompletedCount(), row.getTotalCount()))
         .toList();
   }
 }
