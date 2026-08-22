@@ -13,9 +13,11 @@ Hướng dẫn chạy toàn bộ project trên máy local. Môi trường: **Win
 | Java | 21 | `java -version` |
 | Maven Wrapper | (đi kèm `backend/mvnw.cmd`) | — |
 | Docker | bất kỳ | `docker --version` |
-| Node.js | 20+ | `node -v` |
-| Go | 1.22+ | `go version` |
+| Node.js | 20+ (khi web/admin-web implement) | `node -v` |
+| Go | 1.23+ | `go version` |
 | Python | 3.12 | `python --version` |
+
+> **Trạng thái service:** đã chạy được = `backend/`, `notification/`, `ai-service/`. Còn lại (`social/`, `web/`, `admin-web/`, `mobile/`) mới là placeholder — các lệnh liên quan đánh dấu ⏳.
 
 ---
 
@@ -25,16 +27,20 @@ Hướng dẫn chạy toàn bộ project trên máy local. Môi trường: **Win
 # 1. Tạo .env từ example (dùng cho docker compose)
 Copy-Item .env.dev.example .env
 
-# 2. Cài dependencies frontend
-cd web; npm install
-cd ../admin-web; npm install
-cd ../mobile; npm install
-
-# 3. Python venv cho ai-service
-cd ../ai-service
+# 2. Python venv cho ai-service
+cd ai-service
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+
+# 3. Go dependencies cho notification (chạy lần đầu)
+cd ..\notification
+go mod download
+
+# ⏳ Khi web/admin-web/mobile đã implement:
+# cd ..\web; npm install
+# cd ..\admin-web; npm install
+# cd ..\mobile; npm install
 ```
 
 ---
@@ -117,29 +123,57 @@ Kiểm chứng: mở `http://localhost:8090/docs`
 
 ---
 
-## 6. Social & Notification (Go, port 8081 / 8082)
+## 6. Notification (Go + Gin + GORM, port 8082)
 
-```powershell
-cd social
-go run ./cmd/server
-```
+Consumer của `outbox_events` (ghi bởi backend qua transactional outbox) + inbox API.
+**Phải chạy sau khi backend đã chạy Flyway ít nhất một lần** (cần bảng `outbox_events` + `notifications`).
 
 ```powershell
 cd notification
-go run ./cmd/server
+go run .
+# hoặc: make dev-notification (từ repo root)
+```
+
+Config qua `app.env` (copy từ `app.env.example`) hoặc env vars:
+`DATABASE_URL` · `NOTIFICATION_PORT=8082` · `OUTBOX_POLL_INTERVAL_SECS=5` · `LOG_FILE_PATH`.
+
+**Kiểm chứng:**
+
+```powershell
+Invoke-WebRequest -Uri http://localhost:8082/health_check -UseBasicParsing
+# Kỳ vọng: {"error":false,"message":"ok"}
+```
+
+- Swagger UI: `http://localhost:8082/swagger/index.html`
+- Outbox worker poll mỗi 5s — log ghi ra console + `notification/logs/notification.log`
+- Chi tiết API/outbox: [`notification/CHEATSHEET.md`](notification/CHEATSHEET.md)
+
+---
+
+## ⏳ 6b. Social (Go, port 8081) — CHƯA IMPLEMENT
+
+Folder `social/` hiện là placeholder. Khi implement xong mới chạy:
+
+```powershell
+cd social
+go run ./cmd/server   # theo Makefile hiện tại
 ```
 
 ---
 
-## 7. Web & Admin Web (Next.js, port 3000 / 3001)
+## ⏳ 7. Web & Admin Web (Next.js, port 3000 / 3001) — CHƯA IMPLEMENT
+
+Folder hiện chỉ chứa `.env.*` placeholder. Khi implement xong:
 
 ```powershell
 cd web
+npm install
 npm run dev
 ```
 
 ```powershell
 cd admin-web
+npm install
 npm run dev
 ```
 
@@ -154,10 +188,10 @@ Makefile chỉ chạy được trên bash (WSL/Git Bash). Trên PowerShell chạ
 | Tạo .env | `make env-example` | `Copy-Item .env.dev.example .env` |
 | Lên hạ tầng | `make db-up` | `docker compose up -d postgres redis elasticsearch` |
 | Backend | `make dev-backend` | `cd backend; .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev` |
+| Notification | `make dev-notification` | `cd notification; go run .` |
 | AI | `make dev-ai` | `cd ai-service; uvicorn app.main:app --reload --port 8090` |
-| Social | `make dev-social` | `cd social; go run ./cmd/server` |
-| Notification | `make dev-notification` | `cd notification; go run ./cmd/server` |
-| Web | `make dev-web` | `cd web; npm run dev` |
+| ⏳ Social | `make dev-social` | (chưa implement) |
+| ⏳ Web | `make dev-web` | (chưa implement) |
 | Tắt hạ tầng | `make down` | `docker compose down` |
 
 ---
@@ -189,9 +223,8 @@ cd backend; .\mvnw.cmd test
 # AI
 cd ai-service; pytest
 
-# Go (social + notification)
-cd social; go test ./...
-cd ../notification; go test ./...
+# Go (notification — social chưa implement)
+cd notification; go test ./...
 ```
 
 ---
@@ -210,12 +243,12 @@ cd ../notification; go test ./...
 
 ## 12. Kiến trúc module
 
-| Folder | Runtime | Port |
-|---|---|---|
-| `backend/` | Java 21 + Spring Boot 3 | 9090 |
-| `social/` | Go + Fiber | 8081 |
-| `notification/` | Go + Fiber | 8082 |
-| `ai-service/` | Python 3.12 + FastAPI | 8090 |
-| `web/` | Next.js | 3000 |
-| `admin-web/` | Next.js | 3001 |
-| `mobile/` | React Native | — |
+| Folder | Runtime | Port | Trạng thái |
+|---|---|---|---|
+| `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ |
+| `notification/` | Go + Gin + GORM | 8082 | ✅ |
+| `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ scaffold |
+| `social/` | Go + Fiber | 8081 | ⏳ planned |
+| `web/` | Next.js | 3000 | ⏳ planned |
+| `admin-web/` | Next.js | 3001 | ⏳ planned |
+| `mobile/` | React Native | — | ⏳ planned |

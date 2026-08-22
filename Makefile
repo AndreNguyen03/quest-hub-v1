@@ -31,13 +31,14 @@ ai-test:
 	cd ai-service && pytest
 
 # ── Social / Notification (Go) ────────────────────────────────────────
+# social/ chưa implement — target giữ nguyên cho lúc sau
 .PHONY: dev-social dev-notification go-test
 dev-social:
 	cd social && go run ./cmd/server
 dev-notification:
-	cd notification && go run ./cmd/server
+	cd notification && go run .
 go-test:
-	cd social && go test ./... && cd ../notification && go test ./...
+	cd notification && go test ./...
 
 # ── Web (Next.js) ─────────────────────────────────────────────────────
 .PHONY: dev-web web-test

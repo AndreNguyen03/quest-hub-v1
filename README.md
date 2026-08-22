@@ -4,27 +4,30 @@ Goal-achievement platform: Domain → LearningPath → Quest → Chapter → Tas
 
 ## Monorepo — các service
 
-| Folder | Runtime | Port | Mô tả |
-|--------|---------|------|-------|
-| `backend/` | Java 21 + Spring Boot 3 | 9090 | Modular Monolith — MOD-01→05, 07 (Identity, Quest, Marketplace, World, Admin) |
-| `social/` | Go + Fiber | 8081 | MOD-05 — feed, follow, comment, discussion |
-| `notification/` | Go + Fiber | 8082 | In-app + push + email |
-| `ai-service/` | Python 3.12 + FastAPI | 8090 | MOD-06 — recommend, generate, grade (AI Grader), coach (read-only agent) |
-| `web/` | Next.js | 3000 | Web app (SSR marketplace/quest detail) |
-| `admin-web/` | Next.js | 3001 | Admin panel |
-| `mobile/` | React Native | — | App tracking-first |
+| Folder | Runtime | Port | Trạng thái | Mô tả |
+|--------|---------|------|-----------|-------|
+| `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ chạy được | Modular Monolith — Identity, Quest, Marketplace, World, Admin |
+| `notification/` | Go + Gin + GORM | 8082 | ✅ chạy được | In-app inbox API + consumer `outbox_events` từ backend (push/email ở Phase 2) |
+| `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ scaffold | MOD-06 — recommend, generate, grade (AI Grader), coach (read-only agent) |
+| `social/` | Go + Fiber | 8081 | ⏳ planned | MOD-05 — feed, follow, comment, discussion |
+| `web/` | Next.js | 3000 | ⏳ planned | Web app (SSR marketplace/quest detail) |
+| `admin-web/` | Next.js | 3001 | ⏳ planned | Admin panel |
+| `mobile/` | React Native | — | ⏳ planned | App tracking-first |
 
-> Chia monorepo, khi deploy thật từng service độc lập mới tách repo riêng. Service boundary được enforce bằng cấu trúc folder + ArchUnit (backend) + DB roles.
+> Chia monorepo, khi deploy thật từng service độc lập mới tách repo riêng. Service boundary được enforce bằng cấu trúc folder + ArchUnit/Spring Modulith (backend) + DB roles.
 
 ## Bắt đầu nhanh
 
 ```bash
-make db-up       # postgres + redis + elasticsearch (docker compose)
-make dev-backend # Spring Boot
-make dev-ai      # FastAPI
-make test        # chạy test tất cả service
-make down        # tắt hạ tầng
+make db-up            # postgres + redis + elasticsearch (docker compose)
+make dev-backend      # Spring Boot :9090
+make dev-notification # Go outbox consumer + inbox API :8082
+make dev-ai           # FastAPI :8090
+make test             # test tất cả service đã implement
+make down             # tắt hạ tầng
 ```
+
+> `dev-social` / `dev-web` có trong Makefile nhưng các service này **chưa implement** — bỏ qua ở giai đoạn hiện tại.
 
 ## Môi trường: dev · staging · prod
 
@@ -41,8 +44,12 @@ make down        # tắt hạ tầng
 
 ## Tài liệu thiết kế
 
-Toàn bộ design nằm trong [`docs/`](docs/) — mở bằng trình duyệt:
-`modules-user-stories.html` · `us-analysis.html` · `api-design.html` · `database-schema.html` · `event-contracts.html` · `high-level-design.html` · `sequence-diagrams.html` ...
+Toàn bộ design nằm trong [`docs/`](docs/):
+`high-level-design.md` · `database-schema.md` · `api-design.md` · `event-contracts.md` ·
+`ddd-convention.md` · `modules-user-stories.md` · `sequence-diagrams.md` · `devsecops-pipeline.md` ...
+
+Skill AI dùng khi implement: `GO_SKILL.md`, `JAVA_SKILL.md`, `SKILL_*_ENTERPRISE.md`.
+Cheatsheet Go cho Java dev + quy trình implement US: [`notification/CHEATSHEET.md`](notification/CHEATSHEET.md).
 
 ## Nguyên tắc (tóm tắt từ docs)
 
