@@ -39,7 +39,7 @@ venv/
 *.egg-info/
 
 # Go
-go.sum
+# go.sum phải được commit để verify dependencies — không ignore
 bin/
 
 # React Native
