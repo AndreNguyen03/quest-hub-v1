@@ -1,4 +1,4 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.questhub.modules.world.application.usecase.BuildingUnlockService;
 import com.questhub.modules.world.domain.district.District;
 import com.questhub.modules.world.domain.district.DistrictEventRepository;
 import com.questhub.modules.world.domain.district.DistrictRepository;

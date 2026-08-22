@@ -1,5 +1,6 @@
 package com.questhub.modules.admin.application.usecase;
 
+import com.questhub.modules.admin.application.command.UpdateSkillDomainCommand;
 import com.questhub.modules.admin.domain.skilldomain.AdminSkillDomain;
 import com.questhub.modules.admin.domain.skilldomain.AdminSkillDomainRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -21,7 +22,10 @@ public class UpdateSkillDomainUseCase {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
-  public AdminSkillDomain update(UUID id, String name, String slug, String description, String icon) {
+  public AdminSkillDomain update(UpdateSkillDomainCommand command) {
+    UUID id = command.id();
+    String name = command.name();
+    String slug = command.slug();
     AdminSkillDomain domain =
         adminSkillDomainRepository
             .findById(id)
@@ -36,7 +40,7 @@ public class UpdateSkillDomainUseCase {
               throw BusinessException.conflict(ErrorCodes.CONFLICT, "Tên hoặc slug đã được sử dụng");
             });
 
-    domain.update(name, slug, description, icon);
+    domain.update(name, slug, command.description(), command.icon());
     return adminSkillDomainRepository.save(domain);
   }
 }

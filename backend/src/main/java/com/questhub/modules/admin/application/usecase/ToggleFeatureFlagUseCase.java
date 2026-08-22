@@ -1,5 +1,6 @@
 package com.questhub.modules.admin.application.usecase;
 
+import com.questhub.modules.admin.application.command.ToggleFeatureFlagCommand;
 import com.questhub.modules.admin.domain.featureflag.FeatureFlag;
 import com.questhub.modules.admin.domain.featureflag.FeatureFlagRepository;
 import com.questhub.modules.admin.domain.exception.AdminException;
@@ -23,7 +24,10 @@ public class ToggleFeatureFlagUseCase {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
-  public FeatureFlag toggle(String key, Map<String, Object> value, String description) {
+  public FeatureFlag toggle(ToggleFeatureFlagCommand command) {
+    String key = command.key();
+    Map<String, Object> value = command.value();
+    String description = command.description();
     FeatureFlag existing =
         featureFlagRepository
             .findById(key)

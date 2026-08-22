@@ -1,5 +1,6 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.event;
 
+import com.questhub.modules.world.application.usecase.AchievementUnlockService;
 import com.questhub.modules.world.domain.world.World;
 import com.questhub.modules.world.domain.world.WorldRepository;
 import com.questhub.shared.outbox.OutboxEventDispatched;

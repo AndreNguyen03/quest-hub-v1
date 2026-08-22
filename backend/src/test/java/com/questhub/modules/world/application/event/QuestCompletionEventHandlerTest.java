@@ -1,4 +1,4 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.questhub.modules.world.application.usecase.AchievementUnlockService;
 import com.questhub.modules.world.domain.world.World;
 import com.questhub.modules.world.domain.world.WorldRepository;
 import com.questhub.shared.outbox.OutboxEventDispatched;

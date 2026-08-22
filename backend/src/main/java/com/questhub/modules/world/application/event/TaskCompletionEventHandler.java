@@ -1,5 +1,6 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.event;
 
+import com.questhub.modules.world.application.usecase.BuildingUnlockService;
 import com.questhub.modules.world.domain.district.District;
 import com.questhub.modules.world.domain.district.DistrictEventRepository;
 import com.questhub.modules.world.domain.district.DistrictRepository;

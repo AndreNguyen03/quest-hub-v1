@@ -1,5 +1,6 @@
 package com.questhub.modules.admin.application.usecase;
 
+import com.questhub.modules.admin.application.command.CreateSkillDomainCommand;
 import com.questhub.modules.admin.domain.skilldomain.AdminSkillDomain;
 import com.questhub.modules.admin.domain.skilldomain.AdminSkillDomainRepository;
 import com.questhub.shared.annotation.UseCase;
@@ -21,7 +22,9 @@ public class CreateSkillDomainUseCase {
       isolation = Isolation.DEFAULT,
       rollbackFor = Exception.class,
       propagation = Propagation.REQUIRED)
-  public AdminSkillDomain create(String name, String slug, String description, String icon) {
+  public AdminSkillDomain create(CreateSkillDomainCommand command) {
+    String name = command.name();
+    String slug = command.slug();
     AdminSkillDomain existing =
         adminSkillDomainRepository.findAll().stream()
             .filter(d -> d.getName().equals(name) || d.getSlug().equals(slug))
@@ -31,7 +34,7 @@ public class CreateSkillDomainUseCase {
       throw BusinessException.conflict(ErrorCodes.CONFLICT, "Skill domain đã tồn tại");
     }
 
-    AdminSkillDomain domain = AdminSkillDomain.create(UUID.randomUUID(), name, slug, description, icon);
+    AdminSkillDomain domain = AdminSkillDomain.create(UUID.randomUUID(), name, slug, command.description(), command.icon());
     return adminSkillDomainRepository.save(domain);
   }
 }

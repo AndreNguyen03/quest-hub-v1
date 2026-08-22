@@ -1,4 +1,4 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.event;
 
 import com.questhub.modules.world.domain.world.World;
 import com.questhub.modules.world.domain.world.WorldRepository;

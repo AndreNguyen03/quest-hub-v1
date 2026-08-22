@@ -1,4 +1,4 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.usecase;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

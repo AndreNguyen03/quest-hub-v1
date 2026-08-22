@@ -1,5 +1,8 @@
 package com.questhub.modules.admin.presentation.rest;
 
+import com.questhub.modules.admin.application.command.CreateSkillDomainCommand;
+import com.questhub.modules.admin.application.command.ToggleFeatureFlagCommand;
+import com.questhub.modules.admin.application.command.UpdateSkillDomainCommand;
 import com.questhub.modules.admin.application.dto.FeatureFlagResponse;
 import com.questhub.modules.admin.application.dto.QuestAdminResponse;
 import com.questhub.modules.admin.application.dto.SkillDomainAdminResponse;
@@ -15,7 +18,7 @@ import com.questhub.modules.admin.application.usecase.HideQuestUseCase;
 import com.questhub.modules.admin.application.usecase.RestoreQuestUseCase;
 import com.questhub.modules.admin.application.usecase.ToggleFeatureFlagUseCase;
 import com.questhub.modules.admin.application.usecase.UpdateSkillDomainUseCase;
-import com.questhub.shared.interfaces.dto.ApiResponse;
+import com.questhub.shared.presentation.dto.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -86,7 +89,8 @@ public class AdminController {
       @Valid @RequestBody CreateSkillDomainRequest request) {
     AdminSkillDomain domain =
         createSkillDomainUseCase.create(
-            request.name(), request.slug(), request.description(), request.icon());
+            new CreateSkillDomainCommand(
+                request.name(), request.slug(), request.description(), request.icon()));
     SkillDomainAdminResponse response = SkillDomainAdminResponse.from(domain);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.ok(response));
@@ -97,7 +101,8 @@ public class AdminController {
       @PathVariable UUID id, @Valid @RequestBody UpdateSkillDomainRequest request) {
     AdminSkillDomain domain =
         updateSkillDomainUseCase.update(
-            id, request.name(), request.slug(), request.description(), request.icon());
+            new UpdateSkillDomainCommand(
+                id, request.name(), request.slug(), request.description(), request.icon()));
     SkillDomainAdminResponse response = SkillDomainAdminResponse.from(domain);
     return ResponseEntity.ok(ApiResponse.ok(response));
   }
@@ -122,7 +127,8 @@ public class AdminController {
       @PathVariable String key,
       @Valid @RequestBody ToggleFeatureFlagRequest request) {
     FeatureFlag flag =
-        toggleFeatureFlagUseCase.toggle(key, request.value(), request.description());
+        toggleFeatureFlagUseCase.toggle(
+            new ToggleFeatureFlagCommand(key, request.value(), request.description()));
     FeatureFlagResponse response = FeatureFlagResponse.from(flag);
     return ResponseEntity.ok(ApiResponse.ok(response));
   }

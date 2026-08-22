@@ -1,4 +1,4 @@
-package com.questhub.modules.world.application;
+package com.questhub.modules.world.application.usecase;
 
 import com.questhub.modules.world.domain.achievement.Achievement;
 import com.questhub.modules.world.domain.achievement.AchievementRepository;
