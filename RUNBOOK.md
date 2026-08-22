@@ -248,7 +248,7 @@ cd notification; go test ./...
 | `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ |
 | `notification/` | Go + Gin + GORM | 8082 | ✅ |
 | `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ scaffold |
-| `social/` | Go + Fiber | 8081 | ⏳ planned |
+| `social/` | Go + Gin | 8081 | ⏳ planned |
 | `web/` | Next.js | 3000 | ⏳ planned |
 | `admin-web/` | Next.js | 3001 | ⏳ planned |
 | `mobile/` | React Native | — | ⏳ planned |
