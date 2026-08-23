@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str = "postgresql+asyncpg://questhub:questhub@localhost:5432/questhub"
-    monolith_base_url: str = "http://localhost:8080"
+    monolith_base_url: str = "http://localhost:9090"
 
     # OpenRouter
     openrouter_api_key: str = ""
