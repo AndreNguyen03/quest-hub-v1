@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"questhub/social/infra/worker"
-	"questhub/social/schemas"
+	"social/infra/worker"
+	"social/schemas"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

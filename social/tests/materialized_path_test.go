@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"questhub/social/schemas"
+	"social/schemas"
 
 	"github.com/stretchr/testify/assert"
 )

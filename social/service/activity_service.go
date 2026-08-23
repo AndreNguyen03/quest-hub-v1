@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"questhub/social/repository"
-	"questhub/social/schemas"
-	"questhub/social/util/jsonb"
+	"social/repository"
+	"social/schemas"
+	"social/util/jsonb"
 
 	"github.com/google/uuid"
 )

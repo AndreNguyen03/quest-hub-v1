@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"questhub/notification/repository"
-	"questhub/notification/schemas"
+	"notification/repository"
+	"notification/schemas"
 
 	"github.com/google/uuid"
 )

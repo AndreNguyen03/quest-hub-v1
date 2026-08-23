@@ -6,7 +6,7 @@ import (
 	"context"
 	"sync"
 
-	"questhub/notification/schemas"
+	"notification/schemas"
 
 	"github.com/google/uuid"
 )

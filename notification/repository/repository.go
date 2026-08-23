@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"questhub/notification/infra/db"
+	"notification/infra/db"
 )
 
 // RepositoryContainer aggregates every repository owned by this service.

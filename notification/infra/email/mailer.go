@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/gomail.v2"
 
-	"questhub/notification/util/logger"
+	"notification/util/logger"
 )
 
 // Mailer sends transactional emails via SMTP.

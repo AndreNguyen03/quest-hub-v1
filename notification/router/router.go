@@ -4,8 +4,8 @@ package router
 import (
 	"net/http"
 
-	"questhub/notification/controller"
-	"questhub/notification/helper"
+	"notification/controller"
+	"notification/helper"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

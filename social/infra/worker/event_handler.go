@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"questhub/social/schemas"
-	"questhub/social/service"
-	"questhub/social/util/jsonb"
+	"social/schemas"
+	"social/service"
+	"social/util/jsonb"
 
 	"github.com/google/uuid"
 )

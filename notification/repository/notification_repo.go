@@ -5,8 +5,8 @@ package repository
 import (
 	"context"
 
-	"questhub/notification/schemas"
-	"questhub/notification/util/jsonb"
+	"notification/schemas"
+	"notification/util/jsonb"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"questhub/social/schemas"
-	"questhub/social/util/config"
-	"questhub/social/util/logger"
+	"social/schemas"
+	"social/util/config"
+	"social/util/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

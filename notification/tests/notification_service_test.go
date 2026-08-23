@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"questhub/notification/infra/email"
-	"questhub/notification/infra/push"
-	"questhub/notification/infra/sse"
-	"questhub/notification/schemas"
-	"questhub/notification/service"
+	"notification/infra/email"
+	"notification/infra/push"
+	"notification/infra/sse"
+	"notification/schemas"
+	"notification/service"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

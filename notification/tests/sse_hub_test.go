@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"questhub/notification/infra/sse"
-	"questhub/notification/schemas"
+	"notification/infra/sse"
+	"notification/schemas"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

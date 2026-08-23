@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"questhub/social/repository"
-	"questhub/social/schemas"
+	"social/repository"
+	"social/schemas"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

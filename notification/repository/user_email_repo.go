@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"questhub/notification/schemas"
+	"notification/schemas"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

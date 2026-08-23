@@ -11,14 +11,14 @@ import (
 	"syscall"
 	"time"
 
-	"questhub/social/controller"
-	"questhub/social/infra/db"
-	"questhub/social/infra/worker"
-	"questhub/social/repository"
-	"questhub/social/router"
-	"questhub/social/service"
-	"questhub/social/util/config"
-	"questhub/social/util/logger"
+	"social/controller"
+	"social/infra/db"
+	"social/infra/worker"
+	"social/repository"
+	"social/router"
+	"social/service"
+	"social/util/config"
+	"social/util/logger"
 )
 
 func init() { time.Local = time.UTC }

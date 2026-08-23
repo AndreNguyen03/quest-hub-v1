@@ -4,8 +4,8 @@ package router
 import (
 	"net/http"
 
-	"questhub/social/controller"
-	"questhub/social/helper"
+	"social/controller"
+	"social/helper"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

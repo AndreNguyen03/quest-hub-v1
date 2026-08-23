@@ -4,7 +4,7 @@ package helper
 import (
 	"net/http"
 
-	"questhub/social/util/logger"
+	"social/util/logger"
 
 	"github.com/gin-gonic/gin"
 )

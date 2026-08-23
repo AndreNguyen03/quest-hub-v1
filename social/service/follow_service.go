@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"questhub/social/repository"
-	"questhub/social/schemas"
+	"social/repository"
+	"social/schemas"
 
 	"github.com/google/uuid"
 )

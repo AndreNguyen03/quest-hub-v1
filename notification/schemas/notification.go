@@ -5,7 +5,7 @@ package schemas
 import (
 	"time"
 
-	"questhub/notification/util/jsonb"
+	"notification/util/jsonb"
 
 	"github.com/google/uuid"
 )

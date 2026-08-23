@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"questhub/notification/schemas"
-	"questhub/notification/util/config"
-	"questhub/notification/util/logger"
+	"notification/schemas"
+	"notification/util/config"
+	"notification/util/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

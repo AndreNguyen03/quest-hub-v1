@@ -5,12 +5,12 @@ import (
 	"context"
 	"fmt"
 
-	"questhub/notification/infra/email"
-	"questhub/notification/infra/push"
-	"questhub/notification/infra/sse"
-	"questhub/notification/repository"
-	"questhub/notification/schemas"
-	"questhub/notification/util/logger"
+	"notification/infra/email"
+	"notification/infra/push"
+	"notification/infra/sse"
+	"notification/repository"
+	"notification/schemas"
+	"notification/util/logger"
 
 	"github.com/google/uuid"
 )

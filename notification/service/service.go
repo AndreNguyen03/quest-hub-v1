@@ -1,10 +1,10 @@
 package service
 
 import (
-	"questhub/notification/infra/email"
-	"questhub/notification/infra/push"
-	"questhub/notification/infra/sse"
-	"questhub/notification/repository"
+	"notification/infra/email"
+	"notification/infra/push"
+	"notification/infra/sse"
+	"notification/repository"
 )
 
 // ServiceContainer aggregates every service owned by this service.

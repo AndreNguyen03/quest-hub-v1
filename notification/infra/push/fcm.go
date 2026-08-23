@@ -9,7 +9,7 @@ import (
 	"firebase.google.com/go/v4/messaging"
 	"google.golang.org/api/option"
 
-	"questhub/notification/util/logger"
+	"notification/util/logger"
 )
 
 // FCMClient sends push notifications via Firebase Cloud Messaging.

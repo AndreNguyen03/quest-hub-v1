@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"questhub/notification/util/logger"
+	"notification/util/logger"
 
 	"gorm.io/gorm"
 )

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"questhub/notification/schemas"
+	"notification/schemas"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

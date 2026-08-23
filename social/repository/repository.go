@@ -1,6 +1,6 @@
 package repository
 
-import "questhub/social/infra/db"
+import "social/infra/db"
 
 // RepositoryContainer aggregates every repository owned by the social service.
 type RepositoryContainer struct {

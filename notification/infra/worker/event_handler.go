@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"questhub/notification/repository"
-	"questhub/notification/schemas"
-	"questhub/notification/service"
-	"questhub/notification/util/logger"
+	"notification/repository"
+	"notification/schemas"
+	"notification/service"
+	"notification/util/logger"
 
 	"github.com/google/uuid"
 )

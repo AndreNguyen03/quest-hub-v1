@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"questhub/social/util/logger"
+	"social/util/logger"
 
 	"gorm.io/gorm"
 )

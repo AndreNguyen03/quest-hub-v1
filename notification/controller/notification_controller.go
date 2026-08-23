@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"questhub/notification/helper"
-	"questhub/notification/infra/sse"
-	"questhub/notification/schemas"
-	"questhub/notification/service"
+	"notification/helper"
+	"notification/infra/sse"
+	"notification/schemas"
+	"notification/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

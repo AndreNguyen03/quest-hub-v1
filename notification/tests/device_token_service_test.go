@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"questhub/notification/schemas"
-	"questhub/notification/service"
+	"notification/schemas"
+	"notification/service"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

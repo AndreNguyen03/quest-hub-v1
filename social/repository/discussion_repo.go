@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"questhub/social/schemas"
+	"social/schemas"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

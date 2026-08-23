@@ -4,7 +4,7 @@ package controller
 import (
 	"strconv"
 
-	"questhub/social/service"
+	"social/service"
 
 	"github.com/gin-gonic/gin"
 )

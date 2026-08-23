@@ -17,18 +17,18 @@ import (
 	"syscall"
 	"time"
 
-	"questhub/notification/controller"
-	_ "questhub/notification/docs" // Swagger generated docs
-	"questhub/notification/infra/db"
-	"questhub/notification/infra/email"
-	"questhub/notification/infra/push"
-	"questhub/notification/infra/sse"
-	"questhub/notification/infra/worker"
-	"questhub/notification/repository"
-	"questhub/notification/router"
-	"questhub/notification/service"
-	"questhub/notification/util/config"
-	"questhub/notification/util/logger"
+	"notification/controller"
+	_ "notification/docs" // Swagger generated docs
+	"notification/infra/db"
+	"notification/infra/email"
+	"notification/infra/push"
+	"notification/infra/sse"
+	"notification/infra/worker"
+	"notification/repository"
+	"notification/router"
+	"notification/service"
+	"notification/util/config"
+	"notification/util/logger"
 )
 
 // init pins the whole app to UTC timezone.

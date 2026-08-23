@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"questhub/social/schemas"
-	"questhub/social/util/jsonb"
+	"social/schemas"
+	"social/util/jsonb"
 
 	"github.com/google/uuid"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"questhub/social/service"
+	"social/service"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

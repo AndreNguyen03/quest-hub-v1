@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"questhub/notification/helper"
-	"questhub/notification/schemas"
-	"questhub/notification/service"
+	"notification/helper"
+	"notification/schemas"
+	"notification/service"
 
 	"github.com/gin-gonic/gin"
 )

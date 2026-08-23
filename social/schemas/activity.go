@@ -3,7 +3,7 @@ package schemas
 import (
 	"time"
 
-	"questhub/social/util/jsonb"
+	"social/util/jsonb"
 
 	"github.com/google/uuid"
 )

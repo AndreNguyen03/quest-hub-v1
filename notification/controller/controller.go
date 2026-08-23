@@ -3,8 +3,8 @@
 package controller
 
 import (
-	"questhub/notification/infra/sse"
-	"questhub/notification/service"
+	"notification/infra/sse"
+	"notification/service"
 )
 
 // ControllerContainer aggregates every controller owned by this service.

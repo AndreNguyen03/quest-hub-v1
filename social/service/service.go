@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"questhub/social/repository"
+	"social/repository"
 )
 
 const (

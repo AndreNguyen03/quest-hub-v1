@@ -7,7 +7,7 @@ package helper
 import (
 	"net/http"
 
-	"questhub/notification/util/logger"
+	"notification/util/logger"
 
 	"github.com/gin-gonic/gin"
 )

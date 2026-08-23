@@ -4,7 +4,7 @@ package sse
 import (
 	"sync"
 
-	"questhub/notification/schemas"
+	"notification/schemas"
 
 	"github.com/google/uuid"
 )
