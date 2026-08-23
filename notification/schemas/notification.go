@@ -73,3 +73,12 @@ type UnreadCountRequest struct {
 type UnreadCountResponse struct {
 	Count int `json:"count"`
 }
+
+// BroadcastRequest is the body for POST /api/v1/notifications/broadcast.
+// UserIDs is optional — omit to broadcast to all users (admin use only).
+type BroadcastRequest struct {
+	UserIDs []string         `json:"userIds"`
+	Type    NotificationType `json:"type" binding:"required,oneof=TASK_COMPLETED QUEST_COMPLETED ACHIEVEMENT FOLLOWED COMMENT REVIEW ADMIN"`
+	Title   string           `json:"title" binding:"required"`
+	Body    string           `json:"body"`
+}

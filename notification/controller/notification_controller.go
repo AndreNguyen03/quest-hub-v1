@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"questhub/notification/helper"
+	"questhub/notification/infra/sse"
 	"questhub/notification/schemas"
 	"questhub/notification/service"
 
@@ -15,12 +18,13 @@ import (
 // NotificationController handles HTTP requests for the notifications module.
 type NotificationController struct {
 	service  service.INotificationService
+	hub      *sse.Hub
 	validate *validator.Validate
 }
 
-// NewNotificationController returns a controller backed by the given service.
-func NewNotificationController(svc service.INotificationService) *NotificationController {
-	return &NotificationController{service: svc, validate: validator.New()}
+// NewNotificationController returns a controller backed by the given service and SSE hub.
+func NewNotificationController(svc service.INotificationService, hub *sse.Hub) *NotificationController {
+	return &NotificationController{service: svc, hub: hub, validate: validator.New()}
 }
 
 // List godoc
@@ -145,4 +149,77 @@ func (ctrl *NotificationController) UnreadCount(c *gin.Context) {
 		return
 	}
 	helper.GinResponse(c, http.StatusOK, resp)
+}
+
+// Stream godoc
+// @Summary      SSE notification stream
+// @Description  Kết nối Server-Sent Events để nhận notification real-time. Giữ connection mở; mỗi event là một JSON notification.
+// @Tags         notifications
+// @Produce      text/event-stream
+// @Param        userId  query  string  true  "User ID (UUID)"
+// @Success      200
+// @Failure      400  {object}  helper.ErrorResponse
+// @Router       /api/v1/notifications/stream [get]
+func (ctrl *NotificationController) Stream(c *gin.Context) {
+	userIDStr := c.Query("userId")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		helper.BadRequest(c, "parse userId failed", "userId không hợp lệ")
+		return
+	}
+
+	ch := ctrl.hub.Subscribe(userID)
+	defer ctrl.hub.Unsubscribe(userID, ch)
+
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Header().Set("X-Accel-Buffering", "no")
+	c.Writer.WriteHeader(http.StatusOK)
+
+	// Send an initial ping so the client knows the connection is live.
+	fmt.Fprintf(c.Writer, "event: ping\ndata: {}\n\n")
+	c.Writer.Flush()
+
+	for {
+		select {
+		case <-c.Request.Context().Done():
+			return
+		case n, ok := <-ch:
+			if !ok {
+				return
+			}
+			data, _ := json.Marshal(n)
+			fmt.Fprintf(c.Writer, "event: notification\ndata: %s\n\n", data)
+			c.Writer.Flush()
+		}
+	}
+}
+
+// Broadcast godoc
+// @Summary      Admin broadcast notification
+// @Description  Gửi thông báo hệ thống tới danh sách userIds được chỉ định
+// @Tags         notifications
+// @Accept       json
+// @Produce      json
+// @Param        body  body  schemas.BroadcastRequest  true  "Broadcast payload"
+// @Success      204   "No Content"
+// @Failure      400   {object}  helper.ErrorResponse
+// @Failure      500   {object}  helper.ErrorResponse
+// @Router       /api/v1/notifications/broadcast [post]
+func (ctrl *NotificationController) Broadcast(c *gin.Context) {
+	var req schemas.BroadcastRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.BadRequest(c, "bind broadcast failed", "Dữ liệu không hợp lệ")
+		return
+	}
+	if len(req.UserIDs) == 0 {
+		helper.BadRequest(c, "userIds empty", "userIds không được để trống")
+		return
+	}
+	if err := ctrl.service.Broadcast(c.Request.Context(), &req); err != nil {
+		helper.InternalError(c, err, "broadcast failed")
+		return
+	}
+	c.Status(http.StatusNoContent)
 }

@@ -4,28 +4,32 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"questhub/notification/util/logger"
 
 	"questhub/notification/repository"
 	"questhub/notification/schemas"
+	"questhub/notification/service"
+	"questhub/notification/util/logger"
 
 	"github.com/google/uuid"
 )
 
-// EventHandler converts outbox events into notification rows via the
-// notification repository.
+// EventHandler converts outbox events into notifications via the service layer,
+// which also dispatches SSE, FCM push and email side-effects.
 type EventHandler struct {
-	repo repository.INotificationRepository
+	svc       service.INotificationService
+	emailRepo repository.IUserEmailRepository
 }
 
-// NewEventHandler returns a handler backed by the given repository interface.
-func NewEventHandler(repo repository.INotificationRepository) *EventHandler {
-	return &EventHandler{repo: repo}
+// NewEventHandler returns a handler wired to the notification service and user email repository.
+func NewEventHandler(svc service.INotificationService, emailRepo repository.IUserEmailRepository) *EventHandler {
+	return &EventHandler{svc: svc, emailRepo: emailRepo}
 }
 
 // Handle dispatches a single outbox event to its typed handler.
 func (h *EventHandler) Handle(ctx context.Context, event OutboxEvent) error {
 	switch event.EventType {
+	case "user.registered":
+		return h.handleUserRegistered(ctx, event.Payload)
 	case "task.completed":
 		return h.handleTaskCompleted(ctx, event.Payload)
 	case "quest.completed":
@@ -43,6 +47,25 @@ func (h *EventHandler) Handle(ctx context.Context, event OutboxEvent) error {
 	default:
 		return fmt.Errorf("unknown event type: %s", event.EventType)
 	}
+}
+
+// handleUserRegistered caches the user's email for future email notifications.
+func (h *EventHandler) handleUserRegistered(ctx context.Context, raw json.RawMessage) error {
+	var p struct {
+		UserID string `json:"userId"`
+		Email  string `json:"email"`
+	}
+	if err := json.Unmarshal(raw, &p); err != nil {
+		return err
+	}
+	if p.Email == "" {
+		return nil
+	}
+	userID, err := uuid.Parse(p.UserID)
+	if err != nil {
+		return fmt.Errorf("parse userId: %w", err)
+	}
+	return h.emailRepo.Upsert(ctx, userID, p.Email)
 }
 
 // handleTaskCompleted creates TASK_COMPLETED (and optionally QUEST_COMPLETED
@@ -63,7 +86,7 @@ func (h *EventHandler) handleTaskCompleted(ctx context.Context, raw json.RawMess
 		return fmt.Errorf("parse userId: %w", err)
 	}
 
-	if err := h.repo.Create(ctx, &schemas.Notification{
+	if err := h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  userID,
 		Type:    schemas.TypeTaskCompleted,
@@ -73,9 +96,8 @@ func (h *EventHandler) handleTaskCompleted(ctx context.Context, raw json.RawMess
 		return err
 	}
 
-	// task.completed carries isQuestCompleted flag — send a second notification
 	if p.IsQuestCompleted {
-		return h.repo.Create(ctx, &schemas.Notification{
+		return h.svc.Notify(ctx, &schemas.Notification{
 			ID:      uuid.New(),
 			UserID:  userID,
 			Type:    schemas.TypeQuestCompleted,
@@ -100,7 +122,7 @@ func (h *EventHandler) handleQuestCompleted(ctx context.Context, raw json.RawMes
 	if err != nil {
 		return fmt.Errorf("parse userId: %w", err)
 	}
-	return h.repo.Create(ctx, &schemas.Notification{
+	return h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  userID,
 		Type:    schemas.TypeQuestCompleted,
@@ -123,7 +145,7 @@ func (h *EventHandler) handleAchievementUnlocked(ctx context.Context, raw json.R
 	if err != nil {
 		return fmt.Errorf("parse userId: %w", err)
 	}
-	return h.repo.Create(ctx, &schemas.Notification{
+	return h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  userID,
 		Type:    schemas.TypeAchievement,
@@ -133,8 +155,6 @@ func (h *EventHandler) handleAchievementUnlocked(ctx context.Context, raw json.R
 }
 
 // handleCommentCreated creates a COMMENT notification for the quest owner.
-// recipientUserId must be enriched by Java monolith before publishing to outbox.
-// Phase 2: derive recipient from RabbitMQ routing.
 func (h *EventHandler) handleCommentCreated(ctx context.Context, raw json.RawMessage) error {
 	var p struct {
 		RecipientUserID string `json:"recipientUserId"`
@@ -153,7 +173,7 @@ func (h *EventHandler) handleCommentCreated(ctx context.Context, raw json.RawMes
 	if err != nil {
 		return fmt.Errorf("parse recipientUserId: %w", err)
 	}
-	return h.repo.Create(ctx, &schemas.Notification{
+	return h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  recipientID,
 		Type:    schemas.TypeComment,
@@ -162,9 +182,7 @@ func (h *EventHandler) handleCommentCreated(ctx context.Context, raw json.RawMes
 	})
 }
 
-// handleDiscussionCreated creates a COMMENT notification when someone opens a
-// discussion on your quest. recipientUserId = quest creator, enriched by the
-// Java monolith.
+// handleDiscussionCreated creates a COMMENT notification when someone opens a discussion.
 func (h *EventHandler) handleDiscussionCreated(ctx context.Context, raw json.RawMessage) error {
 	var p struct {
 		RecipientUserID string `json:"recipientUserId"`
@@ -184,7 +202,7 @@ func (h *EventHandler) handleDiscussionCreated(ctx context.Context, raw json.Raw
 	if err != nil {
 		return fmt.Errorf("parse recipientUserId: %w", err)
 	}
-	return h.repo.Create(ctx, &schemas.Notification{
+	return h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  recipientID,
 		Type:    schemas.TypeComment,
@@ -206,7 +224,7 @@ func (h *EventHandler) handleUserFollowed(ctx context.Context, raw json.RawMessa
 	if err != nil {
 		return fmt.Errorf("parse followedUserId: %w", err)
 	}
-	return h.repo.Create(ctx, &schemas.Notification{
+	return h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  recipientID,
 		Type:    schemas.TypeFollowed,
@@ -238,7 +256,7 @@ func (h *EventHandler) handleSubmissionGraded(ctx context.Context, raw json.RawM
 		title = "📝 Submission needs revision — check feedback"
 	}
 
-	return h.repo.Create(ctx, &schemas.Notification{
+	return h.svc.Notify(ctx, &schemas.Notification{
 		ID:      uuid.New(),
 		UserID:  userID,
 		Type:    schemas.TypeReview,

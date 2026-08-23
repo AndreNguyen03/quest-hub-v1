@@ -14,6 +14,7 @@ import (
 // notificationEventTypes lists the outbox event types this service consumes.
 // Phase 2: replace polling with RabbitMQ fan-out exchange.
 var notificationEventTypes = []string{
+	"user.registered",
 	"task.completed",
 	"quest.completed",
 	"achievement.unlocked",

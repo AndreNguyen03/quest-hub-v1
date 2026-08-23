@@ -41,6 +41,7 @@ func (s *APIServer) SetupRouter() *gin.Engine {
 
 	api := r.Group("/api/v1")
 	SetupNotificationRouter(api, s)
+	SetupDeviceTokenRouter(api, s)
 
 	return r
 }

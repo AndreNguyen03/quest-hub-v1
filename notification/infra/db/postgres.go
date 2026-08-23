@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"questhub/notification/schemas"
 	"questhub/notification/util/config"
 	"questhub/notification/util/logger"
 
@@ -37,6 +38,14 @@ func NewPostgres(cfg config.Config) (*Postgres, error) {
 	if err := sqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("db ping: %w", err)
 	}
+
+	if err := gdb.AutoMigrate(
+		&schemas.DeviceToken{},
+		&schemas.UserEmail{},
+	); err != nil {
+		return nil, fmt.Errorf("auto migrate: %w", err)
+	}
+
 	return &Postgres{DB: gdb}, nil
 }
 

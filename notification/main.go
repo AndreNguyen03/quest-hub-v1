@@ -20,6 +20,9 @@ import (
 	"questhub/notification/controller"
 	_ "questhub/notification/docs" // Swagger generated docs
 	"questhub/notification/infra/db"
+	"questhub/notification/infra/email"
+	"questhub/notification/infra/push"
+	"questhub/notification/infra/sse"
 	"questhub/notification/infra/worker"
 	"questhub/notification/repository"
 	"questhub/notification/router"
@@ -45,15 +48,21 @@ func main() {
 	}
 	defer psql.Close()
 
+	// Infrastructure
+	sseHub := sse.NewHub()
+	fcmClient := push.NewFCMClient(cfg.FCMCredentialsPath)
+	mailer := email.NewMailer(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPFrom)
+
+	// Wire layers
 	repos := repository.NewRepositoryFactory(psql).CreateRepositories()
-	services := service.NewServiceFactory(repos).CreateServices()
-	ctrls := controller.NewControllerFactory(services).CreateControllers()
+	services := service.NewServiceFactory(repos, sseHub, fcmClient, mailer).CreateServices()
+	ctrls := controller.NewControllerFactory(services, sseHub).CreateControllers()
 	server := router.NewAPIServer(ctrls)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	eventHandler := worker.NewEventHandler(repos.Notification)
+	eventHandler := worker.NewEventHandler(services.Notification, repos.UserEmail)
 	go worker.NewOutboxWorker(psql.DB, eventHandler, cfg.PollInterval).Run(ctx)
 
 	srv := &http.Server{Addr: ":" + cfg.Port, Handler: server.SetupRouter()}
