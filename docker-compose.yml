@@ -37,7 +37,7 @@ services:
     build: ./backend
     container_name: questhub-backend
     ports:
-      - "8080:8080"
+      - "9090:9090"
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-questhub}
@@ -92,7 +92,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://backend:8080/api
+      NEXT_PUBLIC_API_BASE_URL: http://backend:9090/api
       NEXT_PUBLIC_AI_BASE_URL: http://ai-service:8090
     depends_on:
       - backend

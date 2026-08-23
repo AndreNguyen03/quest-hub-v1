@@ -1,51 +1,61 @@
 # QuestHub
 
-Goal-achievement platform: Domain → LearningPath → Quest → Chapter → Task. Người dùng chọn mục tiêu, đi theo quest, tiến bộ thật được phản ánh vào World cá nhân.
+Nền tảng học tập có gamification: chọn mục tiêu → đi theo Quest → tiến độ thật phản ánh vào World cá nhân. AI chấm bài, gợi ý và coaching theo thời gian thực.
 
 ## Monorepo — các service
 
 | Folder | Runtime | Port | Trạng thái | Mô tả |
 |--------|---------|------|-----------|-------|
-| `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ chạy được | Modular Monolith — Identity, Quest, Marketplace, World, Admin |
-| `notification/` | Go + Gin + GORM | 8082 | ✅ chạy được | In-app inbox API + consumer `outbox_events` từ backend (push/email ở Phase 2) |
-| `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ scaffold | MOD-06 — recommend, generate, grade (AI Grader), coach (read-only agent) |
-| `social/` | Go + Gin | 8081 | ⏳ planned | MOD-05 — feed, follow, comment, discussion |
-| `web/` | Next.js | 3000 | ⏳ planned | Web app (SSR marketplace/quest detail) |
-| `admin-web/` | Next.js | 3001 | ⏳ planned | Admin panel |
-| `mobile/` | React Native | — | ⏳ planned | App tracking-first |
+| `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ Done | Modular Monolith — Identity, Quest, Marketplace, World, Admin |
+| `notification/` | Go + Gin | 8082 | ✅ Done | Inbox API + SSE real-time + FCM push + Email + Admin broadcast |
+| `social/` | Go + Gin | 8081 | ✅ Done | Feed, follows, comments/discussions (materialized path) |
+| `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ Done | Grade, AI Coach (tool-use + SSE), Recommend (ES), Generate quest |
+| `web/` | Next.js 16 | 3000 | 🚧 In progress | Web app — auth done, marketplace/learning UI tiếp theo |
+| `admin-web/` | TBD | 3001 | ⏳ Planned | Admin panel |
+| `mobile/` | React Native | — | ⏳ Planned | Mobile app |
 
-> Chia monorepo, khi deploy thật từng service độc lập mới tách repo riêng. Service boundary được enforce bằng cấu trúc folder + ArchUnit/Spring Modulith (backend) + DB roles.
-
-## Bắt đầu nhanh
+## Bắt đầu nhanh (local)
 
 ```bash
-make db-up            # postgres + redis + elasticsearch (docker compose)
-make dev-backend      # Spring Boot :9090
-make dev-notification # Go outbox consumer + inbox API :8082
+# 1. Setup .env
+cp .env.dev.example .env
+
+# 2. Khởi động infra (Postgres + Redis + Elasticsearch)
+make db-up
+
+# 3. Chạy từng service (mỗi cái 1 terminal)
+make dev-backend      # Spring Boot :8080
+make dev-notification # Go :8082
+make dev-social       # Go :8081
 make dev-ai           # FastAPI :8090
-make test             # test tất cả service đã implement
-make down             # tắt hạ tầng
+make dev-web          # Next.js :3000
+
+# Hoặc chạy toàn bộ bằng Docker
+make build && make up
 ```
 
-> `dev-social` / `dev-web` có trong Makefile nhưng các service này **chưa implement** — bỏ qua ở giai đoạn hiện tại.
+> Chi tiết setup từng bước xem [`RUNBOOK.md`](RUNBOOK.md)
 
-## Môi trường: dev · staging · prod
+## Môi trường
 
-| Env | Chạy ở đâu | Deploy khi nào | Config |
-|-----|-----------|----------------|--------|
-| **dev** | Local — docker compose + máy dev | — | `.env.dev.example` → `.env` · Spring profile `dev` · `web/.env.development` |
-| **staging** | k3s (`questhub-staging`) | Tự động khi merge main | `.env.staging.example` · Spring profile `staging` · `infra/k8s/overlays/staging` · `deploy-staging.yml` |
-| **prod** | k3s (`questhub-prod`) | Manual approval → ArgoCD GitOps | `.env.prod.example` · Spring profile `prod` · `infra/k8s/overlays/prod` · `deploy-prod.yml` |
+| Env | Chạy ở đâu | Config |
+|-----|-----------|--------|
+| **dev** | Local — docker compose + máy dev | `.env.dev.example` → `.env` · Spring profile `dev` |
+| **staging** | k3s (`questhub-staging`) | `.env.staging.example` · `infra/k8s/overlays/staging` |
+| **prod** | k3s (`questhub-prod`) — manual approval | `.env.prod.example` · `infra/k8s/overlays/prod` |
 
-- Chỉ commit file **`*.example`** — bản thật (`.env`, `.env.dev`, ...) đã gitignore.
-- Dev dùng docker compose; staging/prod dùng Kustomize overlays, image tag = git SHA (immutable).
-- Secret thật đi qua CI secrets / Vault, không bao giờ trong repo.
-- Chi tiết pipeline bảo mật: `docs/devsecops-pipeline.html`.
+- Chỉ commit file `*.example` — bản thật đã gitignore.
+- Dev dùng docker compose; staging/prod dùng Kustomize overlays, image tag = git SHA.
 
-## Tài liệu thiết kế
+## Tài liệu
 
-Toàn bộ design nằm trong [`docs/`](docs/):
-`high-level-design.md` · `database-schema.md` · `api-design.md` · `event-contracts.md` ·
-`ddd-convention.md` · `modules-user-stories.md` · `sequence-diagrams.md` · `devsecops-pipeline.md` ...
-
-
+| File | Nội dung |
+|---|---|
+| [`docs/high-level-design.html`](docs/high-level-design.html) | Kiến trúc tổng thể, service boundary |
+| [`docs/api-design.html`](docs/api-design.html) | API contracts tất cả service |
+| [`docs/database-schema.html`](docs/database-schema.html) | Schema toàn bộ DB |
+| [`docs/event-contracts.html`](docs/event-contracts.html) | Outbox event payloads |
+| [`docs/ddd-convention.md`](docs/ddd-convention.md) | DDD conventions cho Java backend |
+| [`docs/module-descriptions.md`](docs/module-descriptions.md) | Mô tả chi tiết trách nhiệm từng module |
+| [`docs/modules-user-stories.html`](docs/modules-user-stories.html) | User stories theo module |
+| [`docs/test-cases.md`](docs/test-cases.md) | 258 test cases toàn dự án |

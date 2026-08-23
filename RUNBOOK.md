@@ -1,8 +1,8 @@
 # RUNBOOK — QuestHub
 
-Hướng dẫn chạy toàn bộ project trên máy local. Môi trường: **Windows + PowerShell 5.1** (lệnh bash tương đương ghi chú trong ngoặc).
+Hướng dẫn chạy toàn bộ project trên máy local.
 
-> Nguyên tắc: `.env` = copy từ `*.example`. **Chỉ commit file `*.example`, không commit `.env`.**
+> **Nguyên tắc:** `.env` = copy từ `*.example`. Chỉ commit file `*.example`, không commit `.env`.
 
 ---
 
@@ -11,36 +11,36 @@ Hướng dẫn chạy toàn bộ project trên máy local. Môi trường: **Win
 | Công cụ | Version | Kiểm tra |
 |---|---|---|
 | Java | 21 | `java -version` |
-| Maven Wrapper | (đi kèm `backend/mvnw.cmd`) | — |
-| Docker | bất kỳ | `docker --version` |
-| Node.js | 20+ (khi web/admin-web implement) | `node -v` |
-| Go | 1.23+ | `go version` |
+| Go | 1.25+ | `go version` |
 | Python | 3.12 | `python --version` |
+| Node.js | 24+ | `node -v` |
+| pnpm | latest | `pnpm -v` |
+| Docker Desktop | bất kỳ | `docker --version` |
 
-> **Trạng thái service:** đã chạy được = `backend/`, `notification/`, `ai-service/`. Còn lại (`social/`, `web/`, `admin-web/`, `mobile/`) mới là placeholder — các lệnh liên quan đánh dấu ⏳.
+> Maven Wrapper (`mvnw`) đi kèm trong `backend/` — không cần cài Maven riêng.
 
 ---
 
-## 2. Cài đặt lần đầu (one-time)
+## 2. Cài đặt lần đầu
 
-```powershell
+```bash
 # 1. Tạo .env từ example (dùng cho docker compose)
-Copy-Item .env.dev.example .env
+cp .env.dev.example .env
 
-# 2. Python venv cho ai-service
+# 2. Go deps
+cd notification && go mod download && cd ..
+cd social && go mod download && cd ..
+
+# 3. Python deps cho ai-service
 cd ai-service
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+# Windows:  .venv\Scripts\activate
+# Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
+cd ..
 
-# 3. Go dependencies cho notification (chạy lần đầu)
-cd ..\notification
-go mod download
-
-# ⏳ Khi web/admin-web/mobile đã implement:
-# cd ..\web; npm install
-# cd ..\admin-web; npm install
-# cd ..\mobile; npm install
+# 4. Web deps
+cd web && pnpm install && cd ..
 ```
 
 ---
@@ -49,206 +49,245 @@ go mod download
 
 Postgres (5432) + Redis (6379) + Elasticsearch (9200):
 
-```powershell
+```bash
+make db-up
+# hoặc:
 docker compose up -d postgres redis elasticsearch
 ```
 
-Kiểm tra container chạy:
-
-```powershell
+Kiểm tra:
+```bash
 docker ps
 ```
 
-Tắt hạ tầng:
-
-```powershell
-docker compose stop postgres redis elasticsearch   # tạm dừng
-docker compose down                                # xóa container (GIỮ volume)
-docker compose down -v                            # xóa luôn data (KHÔNG làm trừ khi muốn reset)
+Tắt:
+```bash
+make down               # tắt container, giữ volume
+docker compose down -v  # xóa cả volume/data (reset hoàn toàn)
 ```
 
-Logs hạ tầng:
-
-```powershell
-docker compose logs -f
-```
-
-> **Lưu ý ES:** image elasticsearch đang dùng `8.18.8` phải khớp version client `elasticsearch-java` trong Spring Boot. Lệch version → health backend báo `DOWN` với lỗi decode `cluster.health`. Không tự ý hạ image xuống.
+> **Lưu ý ES:** image `8.18.8` phải khớp version client trong Spring Boot. Lệch version → backend health `DOWN`.
 
 ---
 
-## 4. Backend (Spring Boot, port 9090)
+## 4. Backend — Spring Boot (port 9090)
 
-```powershell
-cd backend
-.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
+```bash
+make dev-backend
+# hoặc:
+cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# Windows:
+cd backend && .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-> Bash: `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`
-
-**Kiểm chứng:**
-
-```powershell
-Invoke-WebRequest -Uri http://localhost:9090/actuator/health -UseBasicParsing
+Kiểm tra:
+```bash
+curl http://localhost:9090/actuator/health
 # Kỳ vọng: {"status":"UP"}
 ```
 
-- `UP` = DB + Redis + ES đều kết nối được.
-- `DOWN` = xem mục Troubleshooting.
+Swagger UI: `http://localhost:9090/swagger-ui.html`
 
-**Restart khi thêm/sửa migration:** Flyway chỉ chạy migration **lúc startup**. Thêm file `V*.sql` xong phải restart backend:
+**Sau khi thêm migration:** Flyway chỉ chạy lúc startup → restart backend.
 
-```powershell
-# Windows: Ctrl+C trong terminal đang chạy backend, rồi chạy lại lệnh trên
-```
-
-**Kiểm tra schema sau khi Flyway chạy:**
-
-```powershell
-docker exec -it questhub-postgres psql -U questhub -d questhub -c "\d users"
-docker exec -it questhub-postgres psql -U questhub -d questhub -c "SELECT * FROM flyway_schema_history;"
+```bash
+# Kiểm tra schema
+docker exec -it questhub-postgres psql -U questhub -d questhub -c "\dt"
+docker exec -it questhub-postgres psql -U questhub -d questhub -c "SELECT * FROM flyway_schema_history ORDER BY installed_rank;"
 ```
 
 ---
 
-## 5. AI service (FastAPI, port 8090)
+## 5. Notification — Go (port 8082)
 
-```powershell
-cd ai-service
-.\.venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload --port 8090
+Phải chạy **sau khi backend đã chạy Flyway ít nhất 1 lần** (cần bảng `outbox_events` + `notifications`).
+
+```bash
+cp notification/app.env.example notification/app.env
+
+make dev-notification
+# hoặc:
+cd notification && go run .
 ```
 
-Kiểm chứng: mở `http://localhost:8090/docs`
+`notification/app.env`:
+```
+DATABASE_URL=postgres://questhub:questhub@localhost:5432/questhub
+NOTIFICATION_PORT=8082
+OUTBOX_POLL_INTERVAL_SECS=5
+```
+
+Kiểm tra:
+```bash
+curl http://localhost:8082/health_check
+# {"error":false,"message":"ok"}
+```
+
+Swagger UI: `http://localhost:8082/swagger/index.html`
+
+**Features:** In-app inbox · SSE real-time (`/api/v1/notifications/stream`) · FCM push (cần `FCM_CREDENTIALS_PATH`) · Email (cần `SMTP_HOST`) · Admin broadcast
 
 ---
 
-## 6. Notification (Go + Gin + GORM, port 8082)
+## 6. Social — Go (port 8081)
 
-Consumer của `outbox_events` (ghi bởi backend qua transactional outbox) + inbox API.
-**Phải chạy sau khi backend đã chạy Flyway ít nhất một lần** (cần bảng `outbox_events` + `notifications`).
-
-```powershell
-cd notification
-go run .
-# hoặc: make dev-notification (từ repo root)
+```bash
+make dev-social
+# hoặc:
+cd social && go run .
 ```
 
-Config qua `app.env` (copy từ `app.env.example`) hoặc env vars:
-`DATABASE_URL` · `NOTIFICATION_PORT=8082` · `OUTBOX_POLL_INTERVAL_SECS=5` · `LOG_FILE_PATH`.
-
-**Kiểm chứng:**
-
-```powershell
-Invoke-WebRequest -Uri http://localhost:8082/health_check -UseBasicParsing
-# Kỳ vọng: {"error":false,"message":"ok"}
+Config qua env vars:
+```
+DATABASE_URL=postgres://questhub:questhub@localhost:5432/questhub
+SOCIAL_PORT=8081
+OUTBOX_POLL_INTERVAL_SECS=5
 ```
 
-- Swagger UI: `http://localhost:8082/swagger/index.html`
-- Outbox worker poll mỗi 5s — log ghi ra console + `notification/logs/notification.log`
-- Chi tiết API/outbox: [`notification/CHEATSHEET.md`](notification/CHEATSHEET.md)
+Kiểm tra:
+```bash
+curl http://localhost:8081/health_check
+# {"error":false,"message":"ok"}
+```
+
+**Features:** Feed, follow/unfollow · Comments + discussions (materialized path, tối đa 2 cấp) · Outbox worker consume quest/achievement events
 
 ---
 
-## ⏳ 6b. Social (Go, port 8081) — CHƯA IMPLEMENT
+## 7. AI Service — FastAPI (port 8090)
 
-Folder `social/` hiện là placeholder. Khi implement xong mới chạy:
+```bash
+# Activate venv trước
+# Windows:  ai-service\.venv\Scripts\activate
+# Mac/Linux: source ai-service/.venv/bin/activate
 
-```powershell
-cd social
-go run ./cmd/server   # theo Makefile hiện tại
+make dev-ai
+# hoặc:
+cd ai-service && uvicorn app.main:app --reload --port 8090
 ```
+
+Cần set trong môi trường hoặc `ai-service/.env`:
+```
+OPENROUTER_API_KEY=sk-or-...
+AI_MODEL=meta-llama/llama-3.1-8b-instruct:free
+DATABASE_URL=postgresql+asyncpg://questhub:questhub@localhost:5432/questhub
+ELASTICSEARCH_URL=http://localhost:9200
+```
+
+Kiểm tra: `http://localhost:8090/docs`
+
+**Features:** `POST /api/v1/ai/grade` · `POST /api/v1/ai/coach/sessions` + `/messages` (SSE streaming) · `POST /api/v1/ai/recommend` · `POST /api/v1/ai/generate-quest`
 
 ---
 
-## ⏳ 7. Web & Admin Web (Next.js, port 3000 / 3001) — CHƯA IMPLEMENT
+## 8. Web — Next.js (port 3000)
 
-Folder hiện chỉ chứa `.env.*` placeholder. Khi implement xong:
-
-```powershell
-cd web
-npm install
-npm run dev
+```bash
+make dev-web
+# hoặc:
+cd web && pnpm dev
 ```
 
-```powershell
-cd admin-web
-npm install
-npm run dev
+`web/.env.development` đã có sẵn:
 ```
+NEXT_PUBLIC_API_BASE_URL=http://localhost:9090/api
+NEXT_PUBLIC_AI_BASE_URL=http://localhost:8090
+```
+
+Mở: `http://localhost:3000`
 
 ---
 
-## 8. Chạy tất cả (tương đương Makefile)
+## 9. Chạy toàn bộ bằng Docker
 
-Makefile chỉ chạy được trên bash (WSL/Git Bash). Trên PowerShell chạy từng lệnh ở mục 3–7.
+```bash
+# Build tất cả images
+docker compose build
 
-| Việc | Makefile | PowerShell tương đương |
-|---|---|---|
-| Tạo .env | `make env-example` | `Copy-Item .env.dev.example .env` |
-| Lên hạ tầng | `make db-up` | `docker compose up -d postgres redis elasticsearch` |
-| Backend | `make dev-backend` | `cd backend; .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev` |
-| Notification | `make dev-notification` | `cd notification; go run .` |
-| AI | `make dev-ai` | `cd ai-service; uvicorn app.main:app --reload --port 8090` |
-| ⏳ Social | `make dev-social` | (chưa implement) |
-| ⏳ Web | `make dev-web` | (chưa implement) |
-| Tắt hạ tầng | `make down` | `docker compose down` |
+# Chạy toàn bộ stack
+docker compose up -d
 
----
+# Logs
+docker compose logs -f backend
+docker compose logs -f notification
 
-## 9. Migration — quy trình chuẩn
+# Restart 1 service
+docker compose restart backend
 
-1. Tạo file `backend/src/main/resources/db/migration/V<N>__<ten>.sql` — **chung cho mọi env** (dev/staging/prod cùng chain).
-2. **Bất biến:** file migration đã chạy ở prod tuyệt đối không sửa — thay đổi = tạo file `V<N+1>` mới.
-3. Seed data (dữ liệu giả cho dev) — KHÔNG nhét vào `db/migration`. Đặt thư mục riêng + profile riêng.
-4. Restart backend → Flyway tự chạy → kiểm tra bằng `flyway_schema_history`.
-
-**Test nhanh SQL trước khi giao cho Flyway** (tạo bảng tay để bắt syntax error):
-
-```powershell
-Get-Content backend\src\main\resources\db\migration\V1__create_users.sql |
-  docker exec -i questhub-postgres psql -U questhub -d questhub
-```
-
-> Cảnh báo: đã tạo tay bằng psql thì Flyway sẽ báo `relation already exists`. Muốn để Flyway quản lý → `DROP TABLE` bảng đó trước khi restart backend.
-
----
-
-## 10. Test
-
-```powershell
-# Backend
-cd backend; .\mvnw.cmd test
-
-# AI
-cd ai-service; pytest
-
-# Go (notification — social chưa implement)
-cd notification; go test ./...
+# Tắt
+docker compose down
 ```
 
 ---
 
-## 11. Troubleshooting
+## 10. Makefile — tất cả targets
+
+| Target | Việc làm |
+|---|---|
+| `make db-up` | Khởi động postgres + redis + elasticsearch |
+| `make db-down` | Tắt infra |
+| `make dev-backend` | Spring Boot :9090 |
+| `make dev-notification` | Go notification :8082 |
+| `make dev-social` | Go social :8081 |
+| `make dev-ai` | FastAPI :8090 |
+| `make dev-web` | Next.js :3000 |
+| `make build` | Build tất cả Docker images |
+| `make up` | Docker compose up toàn bộ stack |
+| `make down` | Docker compose down |
+| `make test` | Chạy tất cả tests |
+| `make backend-test` | Maven test |
+| `make ai-test` | pytest |
+| `make go-test` | Go test notification + social |
+| `make web-build` | Next.js production build |
+
+---
+
+## 11. Migration
+
+1. Tạo `backend/src/main/resources/db/migration/V<N>__<ten>.sql`
+2. File đã chạy ở prod **tuyệt đối không sửa** — thay đổi = tạo `V<N+1>`
+3. Restart backend → Flyway tự chạy
+
+Test SQL trước:
+```bash
+docker exec -i questhub-postgres psql -U questhub -d questhub < backend/src/main/resources/db/migration/VN__ten.sql
+```
+
+---
+
+## 12. Tests
+
+```bash
+make test           # tất cả (backend + ai + go)
+make backend-test   # Maven
+make ai-test        # pytest
+make go-test        # Go notification + social
+```
+
+---
+
+## 13. Troubleshooting
 
 | Triệu chứng | Nguyên nhân | Cách xử lý |
 |---|---|---|
-| Health backend `DOWN` | ES chưa up / lệch version ES vs client | `docker compose up -d elasticsearch` · xem mục 3 |
-| `relation "users" already exists` | Tạo bảng tay bằng psql trước khi chạy Flyway | `DROP TABLE users;` rồi restart backend |
-| `FlywayException: checksum mismatch` | Sửa file migration đã từng chạy | Không sửa file cũ — tạo `V<N+1>` mới |
-| Port 9090 đã bị chiếm | Backend cũ còn chạy | Tìm & kill process Java cũ, restart |
-| `psql: error: connection refused` | Postgres chưa up | `docker compose up -d postgres` |
+| Backend health `DOWN` | ES chưa up / lệch version | `docker compose up -d elasticsearch` |
+| `relation already exists` | Tạo bảng tay trước Flyway | `DROP TABLE <table>;` → restart backend |
+| `FlywayException: checksum mismatch` | Sửa file migration đã chạy | Tạo `V<N+1>` mới, không sửa cũ |
+| Port 9090 bị chiếm | Backend cũ còn chạy | Kill process Java cũ |
+| `psql: connection refused` | Postgres chưa up | `docker compose up -d postgres` |
+| Notification không poll | Backend chưa tạo bảng outbox | Chạy backend trước ít nhất 1 lần |
+| `OPENROUTER_API_KEY` thiếu | AI service thiếu API key | Set env var hoặc tạo `ai-service/.env` |
 
 ---
 
-## 12. Kiến trúc module
+## 14. Trạng thái service
 
-| Folder | Runtime | Port | Trạng thái |
-|---|---|---|---|
-| `backend/` | Java 21 + Spring Boot 3 | 9090 | ✅ |
-| `notification/` | Go + Gin + GORM | 8082 | ✅ |
-| `ai-service/` | Python 3.12 + FastAPI | 8090 | ✅ scaffold |
-| `social/` | Go + Gin | 8081 | ⏳ planned |
-| `web/` | Next.js | 3000 | ⏳ planned |
-| `admin-web/` | Next.js | 3001 | ⏳ planned |
-| `mobile/` | React Native | — | ⏳ planned |
+| Service | Port | Status |
+|---|---|---|
+| `backend/` | 9090 | ✅ Done |
+| `notification/` | 8082 | ✅ Done |
+| `social/` | 8081 | ✅ Done |
+| `ai-service/` | 8090 | ✅ Done |
+| `web/` | 3000 | 🚧 Auth done, tiếp tục |
+| `admin-web/` | 3001 | ⏳ Planned |
+| `mobile/` | — | ⏳ Planned |
