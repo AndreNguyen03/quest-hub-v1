@@ -43,21 +43,24 @@ ai-eval:
 	cd ai-service && python -m evals.run_evals
 
 # ── Social / Notification (Go) ────────────────────────────────────────
-# social/ chưa implement — target giữ nguyên cho lúc sau
-.PHONY: dev-social dev-notification go-test
+.PHONY: dev-social dev-notification go-test social-test
 dev-social:
-	cd social && go run ./cmd/server
+	cd social && go run .
 dev-notification:
 	cd notification && go run .
 go-test:
-	cd notification && go test ./...
+	cd notification && go test ./... && cd ../social && go test ./...
+social-test:
+	cd social && go test ./...
 
 # ── Web (Next.js) ─────────────────────────────────────────────────────
-.PHONY: dev-web web-test
+.PHONY: dev-web web-build web-test
 dev-web:
-	cd web && npm run dev
+	cd web && pnpm dev
+web-build:
+	cd web && pnpm build
 web-test:
-	cd web && npm run lint && npm run typecheck
+	cd web && pnpm lint && pnpm typecheck
 
 # ── Toàn bộ ───────────────────────────────────────────────────────────
 .PHONY: test test-all

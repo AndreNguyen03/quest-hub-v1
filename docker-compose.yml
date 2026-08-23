@@ -33,7 +33,72 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
 
-  # Phase 2 — mở khi tách microservices / RabbitMQ relay
+  backend:
+    build: ./backend
+    container_name: questhub-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-questhub}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-questhub}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-questhub}
+      SPRING_DATA_REDIS_HOST: redis
+      APP_ELASTICSEARCH_HOST: http://elasticsearch:9200
+      APP_SECURITY_JWT_SECRET: ${JWT_SECRET:-questhub-dev-secret-change-me}
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+
+  notification:
+    build: ./notification
+    container_name: questhub-notification
+    ports:
+      - "8082:8082"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-questhub}:${POSTGRES_PASSWORD:-questhub}@postgres:5432/${POSTGRES_DB:-questhub}
+      NOTIFICATION_PORT: "8082"
+    depends_on:
+      - postgres
+
+  social:
+    build: ./social
+    container_name: questhub-social
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-questhub}:${POSTGRES_PASSWORD:-questhub}@postgres:5432/${POSTGRES_DB:-questhub}
+      SOCIAL_PORT: "8081"
+    depends_on:
+      - postgres
+
+  ai-service:
+    build: ./ai-service
+    container_name: questhub-ai
+    ports:
+      - "8090:8090"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-questhub}:${POSTGRES_PASSWORD:-questhub}@postgres:5432/${POSTGRES_DB:-questhub}
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  web:
+    build: ./web
+    container_name: questhub-web
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://backend:8080/api
+      NEXT_PUBLIC_AI_BASE_URL: http://ai-service:8090
+    depends_on:
+      - backend
+      - ai-service
+
+  # Phase 2 — mở khi migrate sang RabbitMQ
   # rabbitmq:
   #   image: rabbitmq:3.13-management-alpine
   #   container_name: questhub-rabbitmq
