@@ -1,0 +1,3 @@
+{"goal": "Learn to build a TODO app with React", "domain_id": "web-development", "expected": {"has_title": true, "has_chapters": true, "chapter_count_range": [2, 4], "task_types_include": ["LEARN", "PRACTICE"], "difficulty": "BEGINNER"}}
+{"goal": "Master advanced TypeScript patterns", "domain_id": "web-development", "expected": {"has_title": true, "has_chapters": true, "chapter_count_range": [2, 4], "task_types_include": ["LEARN", "REFLECTION"], "difficulty": "ADVANCED"}}
+{"goal": "Build a machine learning pipeline", "domain_id": "data-science", "expected": {"has_title": true, "has_chapters": true, "chapter_count_range": [2, 4], "task_types_include": ["LEARN", "PRACTICE", "SUBMISSION"], "difficulty": "INTERMEDIATE"}}
