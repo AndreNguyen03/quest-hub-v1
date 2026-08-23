@@ -744,4 +744,121 @@
 
 ---
 
-> **Tổng:** 39 files · 198 test cases
+> **Tổng:** 43 files · 231 test cases
+
+---
+
+## Notification Service (Go)
+
+> Package: `questhub/notification/tests` · 4 test files · 33 test cases
+
+**40. SSEHubTest** — SSE Hub real-time delivery
+```
+40.1  SubscriberReceivesPushedNotification  — subscriber nhận đúng notification được push
+                                              — Frontend đang kết nối SSE, server tạo notification mới → trình duyệt nhận ngay lập tức không cần poll
+
+40.2  AllSubscribersReceiveOnPush           — tất cả subscriber của cùng user đều nhận
+                                              — User mở 2 tab, server push notification → cả 2 tab đều hiển thị ngay
+
+40.3  OtherUserReceivesNothing             — push tới user A không rò sang user B
+                                              — Server push notification cho User A → User B không nhận bất kỳ event nào
+
+40.4  UnsubscribeClosesChannel             — channel được đóng sau khi unsubscribe
+                                              — User đóng tab → connection giải phóng sạch, không memory leak
+
+40.5  PushAfterUnsubscribeDoesNotPanic     — push sau khi unsubscribe không panic
+                                              — User đóng tab rồi server vẫn push → hệ thống bỏ qua an toàn, không crash
+
+40.6  FullBufferDoesNotBlock               — buffer đầy không làm block outbox worker
+                                              — Client bị lag không đọc event, server push tiếp → outbox worker không bị đình trệ
+```
+
+**41. NotificationServiceTest** — Business logic của Notification Service
+```
+41.1  Notify_PersistsNotification          — notification được lưu vào repository
+                                              — Outbox worker xử lý event → notification tạo và lưu DB thành công
+
+41.2  Notify_PushesSSERealTime             — Notify() tự động push SSE cho client đang kết nối
+                                              — Notification vừa lưu DB → user đang mở app nhận ngay, không cần reload
+
+41.3  Notify_RepoErrorPropagates           — lỗi từ repo bubble up, không nuốt lỗi
+                                              — DB tạm thời lỗi → outbox worker nhận error, đánh dấu event FAILED để retry sau
+
+41.4  Broadcast_CreatesOneNotifPerUser     — broadcast tạo đúng 1 notification cho mỗi userId
+                                              — Admin broadcast thông báo hệ thống tới 50 user → mỗi user nhận đúng 1 notification
+
+41.5  Broadcast_NotifTypeAndTitlePreserved — Type, Title, Body được giữ nguyên sau broadcast
+                                              — Admin gửi ACHIEVEMENT broadcast với title cụ thể → user nhận đúng type và nội dung
+
+41.6  Broadcast_InvalidUUIDReturnsError    — UUID không hợp lệ trong userIds → trả lỗi rõ ràng
+                                              — Admin gửi broadcast với userId bị sai format → API báo lỗi kèm giá trị sai
+
+41.7  ListByUser_DefaultsApplied           — page=0, limit=0 được áp default (page=1, limit=20)
+                                              — Frontend gọi GET /notifications không truyền page/limit → nhận trang 1 với 20 items
+
+41.8  ListByUser_LimitCappedAt100          — limit > 100 bị cap về 100
+                                              — Frontend truyền limit=999 → service trả tối đa 100 items, không gây query nặng
+
+41.9  ListByUser_NegativePageBecomesOne    — page âm được reset về 1
+                                              — Client truyền page=-5 (edge case) → hệ thống xử lý như page=1
+
+41.10 UnreadCount_ReturnsRepoValue         — UnreadCount trả đúng giá trị từ repository
+                                              — User có 42 notification chưa đọc → badge hiển thị đúng số 42
+```
+
+**42. DeviceTokenServiceTest** — Quản lý FCM device token
+```
+42.1  Register_UpsertsCalled               — Register gọi Upsert với đúng userId, token, platform
+                                              — User đăng nhập app Android, gửi FCM token → token lưu DB gắn với userId
+
+42.2  Register_AllPlatforms                — Register hoạt động đúng cho ANDROID, IOS và WEB
+                                              — User đăng nhập từ app iOS hoặc web → token với platform tương ứng được lưu
+
+42.3  Deregister_DeleteCalled              — Deregister xóa đúng token của đúng user
+                                              — User đăng xuất khỏi thiết bị → FCM token bị xóa, không còn nhận push notification trên thiết bị đó
+```
+
+**43. EventHandlerTest** — Mapping outbox events → notifications
+```
+43.1  HandleTaskCompleted_CreatesTaskNotification               — task.completed → tạo TASK_COMPLETED notification đúng userId/title
+                                                                  — Learner hoàn thành task → notification "🎯 Completed: <taskTitle>" xuất hiện trong inbox
+
+43.2  HandleTaskCompleted_AlsoCreatesQuestNotifWhenFlagSet      — task.completed với isQuestCompleted=true → tạo thêm QUEST_COMPLETED
+                                                                  — Learner hoàn thành task cuối → nhận 2 notification: task done + quest done
+
+43.3  HandleQuestCompleted_CreatesQuestNotification             — quest.completed → tạo QUEST_COMPLETED notification đúng content
+                                                                  — Monolith publish quest.completed → inbox hiển thị "🏆 Quest completed: <questTitle>"
+
+43.4  HandleAchievementUnlocked_CreatesAchievementNotification  — achievement.unlocked → tạo ACHIEVEMENT notification
+                                                                  — Learner mở khóa achievement → notification "🏅 <achievementTitle>" xuất hiện
+
+43.5  HandleCommentCreated_CreatesCommentNotification           — comment.created → tạo COMMENT notification đúng recipient
+                                                                  — Ai đó comment quest của creator → creator nhận notification "💬 <author> commented on your quest"
+
+43.6  HandleCommentCreated_MissingRecipient_Skips               — comment.created thiếu recipientUserId → bỏ qua, không lỗi
+                                                                  — Monolith publish event nhưng chưa enrich recipientUserId → service bỏ qua an toàn, log warning
+
+43.7  HandleDiscussionCreated_CreatesCommentNotification        — discussion.created → tạo COMMENT notification cho creator của quest
+                                                                  — Learner mở discussion trên quest → creator nhận notification về discussion mới
+
+43.8  HandleDiscussionCreated_MissingRecipient_Skips            — discussion.created thiếu recipientUserId → bỏ qua
+                                                                  — Tương tự 43.6 nhưng cho discussion event
+
+43.9  HandleUserFollowed_CreatesFollowedNotification            — user.followed → tạo FOLLOWED notification đúng followedUser
+                                                                  — User A follow User B → User B nhận "👋 <username> followed you"
+
+43.10 HandleSubmissionGraded_Pass                               — submission.graded status=PASS → title hiển thị điểm và trạng thái pass
+                                                                  — AI chấm bài đạt → Learner nhận "✅ Submission passed — AI score: 95"
+
+43.11 HandleSubmissionGraded_Fail                               — submission.graded status=FAIL → title yêu cầu revision
+                                                                  — AI chấm bài không đạt → Learner nhận "📝 Submission needs revision — check feedback"
+
+43.12 HandleUserRegistered_StoresEmail                          — user.registered → email được cache vào notification_user_emails
+                                                                  — User đăng ký → notification service cache email để gửi email notification sau này
+
+43.13 HandleUserRegistered_EmptyEmail_Skips                     — user.registered với email rỗng → không lưu, không lỗi
+                                                                  — Event đến nhưng email field trống (OAuth user) → bỏ qua an toàn
+
+43.14 Handle_UnknownEventType_ReturnsError                      — event type không xác định → trả error rõ ràng
+                                                                  — Outbox có event type lạ → handler báo lỗi, event được mark FAILED để điều tra
+```

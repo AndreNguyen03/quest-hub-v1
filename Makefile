@@ -24,11 +24,23 @@ backend-test:
 	cd backend && ./mvnw test
 
 # ── AI service (FastAPI) ──────────────────────────────────────────────
-.PHONY: dev-ai ai-test
+.PHONY: dev-ai ai-test ai-install ai-install-dev ai-install-eval ai-lint ai-typecheck ai-eval
 dev-ai:
 	cd ai-service && uvicorn app.main:app --reload --port 8090
 ai-test:
 	cd ai-service && pytest
+ai-install:
+	cd ai-service && pip install -e .
+ai-install-dev:
+	cd ai-service && pip install -e ".[dev]"
+ai-install-eval:
+	cd ai-service && pip install -e ".[eval]"
+ai-lint:
+	cd ai-service && ruff check .
+ai-typecheck:
+	cd ai-service && mypy app
+ai-eval:
+	cd ai-service && python -m evals.run_evals
 
 # ── Social / Notification (Go) ────────────────────────────────────────
 # social/ chưa implement — target giữ nguyên cho lúc sau
@@ -48,5 +60,6 @@ web-test:
 	cd web && npm run lint && npm run typecheck
 
 # ── Toàn bộ ───────────────────────────────────────────────────────────
-.PHONY: test
+.PHONY: test test-all
 test: backend-test ai-test go-test
+test-all: backend-test ai-test ai-lint ai-typecheck go-test
