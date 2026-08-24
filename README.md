@@ -47,15 +47,4 @@ make build && make up
 - Chỉ commit file `*.example` — bản thật đã gitignore.
 - Dev dùng docker compose; staging/prod dùng Kustomize overlays, image tag = git SHA.
 
-## Tài liệu
 
-| File | Nội dung |
-|---|---|
-| [`docs/high-level-design.html`](docs/high-level-design.html) | Kiến trúc tổng thể, service boundary |
-| [`docs/api-design.html`](docs/api-design.html) | API contracts tất cả service |
-| [`docs/database-schema.html`](docs/database-schema.html) | Schema toàn bộ DB |
-| [`docs/event-contracts.html`](docs/event-contracts.html) | Outbox event payloads |
-| [`docs/ddd-convention.md`](docs/ddd-convention.md) | DDD conventions cho Java backend |
-| [`docs/module-descriptions.md`](docs/module-descriptions.md) | Mô tả chi tiết trách nhiệm từng module |
-| [`docs/modules-user-stories.html`](docs/modules-user-stories.html) | User stories theo module |
-| [`docs/test-cases.md`](docs/test-cases.md) | 258 test cases toàn dự án |
